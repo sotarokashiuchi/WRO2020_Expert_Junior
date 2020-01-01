@@ -1,6 +1,7 @@
 /* WRO2019 */
 #include "ev3api.h"
 #include "app.h"
+#include <stdio.h>
 
 #if defined(BUILD_MODULE)
 #include "module_cfg.h"
@@ -12,9 +13,8 @@
 #define R_MOTOR         EV3_PORT_C      //右+
 #define L_MOTOR         EV3_PORT_B      //左-
 #define COLO_SENSOR     EV3_PORT_3
-#define BLACK           10              //黒　反射光
-#define WHITE           90              //白　反射光
-
+#define THRESHOLD		50				//閾値
+#define BRAKE(p)		ev3_motor_stop(p,true)
 
 /* 関数のプロトタイプ宣言 */
 int WRO(void);
@@ -33,9 +33,7 @@ int main_task(void) {
 	ev3_speaker_set_volume(10);
 
 
-	tslp_tsk(500);
-	while(false==ev3_button_is_pressed(ENTER_BUTTON));
-	ev3_led_set_color(LED_OFF);
+	
 	/* タスクの開始 */
 	WRO();
 
@@ -45,28 +43,41 @@ int main_task(void) {
 
 int WRO(void) {
 	/* 変数定義 */
-	int conditions;
-	
-	/* 本プログラム開始 */
-	conditions = 1;
-	while(conditions){
-		linetrace(100, 1, 1);
-	}
+	int conditions;			//条件
+	FILE *fp = NULL;				//ファイルポインタ
 
+	fp = ev3_serial_open_file(EV3_SERIAL_BT);
+
+	/* 待機 */
+	tslp_tsk(500);
+	while(false==ev3_button_is_pressed(ENTER_BUTTON));
+	fprintf(fp, "\n\n\n\n\n\n\n\n\n\n\n000スタート\r\n");
+	
+
+	/* 本プログラム開始 */
+	fprintf(fp, "001ライントレース開始\r\n");
+	conditions = 1;
+	while(conditions<=100000){
+		linetrace(100, 1, 1);
+		conditions++;
+	}
+	BRAKE(R_MOTOR);
+	BRAKE(L_MOTOR);
+	fprintf(fp, "002ライントレース終了\r\n");
 	return 0;
 }
 
 	
 int linetrace(int power, int p_gain, int d_gain){
 	/* ライントレース */
-    int threshold = (BLACK+WHITE)/2;        //閾値
-    uint8_t reflect;            			//反射光
+    static uint8_t reflect;            			//反射光//静的なローカル変数
 
     reflect = ev3_color_sensor_get_reflect(COLO_SENSOR);
-    if(reflect<=threshold){
-        ev3_motor_set_power(R_MOTOR, power-(threshold-reflect)*p_gain);
+    if(reflect<=THRESHOLD){
+        ev3_motor_set_power(R_MOTOR, power-(THRESHOLD-reflect)*p_gain);
+		ev3_motor_set_power(L_MOTOR, (-power));
     }else{
-        ev3_motor_set_power(L_MOTOR, -power+(reflect-threshold)*p_gain);
+        ev3_motor_set_power(L_MOTOR, -power+(reflect-THRESHOLD)*p_gain);
         ev3_motor_set_power(R_MOTOR, power);
     }
 
