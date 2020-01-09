@@ -63,6 +63,7 @@ int main_task(void) {
 int WRO(void) {
 	/* 変数定義 */
 	int conditions;			//条件
+	int cokor;
 	
 
 	fp = ev3_serial_open_file(EV3_SERIAL_BT);
@@ -97,24 +98,38 @@ int WRO(void) {
 	ev3_motor_set_power(B_MOTOR, -85);
 	ev3_motor_set_power(C_MOTOR, 85);
 	return_value(003, r, "直進");
-	while(-360 <= ev3_motor_get_counts(B_MOTOR));
+	while(-380 <= ev3_motor_get_counts(B_MOTOR));
 	BRAKE(B_MOTOR);
-	while(600 >= ev3_motor_get_counts(C_MOTOR));
+	while(1000 >= ev3_motor_get_counts(C_MOTOR));
 	BRAKE(C_MOTOR);
 	return_value(004, r, "90度回転");
 	
 	ev3_motor_reset_counts(A_ARM);
 	return_value(005, r1, "Aアームリセット");
 
-	fprintf(fp, "ライントレース開始\r\n");
-	conditions = 1;
-	while(conditions<=100000){
-		linetrace(100, 1, 1);
-		conditions++;
-	}
+	ev3_motor_rotate(B_MOTOR, -780, 55 ,false);
+	r1 = ev3_motor_rotate(C_MOTOR, 780,  55, true);
+	return_value(006, r1, "直進");
+
+	ev3_motor_set_power(B_MOTOR, -85);
+	ev3_motor_set_power(C_MOTOR,  85);
+	
+
+	while(1!=ev3_color_sensor_get_color(COLOR_1));
+	return_value(007, r1, "カラー黒");
+
 	BRAKE(B_MOTOR);
-	BRAKE(C_MOTOR);
-	fprintf(fp, "ライントレース終了\r\n");
+	 
+	
+	// fprintf(fp, "ライントレース開始\r\n");
+	// conditions = 1;
+	// while(conditions<=100000){
+	// 	linetrace(100, 1, 1);
+	// 	conditions++;
+	// }
+	// BRAKE(B_MOTOR);
+	// BRAKE(C_MOTOR);
+	// fprintf(fp, "ライントレース終了\r\n");
 	return 0;
 }
 
