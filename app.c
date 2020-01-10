@@ -24,10 +24,14 @@
 
 /* 関数のプロトタイプ宣言 */
 int WRO(void);
-int linetrace(int,int,int);			//ライントレース
+int linetrace(int power, int p_gain, int d_gain);			//ライントレース
 int return_value(double, ER, char[20]);	//エラー表示
-void A_arm_up(double,int);				//Aアーム上げる
+void A_arm_up(double, int);				//Aアーム上げる
 void A_arm_down(double);				//Aアーム下げる
+void L_rotation(double, int);			//左回転関数
+void R_rotation(double, int);			//右回転関数
+void straight(double, int);				//直進ゆっくり止まる
+
 
 /* グローバル変数宣言 */
 FILE *fp = NULL;				//ファイルポインタ
@@ -70,6 +74,12 @@ int WRO(void) {
 
 	fprintf(fp, "\n\n\n\n\n\n\n\n\n\n\n000.0 待機\r\n");
 	/* 実験スペース */
+	// tslp_tsk(500);
+	// while(false==ev3_button_is_pressed(ENTER_BUTTON));
+
+
+	// BRAKE(B_MOTOR);
+	// BRAKE(C_MOTOR);
 	// r1 = ev3_motor_rotate(A_ARM, -180, 55, false);
 	// return_value(002, r1, "Aアーム準備");
 	// ev3_motor_reset_counts(A_ARM);
@@ -90,38 +100,41 @@ int WRO(void) {
 	ev3_motor_reset_counts(C_MOTOR);
 	ev3_motor_reset_counts(A_ARM);
 	ev3_motor_reset_counts(D_ARM);
-	return_value(001, r1, "角度リセット");
+	return_value(1, r1, "角度リセット");
 
 	r1 = ev3_motor_rotate(A_ARM, -180, 55, false);
-	return_value(002, r1, "Aアーム準備");
+	return_value(2, r1, "Aアーム準備");
 
 	ev3_motor_set_power(B_MOTOR, -85);
 	ev3_motor_set_power(C_MOTOR, 85);
-	return_value(003, r, "直進");
+	return_value(3, r, "直進");
 	while(-380 <= ev3_motor_get_counts(B_MOTOR));
 	BRAKE(B_MOTOR);
 	while(1000 >= ev3_motor_get_counts(C_MOTOR));
 	BRAKE(C_MOTOR);
-	return_value(004, r, "90度回転");
+	return_value(4, r, "90度回転");
 	
 	ev3_motor_reset_counts(A_ARM);
-	return_value(005, r1, "Aアームリセット");
+	return_value(5, r1, "Aアームリセット");
 
 	ev3_motor_rotate(B_MOTOR, -780, 55 ,false);
 	r1 = ev3_motor_rotate(C_MOTOR, 780,  55, true);
-	return_value(006, r1, "直進");
+	return_value(6, r1, "直進");
 
-	ev3_motor_set_power(B_MOTOR, -85);
-	ev3_motor_set_power(C_MOTOR,  85);
-	
-
+	r1 = ev3_motor_steer(B_MOTOR, C_MOTOR, 85, -100);
 	while(1!=ev3_color_sensor_get_color(COLOR_1));
-	return_value(007, r1, "カラー黒");
+	return_value(7, r1, "カラー黒");
+	straight(8, 220);
 
-	BRAKE(B_MOTOR);
-	 
+	L_rotation(9, 300);
+
+	fprintf(fp, "ライントレース開始\r\n");
+	while(1){
+		linetrace(85, 1, 1);
+	}
+
 	
-	// fprintf(fp, "ライントレース開始\r\n");
+	// 
 	// conditions = 1;
 	// while(conditions<=100000){
 	// 	linetrace(100, 1, 1);
@@ -133,23 +146,20 @@ int WRO(void) {
 	return 0;
 }
 
-	
+/* ライントレース */
 int linetrace(int power, int p_gain, int d_gain){
-	/* ライントレース */
     static int reflect;            			//反射光//静的なローカル変数
 	static int gap;
 
-    	reflect = (ev3_color_sensor_get_reflect(COLOR_1))-(ev3_color_sensor_get_reflect(COLOR_2));
-        // sprintf(char_color, "%3d", reflect);
-        // ev3_lcd_draw_string(char_color, 0, 80);
-        if(reflect<=0){
-            ev3_motor_set_power(C_MOTOR, power+((reflect)*p_gain)+(reflect-(gap)));
-            ev3_motor_set_power(B_MOTOR, (-power));
-        }else{
-            ev3_motor_set_power(B_MOTOR, -power+((reflect)*p_gain)+(-(reflect-gap)));
-            ev3_motor_set_power(C_MOTOR, power);
-        }
-        gap = reflect;
+    reflect = (ev3_color_sensor_get_reflect(COLOR_1))-(ev3_color_sensor_get_reflect(COLOR_2));
+    if(reflect<=0){
+        ev3_motor_set_power(C_MOTOR, power+((reflect)*p_gain)+(reflect-(gap)));
+        ev3_motor_set_power(B_MOTOR, (-power));
+    }else{
+        ev3_motor_set_power(B_MOTOR, -power+((reflect)*p_gain)+(-(reflect-gap)));
+        ev3_motor_set_power(C_MOTOR, power);
+    }
+    gap = reflect;
 
 	return 0;
 }
@@ -168,9 +178,78 @@ void A_arm_down(double no_x){
 	return_value(no_x, r1, "A_armアーム下げる関数");
 }
 
+/* 左回転関数 */
+void L_rotation(double no_x, int angle){
+	int total = 0;
+
+	ev3_motor_reset_counts(C_MOTOR);
+	ev3_motor_steer(B_MOTOR, C_MOTOR, 55, 0);
+	while(angle>=ev3_motor_get_counts(C_MOTOR));
+	while(20<=ev3_color_sensor_get_reflect(COLOR_2));
+	BRAKE(B_MOTOR);
+	BRAKE(C_MOTOR);
+	do{
+		total = (ev3_color_sensor_get_reflect(COLOR_1))-(ev3_color_sensor_get_reflect(COLOR_2));
+		if(5<=total){
+			ev3_motor_steer(B_MOTOR, C_MOTOR, 3, 0);
+		}
+		if(-5>=total){
+			ev3_motor_steer(B_MOTOR, C_MOTOR, -3, 0);
+		}
+	}while(-5>total || 5<total);
+	BRAKE(B_MOTOR);
+	BRAKE(C_MOTOR);
+	return_value(no_x, r, "左回転関数");
+}
+
+/* 右回転関数 */
+void R_rotation(double no_x, int angle){
+	int total = 0;
+
+	ev3_motor_reset_counts(C_MOTOR);
+	ev3_motor_steer(B_MOTOR, C_MOTOR, -55, 0);
+	while((-angle)<=ev3_motor_get_counts(C_MOTOR));
+	while(20<=ev3_color_sensor_get_reflect(COLOR_1));
+	BRAKE(B_MOTOR);
+	BRAKE(C_MOTOR);
+	do{
+		total = (ev3_color_sensor_get_reflect(COLOR_1))-(ev3_color_sensor_get_reflect(COLOR_2));
+		if(5<=total){
+			ev3_motor_steer(B_MOTOR, C_MOTOR, -3, 0);
+		}
+		if(-5>=total){
+			ev3_motor_steer(B_MOTOR, C_MOTOR, 3, 0);
+		}
+	}while(-5>total || 5<total);
+	BRAKE(B_MOTOR);
+	BRAKE(C_MOTOR);
+	return_value(no_x, r, "右回転関数");
+}
+
+void straight(double no_x, int angle){
+	angle -=120;
+	ev3_motor_reset_counts(B_MOTOR);
+
+	ev3_motor_steer(B_MOTOR, C_MOTOR, 85, -100);
+	while((-angle) <= ev3_motor_get_counts(B_MOTOR));
+	
+
+	ev3_motor_steer(B_MOTOR, C_MOTOR, 60, -100);
+	while((-(30+angle)) <= ev3_motor_get_counts(B_MOTOR));
 
 
+	ev3_motor_steer(B_MOTOR, C_MOTOR, 30, -100);
+	while((-(100+angle)) <= ev3_motor_get_counts(B_MOTOR));
 
+	ev3_motor_steer(B_MOTOR, C_MOTOR, 20, -100);
+	while((-(120+angle)) <= ev3_motor_get_counts(B_MOTOR));
+
+
+	BRAKE(B_MOTOR);
+	BRAKE(C_MOTOR);
+	return_value(no_x, r, "直進ゆっくり止まる関数");
+}
+	
 
 
 
