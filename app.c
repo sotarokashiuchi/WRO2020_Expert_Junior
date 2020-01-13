@@ -1,3 +1,4 @@
+
 /* WRO2019 */
 #include "ev3api.h"
 #include "app.h"
@@ -49,7 +50,7 @@ int main_task(void) {
     ev3_sensor_config(COLOR_1, COLOR_SENSOR);
 	ev3_sensor_config(COLOR_2, COLOR_SENSOR);
 	ev3_sensor_config(COLOR_3, COLOR_SENSOR);
-	ev3_sensor_config(HIT_C_4, HT_NXT_ACCEL_SENSOR);
+	ev3_sensor_config(HIT_C_4, HT_NXT_COLOR_SENSOR);
 
 	ev3_lcd_set_font(EV3_FONT_MEDIUM);
     ev3_lcd_draw_string("technology", 0, 0);
@@ -57,7 +58,7 @@ int main_task(void) {
 	ev3_speaker_set_volume(10);
 
 
-	
+
 	/* タスクの開始 */
 	WRO();
 
@@ -69,7 +70,7 @@ int WRO(void) {
 	/* 変数定義 */
 	int conditions;			//条件
 	int cokor;
-	rgb_raw_t rgb_val;
+
 	int reflected_light;    //反射光元値
 	int object_1;
 	int object_2;
@@ -79,8 +80,12 @@ int WRO(void) {
 	int object_6;
 	int object_7;
 	int object_8;
+	char char_xx[50];
+	int bll;
+	bool_t x;
+	rgb_raw_t rgb_val;
 
-	
+
 
 	fp = ev3_serial_open_file(EV3_SERIAL_BT);
 
@@ -88,6 +93,9 @@ int WRO(void) {
 	/* 実験スペース */
 	// tslp_tsk(500);
 	// while(false==ev3_button_is_pressed(ENTER_BUTTON));
+
+
+	// L_rotation(8, 220);
 
 
 	// while(1){
@@ -113,8 +121,8 @@ int WRO(void) {
 	/* 待機 */
 	tslp_tsk(500);
 	while(false==ev3_button_is_pressed(ENTER_BUTTON));
-	
-	
+
+
 
 	/* 本プログラム開始 */
 	reflected_light = ev3_color_sensor_get_reflect(COLOR_3);
@@ -132,10 +140,10 @@ int WRO(void) {
 	return_value(3, r, "直進");
 	while(-380 <= ev3_motor_get_counts(B_MOTOR));
 	BRAKE(B_MOTOR);
-	while(1030 >= ev3_motor_get_counts(C_MOTOR));
+	while(1000 >= ev3_motor_get_counts(C_MOTOR));
 	BRAKE(C_MOTOR);
 	return_value(4, r, "90度回転");
-	
+
 	ev3_motor_reset_counts(A_ARM);
 	return_value(5, r1, "Aアームリセット");
 
@@ -150,34 +158,58 @@ int WRO(void) {
 
 	L_rotation(9, 220);
 
-	return_value(8, r, "ライントレース開始\r\n");
+	return_value(8, r, "ライントレース開始");
 	ev3_motor_reset_counts(C_MOTOR);
-	while(260>=ev3_motor_get_counts(C_MOTOR)){
+	while(180>=ev3_motor_get_counts(C_MOTOR)){
 		linetrace(45, 0.4, 0.2);
 	}
 	do{
 		linetrace(45, 0.4, 0.2);
-		ev3_color_sensor_get_rgb_raw(COLOR_1, &rgb_val);
+		tslp_tsk(7);
+		x = ht_nxt_color_sensor_measure_rgb(HIT_C_4, &rgb_val);
+		if(x!=true){
+			fprintf(fp, " エラー\r\n");
+		}else if(x!=false){
+			fprintf(fp, " 正常\r\n");
+		}else{
+			fprintf(fp, " ?\r\n");
+		}
 	}while(50<=rgb_val.b);
 	BRAKE(B_MOTOR);
 	BRAKE(C_MOTOR);
-	return_value(9, r, "ライントレース終了\r\n");
+	return_value(9, r, "ライントレース終了");
 
+	/* オブジェクト有無確認 */
 	if((reflected_light+10)<=ev3_color_sensor_get_reflect(COLOR_3)){
 		object_1 = 1;			//真
 		ev3_speaker_play_tone(1046.50, 100);
 	}else{
 		object_1 = 0;			//偽
 	}
-	return_value(10, r, "色読み取り\r\n");
+	return_value(10, r, "色読み取り");
 	A_arm_up(10,0);
-	
+
 	// ev3_motor_reset_counts(C_MOTOR);
 	// r1 = ev3_motor_steer(B_MOTOR, C_MOTOR, 85, 100);
 	// while(-210<=ev3_motor_get_counts(C_MOTOR));
 	// BRAKE(B_MOTOR);
 	// BRAKE(C_MOTOR);
+
+	/* 下がる */
 	straight_b(11, 210);
+
+	ev3_motor_reset_counts(C_MOTOR);
+	ev3_motor_steer(B_MOTOR, C_MOTOR, 45, 0);
+	while(260>=ev3_motor_get_counts(C_MOTOR));
+	BRAKE(B_MOTOR);
+	BRAKE(C_MOTOR);
+
+	r1 = ev3_motor_steer(B_MOTOR, C_MOTOR, 85, -100);
+	while(1!=ev3_color_sensor_get_color(COLOR_1));
+	return_value(7, r1, "カラー黒");
+	straight(8, 220);
+
+	R_rotation(0, 220);
 
 	return 0;
 }
@@ -236,6 +268,7 @@ void L_rotation(double no_x, int angle){
 	ev3_motor_reset_counts(C_MOTOR);
 	ev3_motor_steer(B_MOTOR, C_MOTOR, 55, 0);
 	while(angle>=ev3_motor_get_counts(C_MOTOR));
+	ev3_motor_steer(B_MOTOR, C_MOTOR, 40, 0);
 	while(20<=ev3_color_sensor_get_reflect(COLOR_2));
 	BRAKE(B_MOTOR);
 	BRAKE(C_MOTOR);
@@ -260,6 +293,7 @@ void R_rotation(double no_x, int angle){
 	ev3_motor_reset_counts(C_MOTOR);
 	ev3_motor_steer(B_MOTOR, C_MOTOR, -55, 0);
 	while((-angle)<=ev3_motor_get_counts(C_MOTOR));
+	ev3_motor_steer(B_MOTOR, C_MOTOR, -40, 0);
 	while(20<=ev3_color_sensor_get_reflect(COLOR_1));
 	BRAKE(B_MOTOR);
 	BRAKE(C_MOTOR);
@@ -284,7 +318,7 @@ void straight(double no_x, int angle){
 
 	ev3_motor_steer(B_MOTOR, C_MOTOR, 85, -100);
 	while((-angle) <= ev3_motor_get_counts(B_MOTOR));
-	
+
 
 	ev3_motor_steer(B_MOTOR, C_MOTOR, 60, -100);
 	while((-(30+angle)) <= ev3_motor_get_counts(B_MOTOR));
@@ -301,16 +335,16 @@ void straight(double no_x, int angle){
 	BRAKE(C_MOTOR);
 	return_value(no_x, r, "直進ゆっくり止まる関数");
 }
-	
 
-/* ほぼ台形制御 */
+
+/* ほぼ台形制御下がる */
 void straight_b(double no_x, int angle){
 	angle -=120;
 	ev3_motor_reset_counts(B_MOTOR);
 
 	ev3_motor_steer(B_MOTOR, C_MOTOR, 85, 100);
 	while((angle) >= ev3_motor_get_counts(B_MOTOR));
-	
+
 
 	ev3_motor_steer(B_MOTOR, C_MOTOR, 60, 100);
 	while(((30+angle)) >= ev3_motor_get_counts(B_MOTOR));
@@ -327,7 +361,7 @@ void straight_b(double no_x, int angle){
 	BRAKE(C_MOTOR);
 	return_value(no_x, r, "バックゆっくり止まる関数");
 }
-	
+
 
 
 
@@ -389,12 +423,10 @@ int return_value(double no,ER return_function, char display[20]){
 		}else if(return_function==E_NORES){
 			fprintf(fp, "  E_NORES...");
 			fprintf(fp, "サウンドデバイスが占有せれている\r\n");
-			
+
 		}else{
 			fprintf(fp, "エラーの詳細が分かりません\r\n");
 		}
 	return 0;
 	}
 }
-
-
