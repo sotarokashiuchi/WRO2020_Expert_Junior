@@ -20,5 +20,6 @@
  *  関数のプロトタイプ宣言
  */
 #ifndef TOPPERS_MACRO_ONLY
-extern int	main_task(void);
+extern void	main_task(intptr_t exinf);
+extern void run_task(void);
 #endif /* TOPPERS_MACRO_ONLY */
