@@ -1,1 +1,1 @@
-APPL_COBJS += ton.o
+APPL_COBJS += kashiuchi.o
