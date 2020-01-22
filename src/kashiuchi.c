@@ -10,7 +10,144 @@
 #else
 #include "kernel_cfg.h"
 #endif
+FILE *kashiuchi_fp = NULL;
 
-void a(void){
-	
+/*
+ *	bluetooth接続関数
+ */
+int bluetooth_kashiuchi_fp(void){
+  kashiuchi_fp = ev3_serial_open_file(EV3_SERIAL_BT);
+  return 0;
 }
+
+
+/*
+ *	整数値入力関数
+ */
+int input_int(int *numbers){
+    tslp_tsk(200);
+	char char_numbers[10];
+
+    ev3_lcd_set_font(EV3_FONT_MEDIUM);
+
+    while(false==ev3_button_is_pressed(ENTER_BUTTON)){
+        sprintf(char_numbers, "%10d", *numbers);
+        ev3_lcd_draw_string(char_numbers, 0, 60);
+
+        if(false!=ev3_button_is_pressed(UP_BUTTON)){
+            (*numbers)++;
+            tslp_tsk(200);
+        }
+        if(false!=ev3_button_is_pressed(DOWN_BUTTON)){
+            (*numbers)--;
+            tslp_tsk(200);
+        }
+        if(false!=ev3_button_is_pressed(RIGHT_BUTTON)){
+            (*numbers) *=10;
+            tslp_tsk(200);
+        }
+        if(false!=ev3_button_is_pressed(LEFT_BUTTON)){
+            (*numbers) /=10;
+            tslp_tsk(200);
+        }
+    }
+    return 0;
+}
+
+
+
+/*
+ *	小数値入力関数
+ */
+int input_float(float *numbers){
+    tslp_tsk(200);
+	char char_numbers[10];
+
+    ev3_lcd_set_font(EV3_FONT_MEDIUM);
+
+    while(false==ev3_button_is_pressed(ENTER_BUTTON)){
+        sprintf(char_numbers, "%5f", *numbers);
+        ev3_lcd_draw_string(char_numbers, 0, 75);
+
+        if(false!=ev3_button_is_pressed(UP_BUTTON)){
+            (*numbers)++;
+            tslp_tsk(200);
+        }
+        if(false!=ev3_button_is_pressed(DOWN_BUTTON)){
+            (*numbers)--;
+            tslp_tsk(200);
+        }
+        if(false!=ev3_button_is_pressed(RIGHT_BUTTON)){
+            (*numbers) *=10;
+            tslp_tsk(200);
+        }
+        if(false!=ev3_button_is_pressed(LEFT_BUTTON)){
+            (*numbers) /=10;
+            tslp_tsk(200);
+        }
+    }
+    return 0;
+}
+
+
+
+/*
+ *	エラー表示関数
+ */
+int return_value(double no, ER return_function, char display[20]){
+ 	if(return_function==E_OK){
+ 		fprintf(kashiuchi_fp, "%05.1f 正常終了_%s\r\n", no, display);
+ 		return 1;
+ 	}else{
+ 		fprintf(kashiuchi_fp, "\n\n%05.1f error_%s\r\n", no, display);
+ 		if(return_function==E_PAR){
+ 			fprintf(kashiuchi_fp, "  E_PAR...");
+ 			fprintf(kashiuchi_fp, "パス名が無効です。\r\n");
+ 			fprintf(kashiuchi_fp, "	不正のモーター、センサータイプ\r\n");
+ 			fprintf(kashiuchi_fp, "   不正の設定値\r\n");
+ 			fprintf(kashiuchi_fp, "	メモリファイルは無効\r\n");
+ 			fprintf(kashiuchi_fp, "	画像のオブジェクトは無効\r\n");
+ 			fprintf(kashiuchi_fp, "	p_image　はNULL\r\n");
+
+ 		}else if(return_function==E_ID){
+ 			fprintf(kashiuchi_fp, "  E_ID...");
+ 			fprintf(kashiuchi_fp, "不正のボタン番号\r\n");
+ 			fprintf(kashiuchi_fp, "	不正ID番号\r\n");
+ 			fprintf(kashiuchi_fp, "	不正のモーター、センサポート番号\r\n");
+
+ 		}else if(return_function==E_SYS){
+ 			fprintf(kashiuchi_fp, "  E_SYS...");
+ 			fprintf(kashiuchi_fp, "I/Oエラーが発生した(SDカード不良の可能性が高い\r\n");
+
+ 		}else if(return_function==E_NOMEM){
+ 			fprintf(kashiuchi_fp, "  E_NOMEM...");
+ 			fprintf(kashiuchi_fp, "メモリ不足\r\n");
+
+ 		}else if(return_function==E_CTX){
+ 			fprintf(kashiuchi_fp, "  E_CTX...");
+ 			fprintf(kashiuchi_fp, "非タスクコンテストから呼び出し\r\n");
+
+ 		}else if(return_function==E_MACV){
+ 			fprintf(kashiuchi_fp, "  E_MACV...");
+ 			fprintf(kashiuchi_fp, "メモリファイルアクセス違反(p_memfile)(path)\r\n");
+
+ 		}else if(return_function==E_OBJ){
+ 			fprintf(kashiuchi_fp, "  E_OBJ...");
+ 			fprintf(kashiuchi_fp, "	モータ未接続\r\n");
+ 			fprintf(kashiuchi_fp, "	画像ファイルは破損\r\n");
+ 			fprintf(kashiuchi_fp, "	(p_memfile)で指定したメモリファイルは無効\r\n");
+
+ 		}else if(return_function==E_NOSPT){
+ 			fprintf(kashiuchi_fp, "  E_NOSPT...");
+ 			fprintf(kashiuchi_fp, "これ以上読み込めるファイルの情報がない\r\n");
+
+ 		}else if(return_function==E_NORES){
+ 			fprintf(kashiuchi_fp, "  E_NORES...");
+ 			fprintf(kashiuchi_fp, "サウンドデバイスが占有せれている\r\n");
+
+ 		}else{
+ 			fprintf(kashiuchi_fp, "エラーの詳細が分かりません\r\n");
+ 		}
+ 	return 0;
+ 	}
+ }

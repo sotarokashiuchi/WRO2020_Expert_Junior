@@ -1,12 +1,12 @@
 /*
- *		サンプルプログラム(00_sample_tone)のヘッダファイル
+ *		WRO2020ヘッダーファイル
  */
 
 /* 定義設定 */
-#define C_MOTOR         EV3_PORT_C      //右+
-#define B_MOTOR         EV3_PORT_B      //左-
-#define A_ARM			EV3_PORT_A		//-上
-#define D_ARM			EV3_PORT_D
+#define C_MOTOR       EV3_PORT_C      //右+
+#define B_MOTOR       EV3_PORT_B      //左-
+#define A_ARM			    EV3_PORT_A		//-上
+#define D_ARM			    EV3_PORT_D
 #define COLOR_1	     	EV3_PORT_1
 #define COLOR_2	     	EV3_PORT_2
 #define COLOR_3	     	EV3_PORT_3
@@ -41,6 +41,4 @@
 #ifndef TOPPERS_MACRO_ONLY
 /* app.c */
 extern int	main_task(void);
-/* kashiuchi.c */
-void a(void);
 #endif /* TOPPERS_MACRO_ONLY */
