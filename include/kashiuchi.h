@@ -6,6 +6,12 @@ int bluetooth_kashiuchi_fp(void);
 
 
 /*
+ *   ライントレース
+ */
+int linetrace(int power, float p_gain, float d_gain);
+
+
+/*
  *	整数値入力関数
  */
 int input_int(int*);

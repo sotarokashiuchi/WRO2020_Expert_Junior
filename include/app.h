@@ -3,21 +3,15 @@
  */
 
 /* 定義設定 */
-#define C_MOTOR       EV3_PORT_C      //右+
-#define B_MOTOR       EV3_PORT_B      //左-
-#define A_ARM			    EV3_PORT_A		//-上
-#define D_ARM			    EV3_PORT_D
-#define COLOR_1	     	EV3_PORT_1
-#define COLOR_2	     	EV3_PORT_2
-#define COLOR_3	     	EV3_PORT_3
-#define COLOR_4	     	EV3_PORT_4
-#define BRAKKU			20			//反射光黒
-#define TAIYA_W_2       340  			//二つのタイヤの幅直径(mm)
+#define A_ARM           EV3_PORT_A      //雪アーム
+#define B_MOTOR         EV3_PORT_B      //右
+#define C_MOTOR         EV3_PORT_C		//左
+#define D_exit			EV3_PORT_D      //雪,研磨剤出口＆車回収
+#define COLOR_1	     	EV3_PORT_1      //中央右
+#define COLOR_2	     	EV3_PORT_2      //中央左
+#define HT_COLOR_3	    EV3_PORT_3      //右
+#define GYRO_4	     	EV3_PORT_4      //ジャイロセンサー
 
-#define TAIYA			56			//タイヤ直径(mm)
-#define TAIYA_EN 175.9291884				//タイヤの円周
-
-#define EN_RITU			3.14159265	//円周率
 #define BRAKE(p)		ev3_motor_stop(p,true)
 
 /*

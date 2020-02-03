@@ -10,6 +10,7 @@
 #else
 #include "kernel_cfg.h"
 #endif
+
 FILE *kashiuchi_fp = NULL;
 
 /*
@@ -19,6 +20,32 @@ int bluetooth_kashiuchi_fp(void){
   kashiuchi_fp = ev3_serial_open_file(EV3_SERIAL_BT);
   return 0;
 }
+
+
+
+/*
+ *   ライントレース
+ */
+int linetrace(int power, float p_gain, float d_gain){
+    static int reflect;            			//反射光//静的なローカル変数
+	static int gap;
+
+    reflect = (ev3_color_sensor_get_reflect(COLOR_1))-(ev3_color_sensor_get_reflect(COLOR_2));
+    if(reflect<=0){
+        ev3_motor_set_power(B_MOTOR, (-power)+((abs(reflect)*p_gain)+((abs(reflect)+(gap))*d_gain)));
+        ev3_motor_set_power(C_MOTOR, power);
+    }else{
+        ev3_motor_set_power(C_MOTOR, power-(((reflect)*p_gain)+(((gap)-reflect)*d_gain)));
+        ev3_motor_set_power(B_MOTOR, -power);
+    }
+    gap = reflect;
+    
+    
+	return 0;
+}
+
+
+
 
 
 /*
