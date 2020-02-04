@@ -1,4 +1,7 @@
 //kashiuchi.h
+
+
+
 /*
  *	bluetooth接続関数
  */
@@ -8,7 +11,13 @@ int bluetooth_kashiuchi_fp(void);
 /*
  *   ライントレース
  */
-int linetrace(int power, float p_gain, float d_gain);
+extern void linetrace_task(void);
+
+
+/*
+ *   ジャイトレース
+ */
+extern void gyrotrace_task(void);
 
 
 /*

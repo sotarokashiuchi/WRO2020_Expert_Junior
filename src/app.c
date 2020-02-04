@@ -36,6 +36,7 @@ ER r = E_OK;
 int main_task(void) {
 
 	/* タスクの開始 */
+	fp = ev3_serial_open_file(EV3_SERIAL_BT);
 	WRO();
 
 	return 0;
@@ -63,18 +64,44 @@ int WRO(void) {
 	
 	/* purpguramu */
 
-	
-	while(1){
-		ev3_motor_rotate(B_MOTOR, -15, 50, false);
-		ev3_motor_rotate(C_MOTOR,  15, 50, true);
-		ev3_motor_rotate(B_MOTOR,  15, 50, false);
-		ev3_motor_rotate(C_MOTOR, -15, 50, true);
-	}
+	// ev3_motor_reset_counts(B_MOTOR);
+	// ev3_motor_reset_counts(C_MOTOR);
+	// while(1){
+	// 	ev3_motor_rotate(B_MOTOR, -15, 50, false);
+	// 	ev3_motor_rotate(C_MOTOR,  15, 50, true);
+	// 	ev3_motor_rotate(B_MOTOR,  15, 50, false);
+	// 	ev3_motor_rotate(C_MOTOR, -15, 50, true);
+	// }
 
-	while(1){
-		linetrace(30, 0.3, 0);
-		tslp_tsk(500);
-	}
+	// while(1){
+	// 	linetrace(30, 0.3, 0);
+	// 	tslp_tsk(0);
+	// }
+
+	ev3_sta_cyc(GYROTRACE_TASK);
+
+	// #define DELTA_T 0.004
+	// #define KP 0.34
+	// #define KI 0.05
+	// #define KD 0.075
+
+	// float p=0, i=0, d=0;
+	// float diff[2];
+	// diff[0] = 0;
+	// diff[1] = 0;
+	// float integral;
+
+	// while(1){
+	// 	diff[0] = diff[1];
+	// 	diff[1] = ev3_color_sensor_get_reflect(COLOR_1)-50;
+	// 	integral += (diff[1] + diff[0]) / 2.0 *DELTA_T; 
+
+	// 	p = KP * diff[1];
+	// 	i = KI * integral;
+	// 	d = KD * (diff[1] - diff[0]) / DELTA_T;
+
+	// 	fprintf(fp,"p=%lf  i=%lf  d=%lf  p+i+d=%lf\r", p, i, d, p+i+d);
+	// }
 	
 
 	return 0;

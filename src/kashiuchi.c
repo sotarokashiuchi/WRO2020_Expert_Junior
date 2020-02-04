@@ -11,14 +11,48 @@
 #include "kernel_cfg.h"
 #endif
 
-FILE *kashiuchi_fp = NULL;
+/*****************************************************************************************************************************************
+*****************************************************************************************************************************************/
+
+/* bluetoothグローバル変数 */
+    FILE *kashiuchi_fp = NULL;
+
+
+/* linetrace_task動的な宣言 */
+    #define LINETRACE_DELTA_T 0.004       //処理周期
+    #define LINETRACE_POWER 30  //パワー
+	#define LINETRACE_KP 0.3             //Pゲイン
+	#define LINETRACE_KI 0.2             //Iゲイン
+	#define LINETRACE_KD 0.02       //Dゲイン
+
+	float line_p=0, line_i=0, line_d=0;
+	float line_old = 0, line_new = 0;
+	float line_integral = 0;
+
+
+/*
+ *   ジャイトレース
+ */
+    #define GYROTRACE_DELTA_T 0.004       //処理周期
+    #define GYROTRACE_POWER 15  //パワー
+	#define GYROTRACE_KP 1             //Pゲイン
+	#define GYROTRACE_KI 0             //Iゲイン
+    #define GYROTRACE_KD 0             //Dゲイン
+
+	float gyro_p=0, gyro_i=0, gyro_d;
+	int gyro_old = 0, gyro_new = 0;
+	float gyro_integral = 0;
+
+/*****************************************************************************************************************************************
+*****************************************************************************************************************************************
+
 
 /*
  *	bluetooth接続関数
  */
 int bluetooth_kashiuchi_fp(void){
-  kashiuchi_fp = ev3_serial_open_file(EV3_SERIAL_BT);
-  return 0;
+    kashiuchi_fp = ev3_serial_open_file(EV3_SERIAL_BT);
+    return 0;
 }
 
 
@@ -26,24 +60,47 @@ int bluetooth_kashiuchi_fp(void){
 /*
  *   ライントレース
  */
-int linetrace(int power, float p_gain, float d_gain){
-    static int reflect;            			//反射光//静的なローカル変数
-	static int gap;
+void linetrace_task(void){
+    line_old = line_new;
+    line_new = ev3_color_sensor_get_reflect(COLOR_1)-ev3_color_sensor_get_reflect(COLOR_2);
+    line_integral += (line_new + line_old) / 2.0 *LINETRACE_DELTA_T; 
 
-    reflect = (ev3_color_sensor_get_reflect(COLOR_1))-(ev3_color_sensor_get_reflect(COLOR_2));
-    if(reflect<=0){
-        ev3_motor_set_power(B_MOTOR, (-power)+((abs(reflect)*p_gain)+((abs(reflect)+(gap))*d_gain)));
-        ev3_motor_set_power(C_MOTOR, power);
+    line_p = LINETRACE_KP * line_new;
+    line_i = LINETRACE_KI * line_integral;
+    line_d = LINETRACE_KD * (line_new - line_old) / LINETRACE_DELTA_T;
+
+    if(line_new>=0){
+        ev3_motor_set_power(C_MOTOR, (LINETRACE_POWER)-(line_p + line_i + line_d));
+        ev3_motor_set_power(B_MOTOR, -LINETRACE_POWER);
     }else{
-        ev3_motor_set_power(C_MOTOR, power-(((reflect)*p_gain)+(((gap)-reflect)*d_gain)));
-        ev3_motor_set_power(B_MOTOR, -power);
+        ev3_motor_set_power(B_MOTOR, (-LINETRACE_POWER)-(line_p + line_i + line_d));
+        ev3_motor_set_power(C_MOTOR, LINETRACE_POWER);
     }
-    gap = reflect;
-    
-    
-	return 0;
 }
 
+
+
+/*
+ *   ジャイトレース
+ */
+void gyrotrace_task(void){
+    gyro_old = gyro_new;
+    gyro_new = ev3_gyro_sensor_get_angle(GYRO_4);
+    gyro_integral += (gyro_new + gyro_old) / 2.0 *GYROTRACE_DELTA_T; 
+    fprintf(kashiuchi_fp, "%d\r",gyro_new);
+
+    gyro_p = GYROTRACE_KP * gyro_new;
+    gyro_i = GYROTRACE_KI * gyro_integral;
+    gyro_d = GYROTRACE_KD * (gyro_new - gyro_old) / GYROTRACE_DELTA_T;
+
+    if(gyro_new>=0){
+        ev3_motor_set_power(C_MOTOR, (GYROTRACE_POWER)-(gyro_p + gyro_i + gyro_d));
+        ev3_motor_set_power(B_MOTOR, -GYROTRACE_POWER);
+    }else{
+        ev3_motor_set_power(B_MOTOR, (-GYROTRACE_POWER)-(gyro_p + gyro_i + gyro_d));
+        ev3_motor_set_power(C_MOTOR, GYROTRACE_POWER);
+    }
+}
 
 
 
