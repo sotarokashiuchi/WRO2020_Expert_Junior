@@ -77,32 +77,18 @@ int WRO(void) {
 	// 	linetrace(30, 0.3, 0);
 	// 	tslp_tsk(0);
 	// }
+	while(1){
+		fprintf(fp, "%-04d\r",ev3_gyro_sensor_get_angle(GYRO_4));
+		if(true==ev3_button_is_pressed(ENTER_BUTTON)){
+			ev3_gyro_sensor_reset(GYRO_4);
+		}
+	}
+	
+
 
 	ev3_sta_cyc(GYROTRACE_TASK);
 
-	// #define DELTA_T 0.004
-	// #define KP 0.34
-	// #define KI 0.05
-	// #define KD 0.075
 
-	// float p=0, i=0, d=0;
-	// float diff[2];
-	// diff[0] = 0;
-	// diff[1] = 0;
-	// float integral;
-
-	// while(1){
-	// 	diff[0] = diff[1];
-	// 	diff[1] = ev3_color_sensor_get_reflect(COLOR_1)-50;
-	// 	integral += (diff[1] + diff[0]) / 2.0 *DELTA_T; 
-
-	// 	p = KP * diff[1];
-	// 	i = KI * integral;
-	// 	d = KD * (diff[1] - diff[0]) / DELTA_T;
-
-	// 	fprintf(fp,"p=%lf  i=%lf  d=%lf  p+i+d=%lf\r", p, i, d, p+i+d);
-	// }
-	
 
 	return 0;
 
