@@ -21,6 +21,18 @@ extern void gyrotrace_task(void);
 
 
 /*
+ *	アーム下げる関数
+ */
+void a_arm_down(void);
+
+
+/*
+ *	アーム上げる関数
+ */
+void a_arm_up(void);
+
+
+/*
  *	整数値入力関数
  */
 int input_int(int*);

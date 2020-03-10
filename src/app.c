@@ -17,7 +17,7 @@
 #define A_ARM           EV3_PORT_A      //雪アーム
 #define B_MOTOR         EV3_PORT_B      //右-
 #define C_MOTOR         EV3_PORT_C		//左+
-#define D_exit			EV3_PORT_D      //雪,研磨剤出口＆車回収
+#define D_MOTOR			EV3_PORT_D      //雪,研磨剤出口＆車回収
 #define COLOR_1	     	EV3_PORT_1      //中央右
 #define COLOR_2	     	EV3_PORT_2      //中央左
 #define HT_COLOR_3	    EV3_PORT_3      //右
@@ -45,7 +45,7 @@ int main_task(void) {
 
 int WRO(void) {
 	bluetooth_kashiuchi_fp();
-	return_value(8, r, "OK");
+	
 
 	/* コンフィング宣言 */
 	ev3_sensor_config(COLOR_1, COLOR_SENSOR);
@@ -56,13 +56,27 @@ int WRO(void) {
 	ev3_motor_config(A_ARM, MEDIUM_MOTOR);
 	ev3_motor_config(B_MOTOR, MEDIUM_MOTOR);
 	ev3_motor_config(C_MOTOR, MEDIUM_MOTOR);
-	ev3_motor_config(D_exit, MEDIUM_MOTOR);
+	ev3_motor_config(D_MOTOR, MEDIUM_MOTOR);
 
 	/* 待機、準備 */
 	tslp_tsk(2000);
-	while(false==ev3_button_is_pressed(ENTER_BUTTON));
+	// while(false==ev3_button_is_pressed(ENTER_BUTTON));
+	return_value(8, r, "OK");
+	while('0' != fgetc(fp));
 	
 	/* purpguramu */
+	ev3_motor_reset_counts(B_MOTOR);
+	ev3_motor_reset_counts(C_MOTOR);
+	ev3_motor_reset_counts(A_ARM);
+	ev3_motor_reset_counts(D_MOTOR);
+
+	ev3_sta_cyc(LINETRACE_TASK);
+	// ev3_motor_set_power(D_MOTOR, -30);
+	// tslp_tsk(2000);
+	// BRAKE(D_MOTOR);
+
+	// a_arm_up();
+	// a_arm_down();
 
 	// ev3_motor_reset_counts(B_MOTOR);
 	// ev3_motor_reset_counts(C_MOTOR);
@@ -72,21 +86,6 @@ int WRO(void) {
 	// 	ev3_motor_rotate(B_MOTOR,  15, 50, false);
 	// 	ev3_motor_rotate(C_MOTOR, -15, 50, true);
 	// }
-
-	// while(1){
-	// 	linetrace(30, 0.3, 0);
-	// 	tslp_tsk(0);
-	// }
-	while(1){
-		fprintf(fp, "%-04d\r",ev3_gyro_sensor_get_angle(GYRO_4));
-		if(true==ev3_button_is_pressed(ENTER_BUTTON)){
-			ev3_gyro_sensor_reset(GYRO_4);
-		}
-	}
-	
-
-
-	ev3_sta_cyc(GYROTRACE_TASK);
 
 
 

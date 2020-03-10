@@ -21,13 +21,16 @@
 /* linetrace_task動的な宣言 */
     #define LINETRACE_DELTA_T 0.004       //処理周期
     #define LINETRACE_POWER 30  //パワー
-	#define LINETRACE_KP 0.3             //Pゲイン
-	#define LINETRACE_KI 0.2             //Iゲイン
-	#define LINETRACE_KD 0.02       //Dゲイン
+	#define LINETRACE_KP 0.185             //Pゲイン
+	#define LINETRACE_KI 0.35             //Iゲイン
+	#define LINETRACE_KD 0.023       //Dゲイン
+    FILE *fp_2 = NULL;
 
 	float line_p=0, line_i=0, line_d=0;
 	float line_old = 0, line_new = 0;
 	float line_integral = 0;
+    //i=p/0.2
+    //d=p*0.075
 
 
 /*
@@ -52,6 +55,7 @@
  */
 int bluetooth_kashiuchi_fp(void){
     kashiuchi_fp = ev3_serial_open_file(EV3_SERIAL_BT);
+    fp_2 = fopen("/ev3rt/document/LINETRACE.xlsk","a+");
     return 0;
 }
 
@@ -76,6 +80,7 @@ void linetrace_task(void){
         ev3_motor_set_power(B_MOTOR, (-LINETRACE_POWER)-(line_p + line_i + line_d));
         ev3_motor_set_power(C_MOTOR, LINETRACE_POWER);
     }
+    fprintf(fp_2,"%lf\t%lf\t%lf\n",line_p, line_i, line_d);
 }
 
 
@@ -102,6 +107,39 @@ void gyrotrace_task(void){
     }
 }
 
+
+
+/*
+ *	アーム上げる関数
+ */
+void a_arm_up(void){
+    ev3_motor_set_power(A_ARM, 30);
+	tslp_tsk(600);
+	BRAKE(A_ARM);
+}
+
+
+
+
+
+/*
+ *	アーム下げる関数
+ */
+void a_arm_down(void){
+    ev3_motor_set_power(A_ARM, -30);
+	tslp_tsk(600);
+	BRAKE(A_ARM);
+}
+
+
+
+/*
+ *	アーム下げる関数
+ */
+void d_motor_car_up(void){
+
+}
+    
 
 
 
