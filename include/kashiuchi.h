@@ -32,6 +32,14 @@ void a_arm_down(void);
 void a_arm_up(void);
 
 
+
+/*
+ *	音関数
+ */
+void tone(void);
+
+
+
 /*
  *	整数値入力関数
  */

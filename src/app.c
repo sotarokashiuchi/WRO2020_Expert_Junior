@@ -58,11 +58,18 @@ int WRO(void) {
 	ev3_motor_config(C_MOTOR, MEDIUM_MOTOR);
 	ev3_motor_config(D_MOTOR, MEDIUM_MOTOR);
 
+	/* 変数 */
+	rgb_raw_t val_1;
+	int i=0;
+
 	/* 待機、準備 */
-	tslp_tsk(2000);
+	tslp_tsk(2500);
 	// while(false==ev3_button_is_pressed(ENTER_BUTTON));
 	return_value(8, r, "OK");
-	while('0' != fgetc(fp));
+	// while('0' != fgetc(fp));
+	// while(1){
+	// 	fprintf(fp, "%d\r",ev3_color_sensor_get_reflect(COLOR_1));
+	// }
 	
 	/* purpguramu */
 	ev3_motor_reset_counts(B_MOTOR);
@@ -70,13 +77,85 @@ int WRO(void) {
 	ev3_motor_reset_counts(A_ARM);
 	ev3_motor_reset_counts(D_MOTOR);
 
-	ev3_sta_cyc(LINETRACE_TASK);
+	ev3_motor_set_power(B_MOTOR, -30);
+	ev3_motor_set_power(C_MOTOR, 30);
+	while(200>=ev3_motor_get_counts(C_MOTOR));
+	while(40<=ev3_color_sensor_get_reflect(COLOR_1));
+	ev3_motor_reset_counts(C_MOTOR);
+	while(35>=ev3_motor_get_counts(C_MOTOR));
+	ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_1);
+	if(30<=(val_1.r + val_1.g + val_1.b)){
+		tone();
+	}
+	ev3_motor_reset_counts(C_MOTOR);
+	for(i=0; i<=7; i++){
+		while(66>=ev3_motor_get_counts(C_MOTOR));
+		ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_1);
+		if(30<=(val_1.r + val_1.g + val_1.b)){
+			tone();
+		}
+		ev3_motor_reset_counts(C_MOTOR);
+	}
+	
+
+	
+	BRAKE(B_MOTOR);
+	BRAKE(C_MOTOR);
+	
+
+//35 60
+	// ev3_sta_cyc(LINETRACE_TASK);
+
+	// ev3_motor_set_power(D_MOTOR, 85);
+	// tslp_tsk(2000);
+	// BRAKE(D_MOTOR);
+
+	// ev3_motor_set_power(A_ARM, -10);
+	// tslp_tsk(800);
+	// BRAKE(A_ARM);
+
+	// while(360>=ev3_gyro_sensor_get_angle(GYRO_4)){
+	// 	ev3_motor_set_power(B_MOTOR, 55);
+	// 	ev3_motor_set_power(C_MOTOR, 55);
+	// }
+	// while(380>=ev3_gyro_sensor_get_angle(GYRO_4)){
+	// 	ev3_motor_set_power(B_MOTOR, 20);
+	// 	ev3_motor_set_power(C_MOTOR, 20);
+	// }
+	// BRAKE(B_MOTOR);
+	// BRAKE(C_MOTOR);
+
+	// while(0<=ev3_gyro_sensor_get_angle(GYRO_4)){
+	// 	ev3_motor_set_power(B_MOTOR, -55);
+	// 	ev3_motor_set_power(C_MOTOR, -55);
+	// }
+	// while(0<=ev3_gyro_sensor_get_angle(GYRO_4)){
+	// 	ev3_motor_set_power(B_MOTOR, -20);
+	// 	ev3_motor_set_power(C_MOTOR, -20);
+	// }
+	// BRAKE(B_MOTOR);
+	// BRAKE(C_MOTOR);
+
 	// ev3_motor_set_power(D_MOTOR, -30);
 	// tslp_tsk(2000);
 	// BRAKE(D_MOTOR);
 
-	// a_arm_up();
-	// a_arm_down();
+	// ev3_motor_rotate(B_MOTOR, -360, 50, false);
+	// ev3_motor_rotate(C_MOTOR,  360, 50, true);
+
+	// ev3_motor_set_power(D_MOTOR, 30);
+	// tslp_tsk(2000);
+	// BRAKE(D_MOTOR);
+
+	
+
+	// ev3_motor_set_power(D_MOTOR, -30);
+	// tslp_tsk(2000);
+	// BRAKE(D_MOTOR);
+
+	// ev3_motor_set_power(D_MOTOR, 30);
+	// tslp_tsk(2000);
+	// BRAKE(D_MOTOR);
 
 	// ev3_motor_reset_counts(B_MOTOR);
 	// ev3_motor_reset_counts(C_MOTOR);

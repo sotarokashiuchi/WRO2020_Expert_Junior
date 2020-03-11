@@ -21,9 +21,9 @@
 /* linetrace_task動的な宣言 */
     #define LINETRACE_DELTA_T 0.004       //処理周期
     #define LINETRACE_POWER 30  //パワー
-	#define LINETRACE_KP 0.185             //Pゲイン
-	#define LINETRACE_KI 0.35             //Iゲイン
-	#define LINETRACE_KD 0.023       //Dゲイン
+	#define LINETRACE_KP 0.26             //Pゲイン
+	#define LINETRACE_KI 0.56             //Iゲイン
+	#define LINETRACE_KD 0.04       //Dゲイン
     FILE *fp_2 = NULL;
 
 	float line_p=0, line_i=0, line_d=0;
@@ -139,7 +139,16 @@ void a_arm_down(void){
 void d_motor_car_up(void){
 
 }
-    
+
+
+
+
+/*
+ *	音関数
+ */
+void tone(void){
+    ev3_speaker_play_tone(554.37, 100);
+}
 
 
 
