@@ -11,13 +11,17 @@ int bluetooth_kashiuchi_fp(void);
 /*
  *   ライントレース
  */
-extern void linetrace_task(void);
+extern void linetrace_task_4(void);
+extern float *line_power;  //30  //パワー
+extern	float *line_p_gein; //0.26             //Pゲイン
+extern	float *line_i_gein; //0.56             //Iゲイン
+extern	float *line_d_gein; //0.04       //Dゲイン
 
 
 /*
  *   ジャイトレース
  */
-extern void gyrotrace_task(void);
+extern void gyrotrace_task_4(void);
 
 
 /*

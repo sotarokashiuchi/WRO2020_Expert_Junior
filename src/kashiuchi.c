@@ -20,10 +20,6 @@
 
 /* linetrace_task動的な宣言 */
     #define LINETRACE_DELTA_T 0.004       //処理周期
-    #define LINETRACE_POWER 30  //パワー
-	#define LINETRACE_KP 0.26             //Pゲイン
-	#define LINETRACE_KI 0.56             //Iゲイン
-	#define LINETRACE_KD 0.04       //Dゲイン
     FILE *fp_2 = NULL;
 
 	float line_p=0, line_i=0, line_d=0;
@@ -31,6 +27,7 @@
 	float line_integral = 0;
     //i=p/0.2
     //d=p*0.075
+    
 
 
 /*
@@ -55,7 +52,7 @@
  */
 int bluetooth_kashiuchi_fp(void){
     kashiuchi_fp = ev3_serial_open_file(EV3_SERIAL_BT);
-    fp_2 = fopen("/ev3rt/document/LINETRACE.xlsk","a+");
+    // fp_2 = fopen("/ev3rt/document/LINETRACE.xlsk","a+");
     return 0;
 }
 
@@ -64,23 +61,27 @@ int bluetooth_kashiuchi_fp(void){
 /*
  *   ライントレース
  */
-void linetrace_task(void){
+void linetrace_task_4(void){
     line_old = line_new;
     line_new = ev3_color_sensor_get_reflect(COLOR_1)-ev3_color_sensor_get_reflect(COLOR_2);
     line_integral += (line_new + line_old) / 2.0 *LINETRACE_DELTA_T; 
 
-    line_p = LINETRACE_KP * line_new;
+    line_p = line_p_gein * line_new;
     line_i = LINETRACE_KI * line_integral;
-    line_d = LINETRACE_KD * (line_new - line_old) / LINETRACE_DELTA_T;
+    line_d = line_d_gein * (line_new - line_old) / LINETRACE_DELTA_T;
 
     if(line_new>=0){
-        ev3_motor_set_power(C_MOTOR, (LINETRACE_POWER)-(line_p + line_i + line_d));
-        ev3_motor_set_power(B_MOTOR, -LINETRACE_POWER);
+        ev3_motor_set_power(C_MOTOR, (line_power
+)-(line_p + line_i + line_d));
+        ev3_motor_set_power(B_MOTOR, -line_power
+);
     }else{
-        ev3_motor_set_power(B_MOTOR, (-LINETRACE_POWER)-(line_p + line_i + line_d));
-        ev3_motor_set_power(C_MOTOR, LINETRACE_POWER);
+        ev3_motor_set_power(B_MOTOR, (-line_power
+)-(line_p + line_i + line_d));
+        ev3_motor_set_power(C_MOTOR, line_power
+);
     }
-    fprintf(fp_2,"%lf\t%lf\t%lf\n",line_p, line_i, line_d);
+    // fprintf(fp_2,"%lf\t%lf\t%lf\n",line_p, line_i, line_d);
 }
 
 
@@ -88,7 +89,7 @@ void linetrace_task(void){
 /*
  *   ジャイトレース
  */
-void gyrotrace_task(void){
+void gyrotrace_task_4(void){
     gyro_old = gyro_new;
     gyro_new = ev3_gyro_sensor_get_angle(GYRO_4);
     gyro_integral += (gyro_new + gyro_old) / 2.0 *GYROTRACE_DELTA_T; 

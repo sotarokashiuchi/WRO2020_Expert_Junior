@@ -59,8 +59,11 @@ int WRO(void) {
 	ev3_motor_config(D_MOTOR, MEDIUM_MOTOR);
 
 	/* 変数 */
-	rgb_raw_t val_1;
+	rgb_raw_t val_1, val_2;
 	int i=0;
+	int binary_code[4][2] = {{}, {}, {}, {}};
+	int max_1 = 0, max_2 = 0;
+	//青0　緑1　黄2　赤3
 
 	/* 待機、準備 */
 	tslp_tsk(2500);
@@ -77,30 +80,114 @@ int WRO(void) {
 	ev3_motor_reset_counts(A_ARM);
 	ev3_motor_reset_counts(D_MOTOR);
 
-	ev3_motor_set_power(B_MOTOR, -30);
-	ev3_motor_set_power(C_MOTOR, 30);
-	while(200>=ev3_motor_get_counts(C_MOTOR));
-	while(40<=ev3_color_sensor_get_reflect(COLOR_1));
-	ev3_motor_reset_counts(C_MOTOR);
-	while(35>=ev3_motor_get_counts(C_MOTOR));
-	ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_1);
-	if(30<=(val_1.r + val_1.g + val_1.b)){
-		tone();
-	}
-	ev3_motor_reset_counts(C_MOTOR);
-	for(i=0; i<=7; i++){
-		while(66>=ev3_motor_get_counts(C_MOTOR));
-		ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_1);
-		if(30<=(val_1.r + val_1.g + val_1.b)){
-			tone();
-		}
-		ev3_motor_reset_counts(C_MOTOR);
+	/* 
+	 *	実験スペース
+	 */
+	*line_power = 10;
+	while(1){
+		ev3_motor_set_power(B_MOTOR, -30);
+		ev3_motor_set_power(C_MOTOR, 30);
+		while(100<=ev3_color_sensor_get_reflect(COLOR_2)+ev3_color_sensor_get_reflect(COLOR_1));
+		ev3_sta_cyc(LINETRACE_TASK_4);
 	}
 	
 
+	while(1)
+	// ev3_motor_set_power(D_MOTOR, 85);
+	// tslp_tsk(5000);
+	// BRAKE(D_MOTOR);
+
+	/* 
+	 *	バイナリコード色読み
+	 */
+	ev3_motor_set_power(B_MOTOR, -20);
+	ev3_motor_set_power(C_MOTOR, 20);
+	while(200>=ev3_motor_get_counts(C_MOTOR));
+	do{
+		ev3_color_sensor_get_rgb_raw(COLOR_1, &val_1);
+	}while(((WHITE_RGB+RED_RGB)/2)<=(val_1.r + val_1.g + val_1.b));
+	BRAKE(C_MOTOR);
+
+	ev3_motor_reset_counts(B_MOTOR);
+	while(-20<=ev3_gyro_sensor_get_angle(GYRO_4));
+	BRAKE(B_MOTOR);
+	ev3_motor_reset_counts(C_MOTOR);
+	ev3_motor_set_power(C_MOTOR, 20);
+	while(-6>=ev3_gyro_sensor_get_angle(GYRO_4));
+	BRAKE(C_MOTOR);
+	BRAKE(B_MOTOR);
+
+	ev3_sta_cyc(GYROTRACE_TASK_4);
+
+	ev3_motor_set_power(B_MOTOR, -30);
+	ev3_motor_set_power(C_MOTOR, 30);
 	
+	ev3_motor_reset_counts(C_MOTOR);
+	while(488>=ev3_motor_get_counts(C_MOTOR)){
+		ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_2);
+		if(15<=(val_2.r + val_2.g + val_2.b)){
+			tone();
+			switch(ev3_motor_get_counts(C_MOTOR)/70){
+				case 0:
+					binary_code[0][1]++;
+					break;
+				case 1:
+					binary_code[1][0]++;
+					break;
+				case 2:
+					binary_code[1][1]++;
+					break;
+				case 3:
+					binary_code[2][0]++;
+					break;
+				case 4:
+					binary_code[2][1]++;
+					break;
+				case 5:
+					binary_code[3][0]++;
+					break;
+				case 6:
+					binary_code[3][1]++;
+					break;
+			}
+		}
+		tslp_tsk(7);
+	}
+	ev3_stp_cyc(GYROTRACE_TASK_4);
 	BRAKE(B_MOTOR);
 	BRAKE(C_MOTOR);
+
+	for(i=0, max_1=0, max_2=0; i<=3; i++){
+		if(max_1 < binary_code[i][0]){
+			max_1 = binary_code[i][0];
+		}
+
+		if(max_2 < binary_code[i][1]){
+			max_2 = binary_code[i][1];
+		}
+	}
+
+	if(5>=max_1){
+		binary_code[0][0] = 999;
+		max_1 = 999;
+	}
+
+	for(i = 0; i<=3; i++){
+		if(max_1 == binary_code[i][0]){
+			binary_code[i][0] = 1;
+			fprintf(fp, "binary_code[%d][%d]%d",i,0,max_1);
+		}else{
+			binary_code[i][0] = 0;
+		}
+
+		if(max_2 == binary_code[i][1]){
+			binary_code[i][1] = 1;
+			fprintf(fp, "binary_code[%d][%d]%d",i,1, max_2);
+		}else{
+			binary_code[i][1] = 0;
+		}
+	}
+	
 	
 
 //35 60
