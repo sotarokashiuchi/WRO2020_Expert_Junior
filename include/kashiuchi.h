@@ -12,16 +12,15 @@ int bluetooth_kashiuchi_fp(void);
  *   ライントレース
  */
 extern void linetrace_task_4(void);
-extern float *line_power;  //30  //パワー
-extern	float *line_p_gein; //0.26             //Pゲイン
-extern	float *line_i_gein; //0.56             //Iゲイン
-extern	float *line_d_gein; //0.04       //Dゲイン
 
+extern void linetrace_task_4_power_p_i_d(int power, float p, float i, float d);
 
 /*
  *   ジャイトレース
  */
 extern void gyrotrace_task_4(void);
+
+extern void gyrotrace_task_4_power_p_i_d_angle(int power, float p, float i, float d, int angle);
 
 
 /*
@@ -34,6 +33,20 @@ void a_arm_down(void);
  *	アーム上げる関数
  */
 void a_arm_up(void);
+
+
+
+/*
+ *	アーム上げる関数
+ */
+void d_motor_car_up(void);
+
+
+
+/*
+ *	アーム下げる関数
+ */
+void d_motor_car_down(void);
 
 
 

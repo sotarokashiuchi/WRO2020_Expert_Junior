@@ -11,12 +11,14 @@
 #define COLOR_2	     	EV3_PORT_2      //中央左
 #define HT_COLOR_3	    EV3_PORT_3      //右
 #define GYRO_4	     	EV3_PORT_4      //ジャイロセンサー
+#define WHITE_REFLECTED 60              //純カラーセンサー白反射光
 #define WHITE_RGB       450             //純カラーセンサー白RGB和
 #define HT_WHITE_RGB    40              //HTカラーセンサー白RGB和
+#define BRAKE_REFLECTED 6               //純カラーセンサー黒反射光
 #define BRAKE_RGB       45              //純カラーセンサー黒RGB和
 #define HT_BRAKE_RGB    3               //HTカラーセンサー黒RGB和
 #define YELLOW_RGB      250             //純カラーセンサー黄RGB和
-#define HT_YELLOW_RGB   0
+#define HT_YELLOW_RGB   
 #define RED_RGB         180             //純カラーセンサー赤RGB和
 #define HT_RED_RGB      15              //HTカラーセンサー赤RGB和
 

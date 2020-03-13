@@ -1,6 +1,7 @@
 /* kashiuchi.c */
 #include "ev3api.h"
 #include "app.h"
+#include "kashiuchi.h"
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
@@ -22,11 +23,23 @@
     #define LINETRACE_DELTA_T 0.004       //処理周期
     FILE *fp_2 = NULL;
 
+    static int line_power;  //30  //パワー
+    static float line_p_gein; //0.26             //Pゲイン
+    static float line_i_gein; //0.56             //Iゲイン
+    static float line_d_gein; //0.04       //Dゲイン
+
 	float line_p=0, line_i=0, line_d=0;
 	float line_old = 0, line_new = 0;
 	float line_integral = 0;
     //i=p/0.2
     //d=p*0.075
+
+    linetrace_task_4_power_p_i_d(int power, float p, float i, float d){
+        line_power = power;
+        line_p_gein = p;
+        line_i_gein = i;
+        line_d_gein = d;
+    }
     
 
 
@@ -34,14 +47,23 @@
  *   ジャイトレース
  */
     #define GYROTRACE_DELTA_T 0.004       //処理周期
-    #define GYROTRACE_POWER 15  //パワー
-	#define GYROTRACE_KP 1             //Pゲイン
-	#define GYROTRACE_KI 0             //Iゲイン
-    #define GYROTRACE_KD 0             //Dゲイン
+    static int gyro_power; //15  //パワー
+	static float gyro_p_gein; //1             //Pゲイン
+	static float gyro_i_gein; //0             //Iゲイン
+    static float gyro_d_gein; //0             //Dゲイン
+    static float gyro_angle = 0;
 
 	float gyro_p=0, gyro_i=0, gyro_d;
 	int gyro_old = 0, gyro_new = 0;
 	float gyro_integral = 0;
+
+    gyrotrace_task_4_power_p_i_d_angle(int power, float p, float i, float d, int angle){
+        gyro_power = power;
+        gyro_p_gein = p;
+        gyro_i_gein = i;
+        gyro_d_gein = d;
+        gyro_angle = angle;
+    }
 
 /*****************************************************************************************************************************************
 *****************************************************************************************************************************************
@@ -67,19 +89,15 @@ void linetrace_task_4(void){
     line_integral += (line_new + line_old) / 2.0 *LINETRACE_DELTA_T; 
 
     line_p = line_p_gein * line_new;
-    line_i = LINETRACE_KI * line_integral;
+    line_i = line_i_gein * line_integral;
     line_d = line_d_gein * (line_new - line_old) / LINETRACE_DELTA_T;
 
     if(line_new>=0){
-        ev3_motor_set_power(C_MOTOR, (line_power
-)-(line_p + line_i + line_d));
-        ev3_motor_set_power(B_MOTOR, -line_power
-);
+        ev3_motor_set_power(C_MOTOR, (line_power)-(line_p + line_i + line_d));
+        ev3_motor_set_power(B_MOTOR, -line_power);
     }else{
-        ev3_motor_set_power(B_MOTOR, (-line_power
-)-(line_p + line_i + line_d));
-        ev3_motor_set_power(C_MOTOR, line_power
-);
+        ev3_motor_set_power(B_MOTOR, (-line_power)-(line_p + line_i + line_d));
+        ev3_motor_set_power(C_MOTOR, line_power);
     }
     // fprintf(fp_2,"%lf\t%lf\t%lf\n",line_p, line_i, line_d);
 }
@@ -91,20 +109,19 @@ void linetrace_task_4(void){
  */
 void gyrotrace_task_4(void){
     gyro_old = gyro_new;
-    gyro_new = ev3_gyro_sensor_get_angle(GYRO_4);
+    gyro_new = ev3_gyro_sensor_get_angle(GYRO_4) - gyro_angle;
     gyro_integral += (gyro_new + gyro_old) / 2.0 *GYROTRACE_DELTA_T; 
-    fprintf(kashiuchi_fp, "%d\r",gyro_new);
 
-    gyro_p = GYROTRACE_KP * gyro_new;
-    gyro_i = GYROTRACE_KI * gyro_integral;
-    gyro_d = GYROTRACE_KD * (gyro_new - gyro_old) / GYROTRACE_DELTA_T;
+    gyro_p = gyro_p_gein * gyro_new;
+    gyro_i = gyro_i_gein * gyro_integral;
+    gyro_d = gyro_d_gein * (gyro_new - gyro_old) / GYROTRACE_DELTA_T;
 
     if(gyro_new>=0){
-        ev3_motor_set_power(C_MOTOR, (GYROTRACE_POWER)-(gyro_p + gyro_i + gyro_d));
-        ev3_motor_set_power(B_MOTOR, -GYROTRACE_POWER);
+        ev3_motor_set_power(C_MOTOR, (gyro_power)-(gyro_p + gyro_i + gyro_d));
+        ev3_motor_set_power(B_MOTOR, -gyro_power);
     }else{
-        ev3_motor_set_power(B_MOTOR, (-GYROTRACE_POWER)-(gyro_p + gyro_i + gyro_d));
-        ev3_motor_set_power(C_MOTOR, GYROTRACE_POWER);
+        ev3_motor_set_power(B_MOTOR, (-gyro_power)-(gyro_p + gyro_i + gyro_d));
+        ev3_motor_set_power(C_MOTOR, gyro_power);
     }
 }
 
@@ -135,12 +152,24 @@ void a_arm_down(void){
 
 
 /*
- *	アーム下げる関数
+ *	アーム上げる関数
  */
 void d_motor_car_up(void){
-
+    ev3_motor_set_power(D_MOTOR, -30);
+	tslp_tsk(600);
+	BRAKE(D_MOTOR);
 }
 
+
+
+/*
+ *	アーム下げる関数
+ */
+void d_motor_car_down(void){
+    ev3_motor_set_power(D_MOTOR, 30);
+	tslp_tsk(600);
+	BRAKE(D_MOTOR);
+}
 
 
 

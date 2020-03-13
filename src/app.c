@@ -26,6 +26,8 @@
 
 /* 関数のプロトタイプ宣言 */
 int WRO(void);
+int collection_red_3_to_1(void);
+int broken_line(void);
 
 /* グローバル変数宣言 */
 FILE *fp = NULL;				//ファイルポインタ
@@ -61,12 +63,13 @@ int WRO(void) {
 	/* 変数 */
 	rgb_raw_t val_1, val_2;
 	int i=0;
+	
 	int binary_code[4][2] = {{}, {}, {}, {}};
 	int max_1 = 0, max_2 = 0;
 	//青0　緑1　黄2　赤3
 
 	/* 待機、準備 */
-	tslp_tsk(2500);
+	tslp_tsk(3500);
 	// while(false==ev3_button_is_pressed(ENTER_BUTTON));
 	return_value(8, r, "OK");
 	// while('0' != fgetc(fp));
@@ -74,28 +77,37 @@ int WRO(void) {
 	// 	fprintf(fp, "%d\r",ev3_color_sensor_get_reflect(COLOR_1));
 	// }
 	
+	
+
+	/* 
+	 *	実験スペース
+	 */
+
+	
+	
+
+	// ev3_sta_cyc(LINETRACE_TASK_4);
+	// while(1);
+
+	// while(1){
+	// 	fprintf(fp, "%d\r",ev3_color_sensor_get_reflect(COLOR_1));
+	// }
+	// linetrace_task_4_power_p_i_d(20, 0.35, 0.56, 0.06);
+
+	// ev3_motor_set_power(B_MOTOR, -30);
+	// ev3_motor_set_power(C_MOTOR, 30);
+	
+
+	collection_red_3_to_1();
+
+	while(1);
+
 	/* purpguramu */
 	ev3_motor_reset_counts(B_MOTOR);
 	ev3_motor_reset_counts(C_MOTOR);
 	ev3_motor_reset_counts(A_ARM);
 	ev3_motor_reset_counts(D_MOTOR);
 
-	/* 
-	 *	実験スペース
-	 */
-	*line_power = 10;
-	while(1){
-		ev3_motor_set_power(B_MOTOR, -30);
-		ev3_motor_set_power(C_MOTOR, 30);
-		while(100<=ev3_color_sensor_get_reflect(COLOR_2)+ev3_color_sensor_get_reflect(COLOR_1));
-		ev3_sta_cyc(LINETRACE_TASK_4);
-	}
-	
-
-	while(1)
-	// ev3_motor_set_power(D_MOTOR, 85);
-	// tslp_tsk(5000);
-	// BRAKE(D_MOTOR);
 
 	/* 
 	 *	バイナリコード色読み
@@ -258,3 +270,94 @@ int WRO(void) {
 	return 0;
 
 }
+
+int collection_red_3_to_1(void){
+	/* ジャイロ直進 */
+	d_motor_car_up();
+	ev3_motor_reset_counts(C_MOTOR);
+	gyrotrace_task_4_power_p_i_d_angle(20, 2, 0, 0, 0);
+	ev3_sta_cyc(GYROTRACE_TASK_4);
+	
+	a_arm_down();
+	while(700>=ev3_motor_get_counts(C_MOTOR));
+	ev3_stp_cyc(GYROTRACE_TASK_4);
+	BRAKE(B_MOTOR);
+	BRAKE(C_MOTOR);
+
+	/* 回転 */
+	// ev3_motor_set_power(B_MOTOR, -30);
+	// ev3_motor_set_power(C_MOTOR, -30);
+	// while(-8<=ev3_gyro_sensor_get_angle(GYRO_4));
+	// BRAKE(B_MOTOR);
+	// BRAKE(C_MOTOR);
+
+	// tslp_tsk(500);
+	// fprintf(fp, "%d\n\r",ev3_gyro_sensor_get_angle(GYRO_4));
+
+	/* 直進 */
+	// ev3_motor_reset_counts(C_MOTOR);
+	// gyrotrace_task_4_power_p_i_d_angle(20, 2, 0, 0, -20);
+	// ev3_sta_cyc(GYROTRACE_TASK_4);
+	// while(190>=ev3_motor_get_counts(C_MOTOR));
+	// ev3_stp_cyc(GYROTRACE_TASK_4);
+	// BRAKE(B_MOTOR);
+	// BRAKE(C_MOTOR);
+
+	/* 雪１回収 */
+	a_arm_up();
+	a_arm_down();
+
+	/* 回転 */
+	// ev3_motor_set_power(B_MOTOR, 30);
+	// ev3_motor_set_power(C_MOTOR, 30);
+	// while(2>=ev3_gyro_sensor_get_angle(GYRO_4));
+	// BRAKE(B_MOTOR);
+	// BRAKE(C_MOTOR);
+
+	// tslp_tsk(500);
+	// fprintf(fp, "%d\n\r",ev3_gyro_sensor_get_angle(GYRO_4));
+
+	/* 直進 */
+	ev3_motor_reset_counts(C_MOTOR);
+	ev3_motor_set_power(B_MOTOR, -30);
+	ev3_motor_set_power(C_MOTOR, 30);
+	while(360>=ev3_motor_get_counts(C_MOTOR));
+	BRAKE(B_MOTOR);
+	BRAKE(C_MOTOR);
+
+	/* 雪２回収 */
+	a_arm_up();
+	a_arm_down();
+
+	return 0;
+}
+
+
+int broken_line(void){
+	int i=0;
+	int gyro_angle = 0;
+
+	linetrace_task_4_power_p_i_d(20, 0.4, 0.6, 0.06);
+	while((BRAKE_REFLECTED + WHITE_REFLECTED)/2+10<=ev3_color_sensor_get_reflect(COLOR_2) && (BRAKE_REFLECTED + WHITE_REFLECTED)/2+10<=ev3_color_sensor_get_reflect(COLOR_1));
+	ev3_stp_cyc(GYROTRACE_TASK_4);
+	ev3_motor_reset_counts(C_MOTOR);
+	ev3_sta_cyc(LINETRACE_TASK_4);
+	while(130>=ev3_motor_get_counts(C_MOTOR));
+	for(i=0; i<=100; i++){
+		gyro_angle += ev3_gyro_sensor_get_angle(GYRO_4);
+	}
+	gyro_angle = gyro_angle / i;
+	ev3_stp_cyc(LINETRACE_TASK_4);
+	BRAKE(B_MOTOR);
+	BRAKE(C_MOTOR);
+	tslp_tsk(500);
+
+	
+	gyrotrace_task_4_power_p_i_d_angle(20, 2, 0, 0, gyro_angle);
+	ev3_sta_cyc(GYROTRACE_TASK_4);
+	while(200>=ev3_motor_get_counts(C_MOTOR));
+	
+	return 0;
+}
+
+
