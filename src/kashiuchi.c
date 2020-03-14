@@ -152,21 +152,21 @@ void a_arm_down(void){
 
 
 /*
- *	アーム上げる関数
+ *	Dアーム上げる関数
  */
 void d_motor_car_up(void){
-    ev3_motor_set_power(D_MOTOR, -30);
-	tslp_tsk(600);
+    ev3_motor_set_power(D_MOTOR, 85);
+	tslp_tsk(2000);
 	BRAKE(D_MOTOR);
 }
 
 
 
 /*
- *	アーム下げる関数
+ *	Dアーム下げる関数
  */
 void d_motor_car_down(void){
-    ev3_motor_set_power(D_MOTOR, 30);
+    ev3_motor_set_power(D_MOTOR, -30);
 	tslp_tsk(600);
 	BRAKE(D_MOTOR);
 }

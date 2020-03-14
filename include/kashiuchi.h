@@ -37,14 +37,14 @@ void a_arm_up(void);
 
 
 /*
- *	アーム上げる関数
+ *	Dアーム上げる関数
  */
 void d_motor_car_up(void);
 
 
 
 /*
- *	アーム下げる関数
+ *	Dアーム下げる関数
  */
 void d_motor_car_down(void);
 
