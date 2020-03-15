@@ -29,8 +29,8 @@
     static float line_d_gein; //0.04       //Dゲイン
 
 	float line_p=0, line_i=0, line_d=0;
-	float line_old = 0, line_new = 0;
-	float line_integral = 0;
+	static float line_old = 0, line_new = 0;
+	static float line_integral = 0;
     //i=p/0.2
     //d=p*0.075
 
@@ -39,6 +39,11 @@
         line_p_gein = p;
         line_i_gein = i;
         line_d_gein = d;
+
+        line_new = 0;
+        line_old = 0;
+        line_integral = 0;
+        
     }
     
 
@@ -99,7 +104,6 @@ void linetrace_task_4(void){
         ev3_motor_set_power(B_MOTOR, (-line_power)-(line_p + line_i + line_d));
         ev3_motor_set_power(C_MOTOR, line_power);
     }
-    // fprintf(fp_2,"%lf\t%lf\t%lf\n",line_p, line_i, line_d);
 }
 
 
@@ -131,7 +135,7 @@ void gyrotrace_task_4(void){
  *	アーム上げる関数
  */
 void a_arm_up(void){
-    ev3_motor_set_power(A_ARM, 30);
+    ev3_motor_set_power(A_ARM, 100);
 	tslp_tsk(600);
 	BRAKE(A_ARM);
 }
