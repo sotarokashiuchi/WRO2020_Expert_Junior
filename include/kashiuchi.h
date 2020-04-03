@@ -53,7 +53,9 @@ void d_motor_car_down(void);
 /*
  *	音関数
  */
-void tone(void);
+void tone_object(void);
+
+void tone_line(void);
 
 
 

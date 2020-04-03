@@ -180,8 +180,12 @@ void d_motor_car_down(void){
 /*
  *	音関数
  */
-void tone(void){
+void tone_object(void){
     ev3_speaker_play_tone(554.37, 100);
+}
+
+void tone_line(void){
+    ev3_speaker_play_tone(1760.00, 100);
 }
 
 

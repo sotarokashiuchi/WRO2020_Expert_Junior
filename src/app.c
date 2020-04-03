@@ -63,19 +63,23 @@ int WRO(void) {
 	ev3_motor_config(C_MOTOR, MEDIUM_MOTOR);
 	ev3_motor_config(D_MOTOR, MEDIUM_MOTOR);
 
+	ev3_speaker_set_volume(100);
+
 	/* 変数 */
 	rgb_raw_t val_1, val_2;
 	int i=0;
 	
 	int binary_code[4][2] = {{}, {}, {}, {}};
+	int sta_point = 0;
 	int max_1 = 0, max_2 = 0;
 	
 	//青0　緑1　黄2　赤3
 
 	/* 待機、準備 */
-	tslp_tsk(3500);
+	tone_line();
+	tslp_tsk(5000);
 	// while(false==ev3_button_is_pressed(ENTER_BUTTON));
-	return_value(8, r, "OK");
+	return_value(1, r, "OK");
 	// while('0' != fgetc(fp));
 	// while(1){
 	// 	fprintf(fp, "%d\r",ev3_color_sensor_get_reflect(COLOR_1));
@@ -86,8 +90,8 @@ int WRO(void) {
 	/* 
 	 *	実験スペース
 	 */
-
-
+	
+	
 	// ev3_sta_cyc(LINETRACE_TASK_4);
 	// while(1);
 
@@ -104,18 +108,7 @@ int WRO(void) {
 	// tslp_tsk(2000);
 	// BRAKE(D_MOTOR);
 	
-	while(1){
-		d_motor_car_up();
-		tslp_tsk(500);
-		d_motor_car_down();
-		tslp_tsk(500);
-	}
 
-
-	gyrotrace_task_4_power_p_i_d_angle(20, 2, 0, 0, gyro_angle_standard);
-	ev3_sta_cyc(GYROTRACE_TASK_4);
-
-	while(1);
 
 	/* purpguramu */
 	ev3_motor_reset_counts(B_MOTOR);
@@ -127,53 +120,57 @@ int WRO(void) {
 	/* 
 	 *	バイナリコード色読み
 	 */
-	ev3_motor_set_power(B_MOTOR, -20);
-	ev3_motor_set_power(C_MOTOR, 20);
+	/* 直進 */
+	gyrotrace_task_4_power_p_i_d_angle(20, 2, 0, 0, gyro_angle_standard);
+	ev3_sta_cyc(GYROTRACE_TASK_4);
 	while(200>=ev3_motor_get_counts(C_MOTOR));
 	do{
 		ev3_color_sensor_get_rgb_raw(COLOR_1, &val_1);
-	}while(((WHITE_RGB+RED_RGB)/2)<=(val_1.r + val_1.g + val_1.b));
-	BRAKE(C_MOTOR);
+	}while(50<=(val_1.b));
 
-	ev3_motor_reset_counts(B_MOTOR);
-	while(-20<=ev3_gyro_sensor_get_angle(GYRO_4));
-	BRAKE(B_MOTOR);
+	/* スタート位置代入&表示 */
+	if((YELLOW_RGB + RED_RGB)/2 < (val_1.r + val_1.g + val_1.b)){
+		sta_point = 1;	//黄
+		fprintf(fp,"黄色\r\n");
+	}else{
+		sta_point = 2;	//赤
+		fprintf(fp,"赤色\r\n");
+	}
+	tone_line();
+
+	/* 直進 */
 	ev3_motor_reset_counts(C_MOTOR);
-	ev3_motor_set_power(C_MOTOR, 20);
-	while(-6>=ev3_gyro_sensor_get_angle(GYRO_4));
-	BRAKE(C_MOTOR);
-	BRAKE(B_MOTOR);
+	while(260>=ev3_motor_get_counts(C_MOTOR));
 
-	ev3_sta_cyc(GYROTRACE_TASK_4);
-
-	ev3_motor_set_power(B_MOTOR, -30);
-	ev3_motor_set_power(C_MOTOR, 30);
-	
+	/* バイナリコード色読み　配列に代入 */
 	ev3_motor_reset_counts(C_MOTOR);
-	while(488>=ev3_motor_get_counts(C_MOTOR)){
+	while(560>=ev3_motor_get_counts(C_MOTOR)){
 		ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_2);
-		if(15<=(val_2.r + val_2.g + val_2.b)){
-			tone();
+		if((HT_WHITE_RGB + HT_BRAKE_RGB)/2 <= (val_2.r + val_2.g + val_2.b)){
+			tone_object();
 			switch(ev3_motor_get_counts(C_MOTOR)/70){
 				case 0:
-					binary_code[0][1]++;
+					binary_code[0][0]++;
 					break;
 				case 1:
-					binary_code[1][0]++;
+					binary_code[0][1]++;
 					break;
 				case 2:
-					binary_code[1][1]++;
+					binary_code[1][0]++;
 					break;
 				case 3:
-					binary_code[2][0]++;
+					binary_code[1][1]++;
 					break;
 				case 4:
-					binary_code[2][1]++;
+					binary_code[2][0]++;
 					break;
 				case 5:
-					binary_code[3][0]++;
+					binary_code[2][1]++;
 					break;
 				case 6:
+					binary_code[3][0]++;
+					break;
+				case 7:
 					binary_code[3][1]++;
 					break;
 			}
@@ -184,6 +181,7 @@ int WRO(void) {
 	BRAKE(B_MOTOR);
 	BRAKE(C_MOTOR);
 
+	/* 配列の最大値を求める */
 	for(i=0, max_1=0, max_2=0; i<=3; i++){
 		if(max_1 < binary_code[i][0]){
 			max_1 = binary_code[i][0];
@@ -194,28 +192,22 @@ int WRO(void) {
 		}
 	}
 
-	if(5>=max_1){
-		binary_code[0][0] = 999;
-		max_1 = 999;
-	}
-
+	/* それぞれの最大値に1を代入、表示、その他は0を代入。 */
 	for(i = 0; i<=3; i++){
 		if(max_1 == binary_code[i][0]){
 			binary_code[i][0] = 1;
-			fprintf(fp, "binary_code[%d][%d]%d",i,0,max_1);
+			fprintf(fp, "binary_code[%d][%d] i=%d\r\n",i,0,max_1);
 		}else{
 			binary_code[i][0] = 0;
 		}
 
 		if(max_2 == binary_code[i][1]){
 			binary_code[i][1] = 1;
-			fprintf(fp, "binary_code[%d][%d]%d",i,1, max_2);
+			fprintf(fp, "binary_code[%d][%d] i=%d\r\n",i,1, max_2);
 		}else{
 			binary_code[i][1] = 0;
 		}
 	}
-	
-	
 
 //35 60
 	// ev3_sta_cyc(LINETRACE_TASK);
@@ -622,7 +614,7 @@ int broken_line(int line_gein_cfg){
 	}
 	
 	while((BRAKE_REFLECTED + WHITE_REFLECTED)/2+10<=ev3_color_sensor_get_reflect(COLOR_2) && (BRAKE_REFLECTED + WHITE_REFLECTED)/2+10<=ev3_color_sensor_get_reflect(COLOR_1));
-	tone();
+	tone_line();
 	ev3_stp_cyc(GYROTRACE_TASK_4);
 	ev3_motor_reset_counts(C_MOTOR);
 	ev3_sta_cyc(LINETRACE_TASK_4);
