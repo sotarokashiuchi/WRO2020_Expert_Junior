@@ -105,14 +105,15 @@ int WRO(void) {
 	// BRAKE(D_MOTOR);
 	
 	while(1){
-		a_arm_up();
+		d_motor_car_up();
 		tslp_tsk(500);
-		a_arm_down();
+		d_motor_car_down();
 		tslp_tsk(500);
 	}
 
 
-	collection_yellow_3_to_1();
+	gyrotrace_task_4_power_p_i_d_angle(20, 2, 0, 0, gyro_angle_standard);
+	ev3_sta_cyc(GYROTRACE_TASK_4);
 
 	while(1);
 

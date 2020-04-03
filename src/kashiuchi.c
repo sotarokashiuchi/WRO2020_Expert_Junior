@@ -135,7 +135,7 @@ void gyrotrace_task_4(void){
  *	アーム上げる関数
  */
 void a_arm_up(void){
-    ev3_motor_set_power(A_ARM, 100);
+    ev3_motor_set_power(A_ARM, -30);
 	tslp_tsk(600);
 	BRAKE(A_ARM);
 }
@@ -148,7 +148,7 @@ void a_arm_up(void){
  *	アーム下げる関数
  */
 void a_arm_down(void){
-    ev3_motor_set_power(A_ARM, -30);
+    ev3_motor_set_power(A_ARM, 30);
 	tslp_tsk(600);
 	BRAKE(A_ARM);
 }
