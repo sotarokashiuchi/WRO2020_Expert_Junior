@@ -69,7 +69,8 @@ int WRO(void) {
 	rgb_raw_t val_1, val_2;
 	int i=0;
 	
-	int binary_code[4][2] = {{}, {}, {}, {}};
+	int binary_code[4][2] = {{0}};
+	int sta_point_no[2] = {0};
 	int sta_point = 0;
 	int max_1 = 0, max_2 = 0;
 	
@@ -80,6 +81,7 @@ int WRO(void) {
 	tslp_tsk(5000);
 	// while(false==ev3_button_is_pressed(ENTER_BUTTON));
 	return_value(1, r, "OK");
+	
 	// while('0' != fgetc(fp));
 	// while(1){
 	// 	fprintf(fp, "%d\r",ev3_color_sensor_get_reflect(COLOR_1));
@@ -128,8 +130,20 @@ int WRO(void) {
 		ev3_color_sensor_get_rgb_raw(COLOR_1, &val_1);
 	}while(50<=(val_1.b));
 
+	ev3_motor_reset_counts(C_MOTOR);
+	sta_point_no[0] = val_1.r + val_1.g + val_1.b;
+	sta_point_no[1] = ev3_motor_get_counts(C_MOTOR);
+
+	while(60>(val_1.b)){
+		ev3_color_sensor_get_rgb_raw(COLOR_1, &val_1);
+		if(sta_point_no[0] > val_1.r + val_1.g + val_1.b){
+			sta_point_no[0] = val_1.r + val_1.g + val_1.b;
+			sta_point_no[1] = ev3_motor_get_counts(C_MOTOR);
+		}
+	}
+
 	/* スタート位置代入&表示 */
-	if((YELLOW_RGB + RED_RGB)/2 < (val_1.r + val_1.g + val_1.b)){
+	if((YELLOW_RGB + RED_RGB)/2 < sta_point_no[0]){
 		sta_point = 1;	//黄
 		fprintf(fp,"黄色\r\n");
 	}else{
