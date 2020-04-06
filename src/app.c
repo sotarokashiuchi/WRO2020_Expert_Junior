@@ -34,6 +34,15 @@ int collection_red_3_to_1(void);
 int collection_yellow_3_to_1(void);
 int collection_blue_3_to_1(void);
 int collection_green_3_to_1(void);
+int put_red_1_to_3(int);
+int put_red_3_to_1(int);
+int put_yellow_1_to_3(int);
+int put_yellow_3_to_1(int);
+int put_blue_1_to_3(int);
+int put_blue_3_to_1(int);
+int put_green_1_to_3(int);
+int put_green_3_to_1(int);
+
 
 /* グローバル変数宣言 */
 FILE *fp = NULL;				//ファイルポインタ
@@ -99,6 +108,27 @@ int WRO(void) {
 	 *	実験スペース
 	 */
 
+	int cfg_power = 30;
+	int angul = 90;
+
+
+
+
+	// collection_red_3_to_1();
+	ev3_motor_set_power(B_MOTOR,30);
+	ev3_motor_set_power(C_MOTOR,30);
+	while(50>=ev3_gyro_sensor_get_angle(GYRO_4));
+	ev3_motor_set_power(B_MOTOR,-20);
+	ev3_motor_set_power(C_MOTOR,-20);
+	ev3_motor_set_power(B_MOTOR,9);
+	ev3_motor_set_power(C_MOTOR,9);
+	while(85>=ev3_gyro_sensor_get_angle(GYRO_4));
+	BRAKE(B_MOTOR);
+	BRAKE(C_MOTOR);
+	tslp_tsk(1000);	
+	fprintf(fp,"最終%d\n\r",ev3_gyro_sensor_get_angle(GYRO_4));
+	while(1);
+	
 	// ev3_sta_cyc(LINETRACE_TASK_4);
 	// while(1);
 
@@ -257,12 +287,44 @@ int WRO(void) {
 	switch(road_priority){
 		case 1:
 			/* スタート1赤道路回収 */
+
+			/* バック */
+			ev3_motor_reset_counts(C_MOTOR);
+			gyrotrace_task_4_power_p_i_d_angle(-20, 2, 0, 0, gyro_angle_standard);
+			ev3_sta_cyc(GYROTRACE_TASK_4);
+			while(-500<=ev3_motor_get_counts(C_MOTOR));
+
+			/* ライン読み */
+			do{
+				ev3_color_sensor_get_rgb_raw(COLOR_1, &val_1);
+			}while(50<=(val_1.b));
+
+			/* バック角度 */
+			ev3_motor_reset_counts(C_MOTOR);
+			while(-50<=ev3_motor_get_counts(C_MOTOR));
+			ev3_stp_cyc(GYROTRACE_TASK_4);
+			BRAKE(B_MOTOR);
+			BRAKE(C_MOTOR);
+
 			break;
+
+
 		case 2:
 			/* スタート1黄道路回収 */
 			break;
 		case 3:
 			/* スタート1青道路回収 */
+
+			/* バック */
+			ev3_motor_reset_counts(C_MOTOR);
+			gyrotrace_task_4_power_p_i_d_angle(20, 2, 0, 0, gyro_angle_standard);
+			ev3_sta_cyc(GYROTRACE_TASK_4);
+			while(970>=ev3_motor_get_counts(C_MOTOR));
+
+			ev3_stp_cyc(GYROTRACE_TASK_4);
+			BRAKE(B_MOTOR);
+			BRAKE(C_MOTOR);
+
 			break;
 		case 4:
 			/* スタート2黄道路回収 */
@@ -404,7 +466,6 @@ int WRO(void) {
 int collection_red_3_to_1(void){
 	gyro_angle_standard = ev3_gyro_sensor_get_angle(GYRO_4);
 	/* ジャイロ直進 */
-	d_motor_car_down();
 	ev3_motor_reset_counts(C_MOTOR);
 	gyrotrace_task_4_power_p_i_d_angle(20, 2, 0, 0, gyro_angle_standard);
 	ev3_sta_cyc(GYROTRACE_TASK_4);
@@ -473,9 +534,11 @@ int collection_red_3_to_1(void){
 
 	/* アーム少し閉じる */
 	ev3_motor_reset_counts(A_ARM);
-	ev3_motor_set_power(A_ARM, 20);
-	while(35>=ev3_motor_get_counts(A_ARM));
+	ev3_motor_set_power(A_ARM, -40);
+	while(-35>=ev3_motor_get_counts(A_ARM));
 	BRAKE(A_ARM);
+
+	tone_line();
 	
 	tslp_tsk(2000);
 
@@ -715,6 +778,56 @@ int collection_green_3_to_1(void){
 
 	return 0;
 }
+
+
+/********************************************************************************************************************************************
+ *	赤道路研磨剤撒く1-3
+ ********************************************************************************************************************************************/
+int put_red_1_to_3(int);
+
+
+/********************************************************************************************************************************************
+ *	赤道路研磨剤撒く3-1
+ ********************************************************************************************************************************************/
+int put_red_3_to_1(int);
+
+
+/********************************************************************************************************************************************
+ *	黄道路研磨剤撒く1-3
+ ********************************************************************************************************************************************/
+int put_yellow_1_to_3(int);
+
+
+/********************************************************************************************************************************************
+ *	黄道路研磨剤撒く3-1
+ ********************************************************************************************************************************************/
+int put_yellow_3_to_1(int);
+
+
+/********************************************************************************************************************************************
+ *	青道路研磨剤撒く1-3
+ ********************************************************************************************************************************************/
+int put_blue_1_to_3(int);
+
+
+/********************************************************************************************************************************************
+ *	青道路研磨剤撒く3-1
+ ********************************************************************************************************************************************/
+int put_blue_3_to_1(int);
+
+
+/********************************************************************************************************************************************
+ *	緑道路研磨剤撒く1-3
+ ********************************************************************************************************************************************/
+int put_green_1_to_3(int);
+
+
+/********************************************************************************************************************************************
+ *	緑道路研磨剤撒く3-1
+ ********************************************************************************************************************************************/
+int put_green_3_to_1(int);
+
+
 
 
 
