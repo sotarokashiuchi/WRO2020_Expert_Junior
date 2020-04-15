@@ -107,26 +107,35 @@ int WRO(void) {
 	/* 
 	 *	実験スペース
 	 */
+	int color_1_hennsuu = 0;
+	int color_2_hennsuu = 0;
+	do{
+		color_1_hennsuu = ev3_color_sensor_get_reflect(COLOR_1)-33;
+		color_2_hennsuu = ev3_color_sensor_get_reflect(COLOR_2)-33;
+		if(0==color_1_hennsuu){
+			BRAKE(B_MOTOR);
+			fprintf(fp,"0__%d\n\r",color_1_hennsuu);
+		}else if(0<color_1_hennsuu){
+			ev3_motor_set_power(B_MOTOR, -5);
+			fprintf(fp,"1__%d\n\r",color_1_hennsuu);
+		}else{
+			ev3_motor_set_power(B_MOTOR,  5);
+			fprintf(fp,"2__%d\n\r",color_1_hennsuu);
+		}
 
-	int cfg_power = 30;
-	int angul = 90;
-
-
-
-
-	// collection_red_3_to_1();
-	ev3_motor_set_power(B_MOTOR,30);
-	ev3_motor_set_power(C_MOTOR,30);
-	while(50>=ev3_gyro_sensor_get_angle(GYRO_4));
-	ev3_motor_set_power(B_MOTOR,-20);
-	ev3_motor_set_power(C_MOTOR,-20);
-	ev3_motor_set_power(B_MOTOR,9);
-	ev3_motor_set_power(C_MOTOR,9);
-	while(85>=ev3_gyro_sensor_get_angle(GYRO_4));
+		if(0==color_2_hennsuu){
+			BRAKE(C_MOTOR);
+			fprintf(fp,"3__%d\n\r",color_2_hennsuu);
+		}else if(0<color_2_hennsuu){
+			ev3_motor_set_power(C_MOTOR,  5);
+			fprintf(fp,"4__%d\n\r",color_2_hennsuu);
+		}else{
+			ev3_motor_set_power(C_MOTOR, -5);
+			fprintf(fp,"5__%d\n\r",color_2_hennsuu);
+		}
+	}while((color_1_hennsuu>=3 || color_1_hennsuu<=-3) || (color_2_hennsuu>=3 || color_2_hennsuu<=-3));
 	BRAKE(B_MOTOR);
 	BRAKE(C_MOTOR);
-	tslp_tsk(1000);	
-	fprintf(fp,"最終%d\n\r",ev3_gyro_sensor_get_angle(GYRO_4));
 	while(1);
 	
 	// ev3_sta_cyc(LINETRACE_TASK_4);
@@ -157,6 +166,7 @@ int WRO(void) {
 	do{
 		ev3_color_sensor_get_rgb_raw(COLOR_1, &val_1);
 	}while(50<=(val_1.b));
+	tone_line();
 	ev3_motor_reset_counts(C_MOTOR);
 	sta_point_no[0] = val_1.r + val_1.g + val_1.b;
 	sta_point_no[1] = ev3_motor_get_counts(C_MOTOR);
@@ -168,7 +178,8 @@ int WRO(void) {
 			sta_point_no[0] = val_1.r + val_1.g + val_1.b;
 			sta_point_no[1] = ev3_motor_get_counts(C_MOTOR);
 		}
-	}while(50>(val_1.b) || 15>=sta_point_no[1]);
+	}while(50>(val_1.b) || 15>=ev3_motor_get_counts(C_MOTOR));
+	tone_object();
 
 	/* スタート位置代入&表示 */
 	if((YELLOW_RGB + RED_RGB)/2 < sta_point_no[0]){
@@ -251,6 +262,8 @@ int WRO(void) {
 		}
 	}
 
+	tslp_tsk(500);
+
 
 
 	/********************************************************************************************************************************************
@@ -290,21 +303,38 @@ int WRO(void) {
 
 			/* バック */
 			ev3_motor_reset_counts(C_MOTOR);
-			gyrotrace_task_4_power_p_i_d_angle(-20, 2, 0, 0, gyro_angle_standard);
+			gyrotrace_task_4_power_p_i_d_angle(-10, 2, 0, 0, gyro_angle_standard);
 			ev3_sta_cyc(GYROTRACE_TASK_4);
 			while(-500<=ev3_motor_get_counts(C_MOTOR));
 
 			/* ライン読み */
+			
 			do{
 				ev3_color_sensor_get_rgb_raw(COLOR_1, &val_1);
 			}while(50<=(val_1.b));
+			ev3_motor_reset_counts(C_MOTOR);
+			tone_line();
+
+			sta_point_no[0] = val_1.r + val_1.g + val_1.b;
+			sta_point_no[1] = ev3_motor_get_counts(C_MOTOR);
+
+			/* ライン色読み＆中心を測定 */
+			do{
+				ev3_color_sensor_get_rgb_raw(COLOR_1, &val_1);
+				if(sta_point_no[0] > val_1.r + val_1.g + val_1.b){
+					sta_point_no[0] = val_1.r + val_1.g + val_1.b;
+					sta_point_no[1] = ev3_motor_get_counts(C_MOTOR);
+				}
+			}while(50>(val_1.b) || -15<=ev3_motor_get_counts(C_MOTOR));
 
 			/* バック角度 */
-			ev3_motor_reset_counts(C_MOTOR);
-			while(-50<=ev3_motor_get_counts(C_MOTOR));
-			ev3_stp_cyc(GYROTRACE_TASK_4);
-			BRAKE(B_MOTOR);
-			BRAKE(C_MOTOR);
+			gyro_deceleration(-70-(sta_point_no[1]/2), gyro_angle_standard, 0);
+
+			rotation(-90);
+			gyro_angle_standard = -90;
+
+			gyro_deceleration(190, gyro_angle_standard, -0);
+			
 
 			break;
 
@@ -338,7 +368,7 @@ int WRO(void) {
 	}
 
 
-
+	while(1);
 
 
 	/********************************************************************************************************************************************
@@ -839,7 +869,7 @@ int broken_line(int line_gein_cfg){
 	int gyro_angle = 0;
 	
 	if(0==line_gein_cfg){
-		linetrace_task_4_power_p_i_d(20, 0.4, 0.6, 0.06);
+		linetrace_task_4_power_p_i_d(15, 0.35, 0.56, 0.06);	
 	}
 	
 	while((BRAKE_REFLECTED + WHITE_REFLECTED)/2+10<=ev3_color_sensor_get_reflect(COLOR_2) && (BRAKE_REFLECTED + WHITE_REFLECTED)/2+10<=ev3_color_sensor_get_reflect(COLOR_1));
@@ -848,11 +878,12 @@ int broken_line(int line_gein_cfg){
 	ev3_motor_reset_counts(C_MOTOR);
 	ev3_sta_cyc(LINETRACE_TASK_4);
 	while(130>=ev3_motor_get_counts(C_MOTOR));
+	tone_line();
 	
 	ev3_stp_cyc(LINETRACE_TASK_4);
 	
-	ev3_motor_set_power(B_MOTOR, -20);
-	ev3_motor_set_power(C_MOTOR,  20);
+	ev3_motor_set_power(B_MOTOR, -15);
+	ev3_motor_set_power(C_MOTOR,  15);
 	while(200>=ev3_motor_get_counts(C_MOTOR));
 	
 	return 0;

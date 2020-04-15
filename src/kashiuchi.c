@@ -130,6 +130,102 @@ void gyrotrace_task_4(void){
 }
 
 
+/*
+ *   回転
+ */
+void rotation(int angul){
+    if(angul>0){
+        ev3_motor_set_power(B_MOTOR,30);
+        ev3_motor_set_power(C_MOTOR,30);
+        while(angul-40>=ev3_gyro_sensor_get_angle(GYRO_4));
+        ev3_motor_set_power(B_MOTOR,15);
+        ev3_motor_set_power(C_MOTOR,15);
+        while(angul-20>=ev3_gyro_sensor_get_angle(GYRO_4));
+        ev3_motor_set_power(B_MOTOR,9);
+        ev3_motor_set_power(C_MOTOR,9);
+        while(angul-5>=ev3_gyro_sensor_get_angle(GYRO_4));
+        BRAKE(B_MOTOR);
+        BRAKE(C_MOTOR);
+    }else{
+        ev3_motor_set_power(B_MOTOR,-30);
+        ev3_motor_set_power(C_MOTOR,-30);
+        while(angul+40<=ev3_gyro_sensor_get_angle(GYRO_4));
+        ev3_motor_set_power(B_MOTOR,-15);
+        ev3_motor_set_power(C_MOTOR,-15);
+        while(angul+25<=ev3_gyro_sensor_get_angle(GYRO_4));
+        ev3_motor_set_power(B_MOTOR,-9);
+        ev3_motor_set_power(C_MOTOR,-9);
+        while(angul+10<=ev3_gyro_sensor_get_angle(GYRO_4));
+        BRAKE(B_MOTOR);
+        BRAKE(C_MOTOR);
+    }
+    tslp_tsk(1000);	
+    fprintf(kashiuchi_fp,"最終%d\n\r",ev3_gyro_sensor_get_angle(GYRO_4));
+}
+
+
+/*
+ *   減速
+ */
+int deceleration(int angul){
+    if(angul>=0){
+        ev3_motor_set_power(B_MOTOR,-30);
+        ev3_motor_set_power(C_MOTOR,30);
+        while(angul-40>=ev3_motor_get_counts(C_MOTOR));
+        ev3_motor_set_power(B_MOTOR,-10);
+        ev3_motor_set_power(C_MOTOR,10);
+        while(angul>=ev3_motor_get_counts(C_MOTOR));
+        BRAKE(B_MOTOR);
+        BRAKE(C_MOTOR);
+    }else{
+        ev3_motor_set_power(B_MOTOR,30);
+        ev3_motor_set_power(C_MOTOR,-30);
+        while(angul+40<=ev3_motor_get_counts(C_MOTOR));
+        ev3_motor_set_power(B_MOTOR,10);
+        ev3_motor_set_power(C_MOTOR,-10);
+        while(angul<=ev3_motor_get_counts(C_MOTOR));
+        BRAKE(B_MOTOR);
+        BRAKE(C_MOTOR);
+    }
+}
+
+
+
+/*
+ *   ジャイロ減速
+ */
+int gyro_deceleration(int angul, int gyro_angle_standard, int stp){
+    if(angul<0){
+        ev3_motor_reset_counts(C_MOTOR);
+        gyrotrace_task_4_power_p_i_d_angle(-30, 2, 0, 0, gyro_angle_standard);
+        ev3_sta_cyc(GYROTRACE_TASK_4);
+        while(angul+40<=ev3_motor_get_counts(C_MOTOR));
+        gyrotrace_task_4_power_p_i_d_angle(-10, 2, 0, 0, gyro_angle_standard);
+        ev3_sta_cyc(GYROTRACE_TASK_4);
+        if(stp==0){
+            while(angul>=ev3_motor_get_counts(C_MOTOR));
+            ev3_stp_cyc(GYROTRACE_TASK_4);
+            BRAKE(B_MOTOR);
+            BRAKE(C_MOTOR);
+        }
+    }else{
+        ev3_motor_reset_counts(C_MOTOR);
+        gyrotrace_task_4_power_p_i_d_angle(30, 2, 0, 0, gyro_angle_standard);
+        ev3_sta_cyc(GYROTRACE_TASK_4);
+        while(angul-40>=ev3_motor_get_counts(C_MOTOR));
+        gyrotrace_task_4_power_p_i_d_angle(10, 2, 0, 0, gyro_angle_standard);
+        ev3_sta_cyc(GYROTRACE_TASK_4);
+        if(stp==0){
+            while(angul>=ev3_motor_get_counts(C_MOTOR));
+            ev3_stp_cyc(GYROTRACE_TASK_4);
+            BRAKE(B_MOTOR);
+            BRAKE(C_MOTOR);
+        }
+    }
+}
+
+
+
 
 /*
  *	アーム上げる関数
