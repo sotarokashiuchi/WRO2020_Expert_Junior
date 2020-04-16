@@ -107,36 +107,6 @@ int WRO(void) {
 	/* 
 	 *	実験スペース
 	 */
-	int color_1_hennsuu = 0;
-	int color_2_hennsuu = 0;
-	do{
-		color_1_hennsuu = ev3_color_sensor_get_reflect(COLOR_1)-33;
-		color_2_hennsuu = ev3_color_sensor_get_reflect(COLOR_2)-33;
-		if(0==color_1_hennsuu){
-			BRAKE(B_MOTOR);
-			fprintf(fp,"0__%d\n\r",color_1_hennsuu);
-		}else if(0<color_1_hennsuu){
-			ev3_motor_set_power(B_MOTOR, -5);
-			fprintf(fp,"1__%d\n\r",color_1_hennsuu);
-		}else{
-			ev3_motor_set_power(B_MOTOR,  5);
-			fprintf(fp,"2__%d\n\r",color_1_hennsuu);
-		}
-
-		if(0==color_2_hennsuu){
-			BRAKE(C_MOTOR);
-			fprintf(fp,"3__%d\n\r",color_2_hennsuu);
-		}else if(0<color_2_hennsuu){
-			ev3_motor_set_power(C_MOTOR,  5);
-			fprintf(fp,"4__%d\n\r",color_2_hennsuu);
-		}else{
-			ev3_motor_set_power(C_MOTOR, -5);
-			fprintf(fp,"5__%d\n\r",color_2_hennsuu);
-		}
-	}while((color_1_hennsuu>=3 || color_1_hennsuu<=-3) || (color_2_hennsuu>=3 || color_2_hennsuu<=-3));
-	BRAKE(B_MOTOR);
-	BRAKE(C_MOTOR);
-	while(1);
 	
 	// ev3_sta_cyc(LINETRACE_TASK_4);
 	// while(1);
@@ -330,9 +300,11 @@ int WRO(void) {
 			/* バック角度 */
 			gyro_deceleration(-70-(sta_point_no[1]/2), gyro_angle_standard, 0);
 
-			rotation(-90);
+			/* 旋回 */
+			rotation(-90,gyro_angle_standard);
 			gyro_angle_standard = -90;
 
+			/* 直進 */
 			gyro_deceleration(190, gyro_angle_standard, -0);
 			
 
@@ -341,29 +313,164 @@ int WRO(void) {
 
 		case 2:
 			/* スタート1黄道路回収 */
-			break;
-		case 3:
-			/* スタート1青道路回収 */
 
 			/* バック */
 			ev3_motor_reset_counts(C_MOTOR);
-			gyrotrace_task_4_power_p_i_d_angle(20, 2, 0, 0, gyro_angle_standard);
+			gyrotrace_task_4_power_p_i_d_angle(-10, 2, 0, 0, gyro_angle_standard);
 			ev3_sta_cyc(GYROTRACE_TASK_4);
-			while(970>=ev3_motor_get_counts(C_MOTOR));
+			while(-500<=ev3_motor_get_counts(C_MOTOR));
 
-			ev3_stp_cyc(GYROTRACE_TASK_4);
+			/* ライン読み */
+			
+			do{
+				ev3_color_sensor_get_rgb_raw(COLOR_1, &val_1);
+			}while(50<=(val_1.b));
+			ev3_motor_reset_counts(C_MOTOR);
+			tone_line();
+
+			sta_point_no[0] = val_1.r + val_1.g + val_1.b;
+			sta_point_no[1] = ev3_motor_get_counts(C_MOTOR);
+
+			/* ライン色読み＆中心を測定 */
+			do{
+				ev3_color_sensor_get_rgb_raw(COLOR_1, &val_1);
+				if(sta_point_no[0] > val_1.r + val_1.g + val_1.b){
+					sta_point_no[0] = val_1.r + val_1.g + val_1.b;
+					sta_point_no[1] = ev3_motor_get_counts(C_MOTOR);
+				}
+			}while(50>(val_1.b) || -15<=ev3_motor_get_counts(C_MOTOR));
+
+			/* バック角度 */
+			gyro_deceleration(-0-(sta_point_no[1]/2), gyro_angle_standard, 0);
+
+			/* 旋回 */
+			rotation(-90,gyro_angle_standard);
+			gyro_angle_standard = -90;
+
+			/* ジャイロ直進 */
+			gyro_deceleration(190, gyro_angle_standard, -1);
+
+			do{
+				ev3_color_sensor_get_rgb_raw(COLOR_1, &val_1);
+			}while(50<=(val_1.b));
+			ev3_motor_reset_counts(C_MOTOR);
+			tone_line();
+
+			line_fix(33);
+
+			tslp_tsk(500);
+			gyro_angle_standard = ev3_gyro_sensor_get_angle(GYRO_4);
+
+			/* ジャイロ直進 */
+			gyro_deceleration(1300, gyro_angle_standard, 0);
+			fprintf(fp,"%d",ev3_gyro_sensor_get_angle(GYRO_4));
+
+			/* 旋回 */
+			rotation(90,gyro_angle_standard);
+			tone_line();
+			gyro_angle_standard += 90;
+
+			/* 点線ライントレース */
+			ev3_motor_set_power(B_MOTOR, -15);
+			ev3_motor_set_power(C_MOTOR,  15);
+
+			for(i=1; i<=7; i++){
+				broken_line(0);
+			}
+
+			/* 直進 */
+			deceleration(1000,-1);
+
+			/* 色読み */
+
+			/* 直進 */
+
+			/* 旋回 */
+
+			/* 壁合わせ */
+			
+
+			
+			break;
+
+
+		case 3:
+			/* スタート1青道路回収 */
+
+			/* 直進 */
+			ev3_motor_reset_counts(B_MOTOR);
+			ev3_motor_set_power(B_MOTOR, -20);
+			while(-200<=ev3_motor_get_counts(B_MOTOR));
 			BRAKE(B_MOTOR);
+			ev3_motor_reset_counts(C_MOTOR);
+			ev3_motor_set_power(C_MOTOR, 20);
+			while(200>=ev3_motor_get_counts(C_MOTOR));
 			BRAKE(C_MOTOR);
+			BRAKE(B_MOTOR);
+
+
+			gyro_deceleration(850, gyro_angle_standard, 0);
+
+			/* 回転 */
+			rotation(-90, gyro_angle_standard);
+
+			/* 壁合わせ */
 
 			break;
 		case 4:
 			/* スタート2黄道路回収 */
+
+			/* バック */
+			ev3_motor_reset_counts(C_MOTOR);
+			gyrotrace_task_4_power_p_i_d_angle(-10, 2, 0, 0, gyro_angle_standard);
+			ev3_sta_cyc(GYROTRACE_TASK_4);
+			while(-1000<=ev3_motor_get_counts(C_MOTOR));
+
+			/* ライン読み */
+			
+			
+			ev3_motor_reset_counts(C_MOTOR);
+			tone_line();
+
+			/* バック角度 */
+			// gyro_deceleration
+
+			/* 旋回 */
+			rotation(-90,gyro_angle_standard);
+			gyro_angle_standard = -90;
+
+			/* 壁合わせ */
+
+
 			break;
+
+
 		case 5:
 			/* スタート2赤道路回収 */
 			break;
 		case 6:
 			/* スタート2緑道路回収 */
+
+			/* 直進 */
+			ev3_motor_reset_counts(B_MOTOR);
+			ev3_motor_set_power(B_MOTOR, -20);
+			while(-200<=ev3_motor_get_counts(B_MOTOR));
+			BRAKE(B_MOTOR);
+			ev3_motor_reset_counts(C_MOTOR);
+			ev3_motor_set_power(C_MOTOR, 20);
+			while(200>=ev3_motor_get_counts(C_MOTOR));
+			BRAKE(C_MOTOR);
+			BRAKE(B_MOTOR);
+
+
+			gyro_deceleration(400, gyro_angle_standard, 0);
+
+			/* 回転 */
+			rotation(-90, gyro_angle_standard);
+
+			/* 壁合わせ */
+
+
 			break;
 	}
 

@@ -133,29 +133,29 @@ void gyrotrace_task_4(void){
 /*
  *   回転
  */
-void rotation(int angul){
-    if(angul>0){
+void rotation(int angul, int angul_cfg){
+    if(angul_cfg<angul){
         ev3_motor_set_power(B_MOTOR,30);
         ev3_motor_set_power(C_MOTOR,30);
-        while(angul-40>=ev3_gyro_sensor_get_angle(GYRO_4));
+        while(angul-40>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
         ev3_motor_set_power(B_MOTOR,15);
         ev3_motor_set_power(C_MOTOR,15);
-        while(angul-20>=ev3_gyro_sensor_get_angle(GYRO_4));
+        while(angul-20>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
         ev3_motor_set_power(B_MOTOR,9);
         ev3_motor_set_power(C_MOTOR,9);
-        while(angul-5>=ev3_gyro_sensor_get_angle(GYRO_4));
+        while(angul-5>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
         BRAKE(B_MOTOR);
         BRAKE(C_MOTOR);
     }else{
         ev3_motor_set_power(B_MOTOR,-30);
         ev3_motor_set_power(C_MOTOR,-30);
-        while(angul+40<=ev3_gyro_sensor_get_angle(GYRO_4));
+        while(angul+40<=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
         ev3_motor_set_power(B_MOTOR,-15);
         ev3_motor_set_power(C_MOTOR,-15);
-        while(angul+25<=ev3_gyro_sensor_get_angle(GYRO_4));
+        while(angul+25<=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
         ev3_motor_set_power(B_MOTOR,-9);
         ev3_motor_set_power(C_MOTOR,-9);
-        while(angul+10<=ev3_gyro_sensor_get_angle(GYRO_4));
+        while(angul+10<=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
         BRAKE(B_MOTOR);
         BRAKE(C_MOTOR);
     }
@@ -167,7 +167,8 @@ void rotation(int angul){
 /*
  *   減速
  */
-int deceleration(int angul){
+int deceleration(int angul, int stp){
+    ev3_motor_reset_counts(C_MOTOR);
     if(angul>=0){
         ev3_motor_set_power(B_MOTOR,-30);
         ev3_motor_set_power(C_MOTOR,30);
@@ -175,8 +176,10 @@ int deceleration(int angul){
         ev3_motor_set_power(B_MOTOR,-10);
         ev3_motor_set_power(C_MOTOR,10);
         while(angul>=ev3_motor_get_counts(C_MOTOR));
-        BRAKE(B_MOTOR);
-        BRAKE(C_MOTOR);
+        if(stp==0){
+            BRAKE(B_MOTOR);
+            BRAKE(C_MOTOR);
+        }
     }else{
         ev3_motor_set_power(B_MOTOR,30);
         ev3_motor_set_power(C_MOTOR,-30);
@@ -184,8 +187,10 @@ int deceleration(int angul){
         ev3_motor_set_power(B_MOTOR,10);
         ev3_motor_set_power(C_MOTOR,-10);
         while(angul<=ev3_motor_get_counts(C_MOTOR));
-        BRAKE(B_MOTOR);
-        BRAKE(C_MOTOR);
+        if(stp==0){
+            BRAKE(B_MOTOR);
+            BRAKE(C_MOTOR);
+        }
     }
 }
 
@@ -224,6 +229,35 @@ int gyro_deceleration(int angul, int gyro_angle_standard, int stp){
     }
 }
 
+
+/*
+ *   線合わせ
+ */
+line_fix(int color_reflect){
+    int color_1_hennsuu = 0;
+	int color_2_hennsuu = 0;
+	do{
+		color_1_hennsuu = ev3_color_sensor_get_reflect(COLOR_1)-color_reflect;
+		color_2_hennsuu = ev3_color_sensor_get_reflect(COLOR_2)-color_reflect;
+		if(0==color_1_hennsuu){
+			BRAKE(B_MOTOR);
+		}else if(0<color_1_hennsuu){
+			ev3_motor_set_power(B_MOTOR, -5);
+		}else{
+			ev3_motor_set_power(B_MOTOR,  5);
+		}
+
+		if(0==color_2_hennsuu){
+			BRAKE(C_MOTOR);
+		}else if(0<color_2_hennsuu){
+			ev3_motor_set_power(C_MOTOR,  5);
+		}else{
+			ev3_motor_set_power(C_MOTOR, -5);
+		}
+	}while((color_1_hennsuu>=3 || color_1_hennsuu<=-3) || (color_2_hennsuu>=3 || color_2_hennsuu<=-3));
+	BRAKE(B_MOTOR);
+	BRAKE(C_MOTOR);
+}
 
 
 

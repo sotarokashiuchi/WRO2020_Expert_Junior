@@ -28,14 +28,14 @@ extern void gyrotrace_task_4_power_p_i_d_angle(int power, float p, float i, floa
 /*
  *   回転
  */
-void rotation(int angul);
+void rotation(int angul, int angul_cfg);
 
 
 
 /*
  *   減速
  */
-int deceleration(int angul);
+int deceleration(int angul, int stp);
 
 
 
@@ -43,6 +43,12 @@ int deceleration(int angul);
  *   ジャイロ減速
  */
 int gyro_deceleration(int angul, int gyro_angle_standard, int stp);
+
+
+/*
+ *   線合わせ
+ */
+line_fix(int color_reflect);
 
 
 
