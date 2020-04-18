@@ -262,6 +262,20 @@ line_fix(int color_reflect){
 
 
 /*
+ *   壁合わせ
+ */
+int wall_fix(int angle){
+    while(false==ev3_button_is_pressed(ENTER_BUTTON));
+    tone_line();
+    tslp_tsk(1000);
+    
+    return ev3_gyro_sensor_get_angle(GYRO_4);
+}
+
+
+
+
+/*
  *	アーム上げる関数
  */
 void a_arm_up(void){

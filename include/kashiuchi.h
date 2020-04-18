@@ -48,7 +48,14 @@ int gyro_deceleration(int angul, int gyro_angle_standard, int stp);
 /*
  *   線合わせ
  */
-line_fix(int color_reflect);
+void line_fix(int color_reflect);
+
+
+
+/*
+ *   壁合わせ
+ */
+int wall_fix(int angle);
 
 
 
