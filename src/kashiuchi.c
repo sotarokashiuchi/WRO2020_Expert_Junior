@@ -268,7 +268,7 @@ int wall_fix(int angle){
     while(false==ev3_button_is_pressed(ENTER_BUTTON));
     tone_line();
     tslp_tsk(1000);
-    
+
     return ev3_gyro_sensor_get_angle(GYRO_4);
 }
 
@@ -279,8 +279,9 @@ int wall_fix(int angle){
  *	アーム上げる関数
  */
 void a_arm_up(void){
-    ev3_motor_set_power(A_ARM, -30);
-	tslp_tsk(600);
+    ev3_motor_set_power(A_ARM, -85);
+    while(-190 <= ev3_motor_get_counts(A_ARM));
+	// tslp_tsk(300);
 	BRAKE(A_ARM);
 }
 
@@ -315,7 +316,7 @@ void d_motor_car_up(void){
  */
 void d_motor_car_down(void){
     ev3_motor_set_power(D_MOTOR, 30);
-	tslp_tsk(600);
+	tslp_tsk(2000);
 	BRAKE(D_MOTOR);
 }
 
