@@ -42,6 +42,7 @@ int put_blue_1_to_3(int);
 int put_blue_3_to_1(int);
 int put_green_1_to_3(int);
 int put_green_3_to_1(int);
+int  snow_car_put(int color_direction);
 
 
 /* グローバル変数宣言 */
@@ -122,10 +123,8 @@ int WRO(void) {
 
 	a_arm_up();
 
+	// deceleration(,0);
 
-
-	collection_red_3_to_1();
-	while(1)
 
 
 	/********************************************************************************************************************************************
@@ -309,6 +308,9 @@ int WRO(void) {
 
 			/* 壁合わせ */
 			gyro_angle_standard = wall_fix(-0);
+
+			/* 車＆雪回収 */
+			collection_red_3_to_1();
 			
 
 			break;
@@ -506,6 +508,9 @@ int WRO(void) {
 
 			/* 壁合わせ */
 			// gyro_angle_standard = wall_fix(-0);
+
+			/* 車＆雪回収 */
+			// collection_red_3_to_1();
 			
 
 
@@ -666,7 +671,6 @@ int collection_red_3_to_1(void){
 	a_arm_down();
 	d_motor_car_down();
 
-	gyro_angle_standard = ev3_gyro_sensor_get_angle(GYRO_4);
 	/* ジャイロ直進 */
 	gyro_deceleration(950, gyro_angle_standard, 0);
 
@@ -704,7 +708,7 @@ int collection_red_3_to_1(void){
 	/* 右回転 */
 	ev3_motor_set_power(B_MOTOR, -10);
 	ev3_motor_set_power(C_MOTOR, 30);
-	while(82>=ev3_gyro_sensor_get_angle(GYRO_4));
+	while(gyro_angle_standard+82>=ev3_gyro_sensor_get_angle(GYRO_4));
 	BRAKE(B_MOTOR);
 	BRAKE(C_MOTOR);
 
@@ -1064,6 +1068,69 @@ int broken_line(int line_gein_cfg){
 	while(200>=ev3_motor_get_counts(C_MOTOR));
 	
 	return 0;
+}
+
+
+/********************************************************************************************************************************************
+ *	雪&車置く
+ ********************************************************************************************************************************************/
+int  snow_car_put(int color_direction){
+	if(color_direction==1){
+		//黄道路
+		/* 直進 */
+		gyro_deceleration(1200, gyro_angle_standard, 0);
+		
+		tslp_tsk(1000);
+		/* 回転 */
+		rotation(-90, gyro_angle_standard);
+		gyro_angle_standard += -90;
+			
+	
+	}else{
+		//赤道路
+		/* 直進 */
+		gyro_deceleration(480, gyro_angle_standard, 0);
+
+		tslp_tsk(1000);
+
+		/* 回転 */
+		rotation(90, gyro_angle_standard);
+		gyro_angle_standard += 90;
+		
+	}
+	tslp_tsk(1000);
+	/* 直進 */
+	gyro_deceleration(100, gyro_angle_standard, -1);
+    
+	/* 色読み */
+	while((WHITE_REFLECTED + BRAKE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+	tone_line();
+
+	gyro_deceleration(100, gyro_angle_standard, 0);
+
+	tslp_tsk(1000);
+
+	/* バック */
+	ev3_motor_set_power(B_MOTOR, 9);
+	ev3_motor_set_power(C_MOTOR, -30);
+
+	if(gyro_angle_standard<-180){
+        while((-180)-5>=ev3_gyro_sensor_get_angle(GYRO_4)-gyro_angle_standard);
+    }else{
+        while((-180)+10<=ev3_gyro_sensor_get_angle(GYRO_4)-gyro_angle_standard);
+    }
+	BRAKE(B_MOTOR);
+	BRAKE(C_MOTOR);
+
+	a_arm_down();
+
+	/* 壁合わせ */
+	ev3_motor_set_power(B_MOTOR, 20);
+	ev3_motor_set_power(C_MOTOR, -20);
+	
+	tslp_tsk(5000);
+	BRAKE(B_MOTOR);
+	BRAKE(C_MOTOR);
 }
 
 
