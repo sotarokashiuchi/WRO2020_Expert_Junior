@@ -109,6 +109,15 @@ int WRO(void) {
 	/* 
 	 *	実験スペース
 	 */
+	
+
+	linetrace_task_4_power_p_i_d(15, 0.35, 0.56, 0.06);	
+	ev3_sta_cyc(LINETRACE_TASK_4);
+	while(1);
+
+	while(1){
+		broken_line(0);
+	}
 	// while(1){
 	// 	fprintf(fp, "%d\r",ev3_color_sensor_get_reflect(COLOR_1));
 	// }
@@ -307,7 +316,7 @@ int WRO(void) {
 			gyro_angle_standard = -90;
 
 			/* 壁合わせ */
-			gyro_angle_standard = wall_fix(-0);
+			gyro_angle_standard = wall_fix(500);
 
 			/* 車＆雪回収 */
 			collection_red_3_to_1();
@@ -1043,7 +1052,7 @@ int put_green_3_to_1(int);
 
 
 /********************************************************************************************************************************************
- *	点線直直進
+ *	点線ライントレース
  ********************************************************************************************************************************************/
 int broken_line(int line_gein_cfg){
 	int i=0;
