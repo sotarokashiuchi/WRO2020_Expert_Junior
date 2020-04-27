@@ -109,20 +109,10 @@ int WRO(void) {
 	/* 
 	 *	実験スペース
 	 */
-	
-
-	linetrace_task_4_power_p_i_d(15, 0.35, 0.56, 0.06);	
-	ev3_sta_cyc(LINETRACE_TASK_4);
-	while(1);
-
-	while(1){
-		broken_line(0);
-	}
 	// while(1){
 	// 	fprintf(fp, "%d\r",ev3_color_sensor_get_reflect(COLOR_1));
 	// }
-	// linetrace_task_4_power_p_i_d(20, 0.35, 0.56, 0.06);	
-
+	// linetrace_task_4_power_p_i_d(20, 0.35, 0.56, 0.06);
 
 	/* purpguramu */
 	ev3_motor_reset_counts(B_MOTOR);
@@ -696,11 +686,11 @@ int collection_red_3_to_1(void){
 	BRAKE(C_MOTOR);
 	ev3_motor_reset_counts(B_MOTOR);
 	ev3_motor_set_power(B_MOTOR, -20);
-	while(200<=ev3_motor_get_counts(B_MOTOR));
+	while(-200<=ev3_motor_get_counts(B_MOTOR));
 	BRAKE(C_MOTOR);
 	BRAKE(B_MOTOR);
 
-
+	tslp_tsk(5000);
 	/* 直進 */
 	gyro_deceleration(220, gyro_angle_standard, 0);
 
@@ -1059,7 +1049,7 @@ int broken_line(int line_gein_cfg){
 	int gyro_angle = 0;
 	
 	if(0==line_gein_cfg){
-		linetrace_task_4_power_p_i_d(15, 0.35, 0.56, 0.06);	
+		linetrace_task_4_power_p_i_d(15, 0.4, 0, 0.06);	
 	}
 	
 	while((BRAKE_REFLECTED + WHITE_REFLECTED)/2+10<=ev3_color_sensor_get_reflect(COLOR_2) && (BRAKE_REFLECTED + WHITE_REFLECTED)/2+10<=ev3_color_sensor_get_reflect(COLOR_1));
