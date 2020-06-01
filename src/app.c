@@ -114,6 +114,31 @@ int WRO(void) {
 	// }
 	// linetrace_task_4_power_p_i_d(20, 0.35, 0.56, 0.06);
 
+	
+	ev3_motor_set_power(B_MOTOR, -30);
+	ev3_motor_set_power(C_MOTOR,  30);
+
+	while(40>=ev3_motor_get_counts(C_MOTOR));
+	BRAKE(B_MOTOR);
+	BRAKE(C_MOTOR);
+
+	tslp_tsk(1000);
+
+	ev3_motor_reset_counts(C_MOTOR);
+	ev3_motor_set_power(B_MOTOR,  30);
+	ev3_motor_set_power(C_MOTOR, -30);
+	while(-20<=ev3_motor_get_counts(C_MOTOR));
+	BRAKE(B_MOTOR);
+	BRAKE(C_MOTOR);
+	
+
+	
+	
+
+
+	while(1);
+
+
 	/* purpguramu */
 	ev3_motor_reset_counts(B_MOTOR);
 	ev3_motor_reset_counts(C_MOTOR);
@@ -411,7 +436,9 @@ int WRO(void) {
 			rotation(-90, gyro_angle_standard);
 
 			/* 壁合わせ */
-			gyro_angle_standard = wall_fix(-0);
+			gyro_angle_standard = wall_fix(1000);
+			
+			collection_blue_3_to_1();
 
 			break;
 		case 4:
@@ -444,7 +471,9 @@ int WRO(void) {
 			gyro_angle_standard = -90;
 
 			/* 壁合わせ */
-			gyro_angle_standard = wall_fix(-0);
+			gyro_angle_standard = wall_fix(1000);
+
+			
 
 			break;
 
@@ -974,6 +1003,9 @@ int collection_yellow_3_to_1(void){
  *	青道路車雪回収
  ********************************************************************************************************************************************/
 int collection_blue_3_to_1(void){
+	gyro_deceleration(500, gyro_angle_standard, -1);
+	linetrace_task_4_power_p_i_d(15, 0.35, 0.56, 0.06);
+	ev3_sta_cyc(LINETRACE_TASK_4);
 
 	return 0;
 }
