@@ -114,31 +114,6 @@ int WRO(void) {
 	// }
 	// linetrace_task_4_power_p_i_d(20, 0.35, 0.56, 0.06);
 
-	
-	ev3_motor_set_power(B_MOTOR, -30);
-	ev3_motor_set_power(C_MOTOR,  30);
-
-	while(40>=ev3_motor_get_counts(C_MOTOR));
-	BRAKE(B_MOTOR);
-	BRAKE(C_MOTOR);
-
-	tslp_tsk(1000);
-
-	ev3_motor_reset_counts(C_MOTOR);
-	ev3_motor_set_power(B_MOTOR,  30);
-	ev3_motor_set_power(C_MOTOR, -30);
-	while(-20<=ev3_motor_get_counts(C_MOTOR));
-	BRAKE(B_MOTOR);
-	BRAKE(C_MOTOR);
-	
-
-	
-	
-
-
-	while(1);
-
-
 	/* purpguramu */
 	ev3_motor_reset_counts(B_MOTOR);
 	ev3_motor_reset_counts(C_MOTOR);
