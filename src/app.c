@@ -104,7 +104,8 @@ int WRO(void) {
 	// 	fprintf(fp, "%d\r",ev3_color_sensor_get_reflect(COLOR_1));
 	// }
 	
-	
+	collection_blue_3_to_1();
+	while(1);
 
 	/* 
 	 *	実験スペース
@@ -113,7 +114,7 @@ int WRO(void) {
 	// 	fprintf(fp, "%d\r",ev3_color_sensor_get_reflect(COLOR_1));
 	// }
 	// linetrace_task_4_power_p_i_d(20, 0.35, 0.56, 0.06);
-
+	
 	/* purpguramu */
 	ev3_motor_reset_counts(B_MOTOR);
 	ev3_motor_reset_counts(C_MOTOR);
@@ -166,7 +167,7 @@ int WRO(void) {
 
 	/* 直進 */
 	ev3_motor_reset_counts(C_MOTOR);
-	while(260-(sta_point_no[1]/2) >= ev3_motor_get_counts(C_MOTOR));
+	while(90-(sta_point_no[1]/2) >= ev3_motor_get_counts(C_MOTOR));
 
 	/* バイナリコード色読み　配列に代入 */
 	ev3_motor_reset_counts(C_MOTOR);
@@ -405,13 +406,13 @@ int WRO(void) {
 			BRAKE(B_MOTOR);
 
 
-			gyro_deceleration(850, gyro_angle_standard, 0);
+			gyro_deceleration(1020, gyro_angle_standard, 0);
 
 			/* 回転 */
 			rotation(-90, gyro_angle_standard);
 
 			/* 壁合わせ */
-			gyro_angle_standard = wall_fix(1000);
+			gyro_angle_standard = wall_fix(500);
 			
 			collection_blue_3_to_1();
 
@@ -978,7 +979,21 @@ int collection_yellow_3_to_1(void){
  *	青道路車雪回収
  ********************************************************************************************************************************************/
 int collection_blue_3_to_1(void){
-	gyro_deceleration(500, gyro_angle_standard, -1);
+	/* 準備 */
+	d_motor_car_down();
+	a_arm_down();
+
+	//直進
+	gyro_deceleration(300, gyro_angle_standard, -1);
+	ev3_stp_cyc(GYROTRACE_TASK_4);
+
+	//回転
+	ev3_motor_set_power(B_MOTOR,-20);
+	ev3_motor_set_power(C_MOTOR,-20);
+	while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+	tone_line();
+
+	//ライントレース
 	linetrace_task_4_power_p_i_d(15, 0.35, 0.56, 0.06);
 	ev3_sta_cyc(LINETRACE_TASK_4);
 

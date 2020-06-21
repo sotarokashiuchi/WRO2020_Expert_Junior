@@ -265,12 +265,13 @@ line_fix(int color_reflect){
  *   壁合わせ
  */
 int wall_fix(int angle){
-    ev3_motor_set_power(B_MOTOR,  30);
-    ev3_motor_set_power(C_MOTOR, -30);
-    tslp_tsk(angle);
-    BRAKE(B_MOTOR);
-    BRAKE(C_MOTOR);
     tslp_tsk(1000);
+    // ev3_motor_set_power(B_MOTOR,  30);
+    // ev3_motor_set_power(C_MOTOR, -30);
+    // tslp_tsk(angle);
+    // BRAKE(B_MOTOR);
+    // BRAKE(C_MOTOR);
+    // tslp_tsk(1000);
 
     return ev3_gyro_sensor_get_angle(GYRO_4);
 }
@@ -319,7 +320,7 @@ void d_motor_car_up(void){
  */
 void d_motor_car_down(void){
     ev3_motor_set_power(D_MOTOR, 30);
-	tslp_tsk(2000);
+	tslp_tsk(400);
 	BRAKE(D_MOTOR);
 }
 
