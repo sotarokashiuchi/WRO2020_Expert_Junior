@@ -283,8 +283,8 @@ int wall_fix(int angle){
  *	アーム上げる関数
  */
 void a_arm_up(void){
-    ev3_motor_set_power(A_ARM, -85);
-    while(-190 <= ev3_motor_get_counts(A_ARM));
+    ev3_motor_set_power(A_ARM, -30);
+    while(-400 <= ev3_motor_get_counts(A_ARM));
 	// tslp_tsk(300);
 	BRAKE(A_ARM);
 }

@@ -979,6 +979,14 @@ int collection_yellow_3_to_1(void){
  *	青道路車雪回収
  ********************************************************************************************************************************************/
 int collection_blue_3_to_1(void){
+	while(1){
+		
+	a_arm_up();
+	a_arm_down();
+	tslp_tsk(1000);
+	}
+	
+
 	/* 準備 */
 	d_motor_car_down();
 	a_arm_down();
@@ -986,6 +994,8 @@ int collection_blue_3_to_1(void){
 	//直進
 	gyro_deceleration(300, gyro_angle_standard, -1);
 	ev3_stp_cyc(GYROTRACE_TASK_4);
+	ev3_motor_reset_counts(C_MOTOR);
+
 
 	//回転
 	ev3_motor_set_power(B_MOTOR,-20);
@@ -996,6 +1006,16 @@ int collection_blue_3_to_1(void){
 	//ライントレース
 	linetrace_task_4_power_p_i_d(15, 0.35, 0.56, 0.06);
 	ev3_sta_cyc(LINETRACE_TASK_4);
+
+	while(300>=ev3_motor_get_counts(C_MOTOR));
+
+	ev3_stp_cyc(LINETRACE_TASK_4);
+	BRAKE(B_MOTOR);
+	BRAKE(C_MOTOR);
+
+	a_arm_up();
+
+
 
 	return 0;
 }
