@@ -72,6 +72,9 @@ void a_arm_up(void);
 
 
 
+void a_arm_close(int level);
+
+
 /*
  *	Dアーム上げる関数
  */

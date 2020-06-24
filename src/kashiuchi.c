@@ -284,7 +284,7 @@ int wall_fix(int angle){
  */
 void a_arm_up(void){
     ev3_motor_set_power(A_ARM, -30);
-    while(-400 <= ev3_motor_get_counts(A_ARM));
+    while(-500 <= ev3_motor_get_counts(A_ARM));
 	// tslp_tsk(300);
 	BRAKE(A_ARM);
 }
@@ -298,8 +298,29 @@ void a_arm_up(void){
  */
 void a_arm_down(void){
     ev3_motor_set_power(A_ARM, 30);
-	tslp_tsk(600);
+	tslp_tsk(800);
 	BRAKE(A_ARM);
+}
+
+
+
+/*
+ *	アーム閉じる関数
+ */
+void a_arm_close(int level){
+    if(level==1){
+        if(-300<=ev3_motor_get_counts(A_ARM)){
+            ev3_motor_set_power(A_ARM, -30);
+            while(-300<=ev3_motor_get_counts(A_ARM));
+            BRAKE(A_ARM);
+        }else{
+            ev3_motor_set_power(A_ARM, 30);
+            while(-300>=ev3_motor_get_counts(A_ARM));
+            BRAKE(A_ARM);
+        }
+    }else if(level==2){
+
+    }
 }
 
 
