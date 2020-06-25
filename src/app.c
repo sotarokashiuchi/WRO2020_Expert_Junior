@@ -141,8 +141,6 @@ int WRO(void) {
 	
 	/* purpguramu */
 
-	collection_blue_3_to_1();
-	while(1);
 
 	
 	// deceleration(,0);
@@ -1063,6 +1061,7 @@ int collection_blue_3_to_1(void){
 
 	/* 雪3回収 */
 	a_arm_up();
+	a_arm_close(1);
 
 	/* ライントレース */
 	ev3_sta_cyc(LINETRACE_TASK_4);
@@ -1071,13 +1070,6 @@ int collection_blue_3_to_1(void){
 	BRAKE(B_MOTOR);
 	BRAKE(C_MOTOR);
 
-	/* バック */
-	ev3_motor_reset_counts(C_MOTOR);
-	ev3_motor_set_power(C_MOTOR,-30);
-	ev3_motor_set_power(B_MOTOR, 30);
-	while(-300<=ev3_motor_get_counts(C_MOTOR));
-	BRAKE(B_MOTOR);
-	BRAKE(C_MOTOR);
 
 	a_arm_down();
 
