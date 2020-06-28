@@ -309,13 +309,13 @@ void a_arm_down(void){
  */
 void a_arm_close(int level){
     if(level==1){
-        if(-300<=ev3_motor_get_counts(A_ARM)){
+        if(-280<=ev3_motor_get_counts(A_ARM)){
             ev3_motor_set_power(A_ARM, -30);
             while(-300<=ev3_motor_get_counts(A_ARM));
             BRAKE(A_ARM);
         }else{
             ev3_motor_set_power(A_ARM, 30);
-            while(-300>=ev3_motor_get_counts(A_ARM));
+            while(-280>=ev3_motor_get_counts(A_ARM));
             BRAKE(A_ARM);
         }
     }else if(level==2){
