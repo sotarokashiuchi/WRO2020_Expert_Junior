@@ -142,9 +142,13 @@ int WRO(void) {
 	/* purpguramu */
 
 
+	
+	// deceleration(,0);
+
 	collection_yellow_3_to_1();
 	while(1);
-	// deceleration(,0);
+
+
 
 
 	/********************************************************************************************************************************************
@@ -910,9 +914,9 @@ int collection_yellow_3_to_1(void){
 
 	/* 点線5 */
 	broken_line(0,false);
-	ev3_motor_set_power(A_ARM, 30);
-	while(-150>=ev3_motor_get_counts(A_ARM));
-	BRAKE(A_ARM);
+
+	/* 雪5回収準備 */
+	a_arm_close(1);
 
 	/* 点線5 */
 	broken_line(200,true);
@@ -929,9 +933,7 @@ int collection_yellow_3_to_1(void){
 	broken_line(200,false);
 
 	/* 雪5,6回収 */
-	ev3_motor_rotate(A_ARM, -500, 30, false);
-
-	deceleration(100,false);
+	a_arm_up();
 
 	while(1);
 
