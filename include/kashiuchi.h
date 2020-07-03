@@ -99,6 +99,12 @@ void tone_line(void);
 
 
 /*
+ *	完全停止
+ */
+void perfect_BRAKE(void);
+
+
+/*
  *	整数値入力関数
  */
 int input_int(int*);

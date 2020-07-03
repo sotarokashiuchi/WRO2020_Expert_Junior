@@ -144,13 +144,6 @@ int WRO(void) {
 
 	
 	// deceleration(,0);
-	while(1);
-
-	collection_green_3_to_1();
-	while(1);
-
-
-
 
 	/********************************************************************************************************************************************
 	 *	バイナリコード色読み
@@ -159,7 +152,7 @@ int WRO(void) {
 	/* 直進 */
 	gyrotrace_task_4_power_p_i_d_angle(20, 2, 0, 0, gyro_angle_standard);
 	ev3_sta_cyc(GYROTRACE_TASK_4);
-	while(200>=ev3_motor_get_counts(C_MOTOR));
+	while(400>=ev3_motor_get_counts(C_MOTOR));
 
 	/* ライン検知 */
 	do{
@@ -456,7 +449,7 @@ int WRO(void) {
 			BRAKE(C_MOTOR);
 			BRAKE(B_MOTOR);
 			
-			gyro_deceleration(-900, gyro_angle_standard, -1);
+			gyro_deceleration(-830, gyro_angle_standard, -1);
 			
 			
 
@@ -559,19 +552,18 @@ int WRO(void) {
 			BRAKE(B_MOTOR);
 
 
-			gyro_deceleration(400, gyro_angle_standard, 0);
+			gyro_deceleration(600, gyro_angle_standard, 0);
 
 			/* 回転 */
 			rotation(-90, gyro_angle_standard);
 
 			/* 壁合わせ */
-			gyro_angle_standard = wall_fix(-0);
+			gyro_angle_standard = wall_fix(1000);
+
+			collection_green_3_to_1();
 
 			break;
 	}
-
-
-	while(1);
 
 
 	/********************************************************************************************************************************************
@@ -1052,7 +1044,7 @@ int collection_green_3_to_1(void){
 	tone_line();
 
 	//ライントレース
-	linetrace_task_4_power_p_i_d(15, 0.35, 0.56, 0.06);
+	linetrace_task_4_power_p_i_d(15, 0.35, 0, 0.06);
 	ev3_sta_cyc(LINETRACE_TASK_4);
 	while(180>=ev3_motor_get_counts(C_MOTOR));
 	ev3_stp_cyc(LINETRACE_TASK_4);
@@ -1080,12 +1072,19 @@ int collection_green_3_to_1(void){
 
 	/* 雪3回収 */
 	a_arm_up();
+	a_arm_close(1);
 
 	ev3_sta_cyc(LINETRACE_TASK_4);
 	while(1000>=ev3_motor_get_counts(C_MOTOR));
 	ev3_stp_cyc(LINETRACE_TASK_4);
 	BRAKE(B_MOTOR);
 	BRAKE(C_MOTOR);
+
+	
+
+	ev3_sta_cyc(LINETRACE_TASK_4);
+	while(1000>=ev3_motor_get_counts(C_MOTOR));
+	perfect_BRAKE();
 
 	return 0;
 }

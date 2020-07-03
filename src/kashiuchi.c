@@ -265,13 +265,12 @@ line_fix(int color_reflect){
  *   壁合わせ
  */
 int wall_fix(int angle){
-    tslp_tsk(1000);
     ev3_motor_set_power(B_MOTOR,  30);
     ev3_motor_set_power(C_MOTOR, -30);
     tslp_tsk(angle);
     BRAKE(B_MOTOR);
     BRAKE(C_MOTOR);
-    tslp_tsk(1000);
+    tslp_tsk(500);
 
     return ev3_gyro_sensor_get_angle(GYRO_4);
 }
@@ -358,6 +357,17 @@ void tone_line(void){
     ev3_speaker_play_tone(1760.00, 100);
 }
 
+
+
+/*
+ *	完全停止
+ */
+void perfect_BRAKE(void){
+    ev3_stp_cyc(GYROTRACE_TASK_4);
+    ev3_stp_cyc(LINETRACE_TASK_4);
+    BRAKE(B_MOTOR);
+    BRAKE(C_MOTOR);
+}
 
 
 /*
