@@ -402,8 +402,9 @@ int WRO(void) {
 			gyro_angle_standard = -90;
 
 			/* 壁合わせ */
-			gyro_angle_standard = wall_fix(-0);
+			gyro_angle_standard = wall_fix(1000);
 			
+			collection_yellow_3_to_1();
 
 			
 			break;
@@ -467,7 +468,7 @@ int WRO(void) {
 			/* 壁合わせ */
 			gyro_angle_standard = wall_fix(1000);
 
-			
+			collection_yellow_3_to_1();
 
 			break;
 
@@ -486,7 +487,7 @@ int WRO(void) {
 			BRAKE(C_MOTOR);
 			BRAKE(B_MOTOR);
 		
-			gyro_deceleration(-900, gyro_angle_standard, -1);
+			gyro_deceleration(-800, gyro_angle_standard, -1);
 
 			/* ライン読み */
 			while((WHITE_REFLECTED + BRAKE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
@@ -494,35 +495,47 @@ int WRO(void) {
 
 			/* バック角度 */
 			gyro_deceleration(-110, gyro_angle_standard, 0);
-
+			
 			/* 旋回 */
 			rotation(-90,gyro_angle_standard);
 			gyro_angle_standard = -90;
 
 			/* 壁合わせ */
-			gyro_angle_standard = wall_fix(-0);
+			gyro_angle_standard = wall_fix(1000);
 
 			/* ジャイロ直進 */
-			gyro_deceleration(1570, gyro_angle_standard, 0);
-			fprintf(fp,"%d",ev3_gyro_sensor_get_angle(GYRO_4));
+			gyro_deceleration(1450, gyro_angle_standard, 0);
 
 			/* 旋回 */
-			rotation(90,gyro_angle_standard);
-			tone_line();
+			ev3_motor_set_power(C_MOTOR,20);
+			while(gyro_angle_standard+85>=ev3_gyro_sensor_get_angle(GYRO_4));
+        	BRAKE(B_MOTOR);
+        	BRAKE(C_MOTOR);
 			gyro_angle_standard += 90;
 
-			/* 点線ライントレース */
-			ev3_motor_set_power(B_MOTOR, -15);
-			ev3_motor_set_power(C_MOTOR,  15);
-
+			/* 点線1 */
+			gyrotrace_task_4_power_p_i_d_angle(20,2,0,0,gyro_angle_standard);
+			ev3_sta_cyc(GYROTRACE_TASK_4);
 			for(i=1; i<=8; i++){
-				broken_line(0,0);
+				broken_line(200,true);
 			}
 
 			/* 直進 */
-			deceleration(1000,-1);
+			ev3_stp_cyc(GYROTRACE_TASK_4);
+			ev3_motor_reset_counts(B_MOTOR);
+			ev3_motor_set_power(B_MOTOR, -20);
+			while(-200<=ev3_motor_get_counts(B_MOTOR));
+			BRAKE(B_MOTOR);
+			ev3_motor_reset_counts(C_MOTOR);
+			ev3_motor_set_power(C_MOTOR, 20);
+			while(200>=ev3_motor_get_counts(C_MOTOR));
+
+			gyro_deceleration(800,gyro_angle_standard,true);
 
 			/* 色読み */
+			while((WHITE_REFLECTED + BRAKE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+			tone_line();
+			perfect_BRAKE();
 
 			/* 直進 */
 
@@ -530,9 +543,10 @@ int WRO(void) {
 
 			/* 壁合わせ */
 			// gyro_angle_standard = wall_fix(-0);
+			while(1);
 
 			/* 車＆雪回収 */
-			// collection_red_3_to_1();
+			collection_red_3_to_1();
 			
 
 
@@ -848,9 +862,7 @@ int collection_yellow_3_to_1(void){
 	gyrotrace_task_4_power_p_i_d_angle(20, 2, 0, 0, gyro_angle_standard);
 	ev3_sta_cyc(GYROTRACE_TASK_4);
 	while(400>=ev3_motor_get_counts(C_MOTOR));
-	ev3_stp_cyc(GYROTRACE_TASK_4);
-	BRAKE(B_MOTOR);
-	BRAKE(C_MOTOR);
+	perfect_BRAKE();
 
 	/* 雪1回収 */
 	tslp_tsk(500);
@@ -861,9 +873,7 @@ int collection_yellow_3_to_1(void){
 	gyrotrace_task_4_power_p_i_d_angle(20, 2, 0, 0, gyro_angle_standard);
 	ev3_sta_cyc(GYROTRACE_TASK_4);
 	while(1200>=ev3_motor_get_counts(C_MOTOR));
-	ev3_stp_cyc(GYROTRACE_TASK_4);
-	BRAKE(B_MOTOR);
-	BRAKE(C_MOTOR);
+	perfect_BRAKE();
 
 	/* 雪2回収 */
 	tslp_tsk(500);
@@ -873,9 +883,8 @@ int collection_yellow_3_to_1(void){
 	/* 右回転 */
 	ev3_motor_set_power(B_MOTOR, -12);
 	ev3_motor_set_power(C_MOTOR, 30);
-	while(72>=ev3_gyro_sensor_get_angle(GYRO_4));
-	BRAKE(B_MOTOR);
-	BRAKE(C_MOTOR);
+	while(gyro_angle_standard+72>=ev3_gyro_sensor_get_angle(GYRO_4));
+	perfect_BRAKE();
 
 	/* 雪3回収 */
 	tslp_tsk(500);
@@ -964,9 +973,7 @@ int collection_blue_3_to_1(void){
 	linetrace_task_4_power_p_i_d(15, 0.35, 0.56, 0.06);
 	ev3_sta_cyc(LINETRACE_TASK_4);
 	while(180>=ev3_motor_get_counts(C_MOTOR));
-	ev3_stp_cyc(LINETRACE_TASK_4);
-	BRAKE(B_MOTOR);
-	BRAKE(C_MOTOR);
+	perfect_BRAKE();
 
 	/* 雪1回収 */
 	tslp_tsk(500);
@@ -976,18 +983,14 @@ int collection_blue_3_to_1(void){
 	//ライントレース
 	ev3_sta_cyc(LINETRACE_TASK_4);
 	while(500>=ev3_motor_get_counts(C_MOTOR));
-	ev3_stp_cyc(LINETRACE_TASK_4);
-	BRAKE(B_MOTOR);
-	BRAKE(C_MOTOR);
+	perfect_BRAKE();
 
 	a_arm_down();
 
 	/* ライントレース */
 	ev3_sta_cyc(LINETRACE_TASK_4);
 	while(600>=ev3_motor_get_counts(C_MOTOR));
-	ev3_stp_cyc(LINETRACE_TASK_4);
-	BRAKE(B_MOTOR);
-	BRAKE(C_MOTOR);
+	perfect_BRAKE();
 
 	/* 雪2回収 */
 	tslp_tsk(500);
@@ -997,9 +1000,7 @@ int collection_blue_3_to_1(void){
 	/* ライントレース */
 	ev3_sta_cyc(LINETRACE_TASK_4);
 	while(800>=ev3_motor_get_counts(C_MOTOR));
-	ev3_stp_cyc(LINETRACE_TASK_4);
-	BRAKE(B_MOTOR);
-	BRAKE(C_MOTOR);
+	perfect_BRAKE();
 
 	/* 雪3回収 */
 	a_arm_up();
@@ -1008,9 +1009,7 @@ int collection_blue_3_to_1(void){
 	/* ライントレース */
 	ev3_sta_cyc(LINETRACE_TASK_4);
 	while(1100>=ev3_motor_get_counts(C_MOTOR));
-	ev3_stp_cyc(LINETRACE_TASK_4);
-	BRAKE(B_MOTOR);
-	BRAKE(C_MOTOR);
+	perfect_BRAKE();
 
 
 	a_arm_down();
@@ -1047,9 +1046,7 @@ int collection_green_3_to_1(void){
 	linetrace_task_4_power_p_i_d(15, 0.35, 0, 0.06);
 	ev3_sta_cyc(LINETRACE_TASK_4);
 	while(180>=ev3_motor_get_counts(C_MOTOR));
-	ev3_stp_cyc(LINETRACE_TASK_4);
-	BRAKE(B_MOTOR);
-	BRAKE(C_MOTOR);
+	perfect_BRAKE();
 
 	/* 雪1回収 */
 	tslp_tsk(500);
@@ -1058,17 +1055,13 @@ int collection_green_3_to_1(void){
 
 	ev3_sta_cyc(LINETRACE_TASK_4);
 	while(700>=ev3_motor_get_counts(C_MOTOR));
-	ev3_stp_cyc(LINETRACE_TASK_4);
-	BRAKE(B_MOTOR);
-	BRAKE(C_MOTOR);
+	perfect_BRAKE();
 
 	a_arm_down();
 
 	ev3_sta_cyc(LINETRACE_TASK_4);
 	while(850>=ev3_motor_get_counts(C_MOTOR));
-	ev3_stp_cyc(LINETRACE_TASK_4);
-	BRAKE(B_MOTOR);
-	BRAKE(C_MOTOR);
+	perfect_BRAKE();
 
 	/* 雪3回収 */
 	a_arm_up();
@@ -1076,9 +1069,7 @@ int collection_green_3_to_1(void){
 
 	ev3_sta_cyc(LINETRACE_TASK_4);
 	while(1000>=ev3_motor_get_counts(C_MOTOR));
-	ev3_stp_cyc(LINETRACE_TASK_4);
-	BRAKE(B_MOTOR);
-	BRAKE(C_MOTOR);
+	perfect_BRAKE();
 
 	
 
@@ -1152,8 +1143,7 @@ int broken_line(int tire_angul,int tire_brake){
 	ev3_motor_reset_counts(C_MOTOR);
 	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
 	if(tire_brake==0){
-		BRAKE(B_MOTOR);
-		BRAKE(C_MOTOR);
+		perfect_BRAKE();
 	}
 	
 	// int i=0;
@@ -1229,8 +1219,7 @@ int  snow_car_put(int color_direction){
     }else{
         while((-180)+10<=ev3_gyro_sensor_get_angle(GYRO_4)-gyro_angle_standard);
     }
-	BRAKE(B_MOTOR);
-	BRAKE(C_MOTOR);
+	perfect_BRAKE();
 
 	a_arm_down();
 
@@ -1239,8 +1228,7 @@ int  snow_car_put(int color_direction){
 	ev3_motor_set_power(C_MOTOR, -20);
 	
 	tslp_tsk(5000);
-	BRAKE(B_MOTOR);
-	BRAKE(C_MOTOR);
+	perfect_BRAKE();
 }
 
 

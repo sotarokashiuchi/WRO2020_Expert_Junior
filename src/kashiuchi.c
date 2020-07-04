@@ -1,4 +1,6 @@
 /* kashiuchi.c */
+//false = 0
+//true = 1
 #include "ev3api.h"
 #include "app.h"
 #include "kashiuchi.h"
