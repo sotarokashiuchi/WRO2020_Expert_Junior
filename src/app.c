@@ -133,7 +133,6 @@ int WRO(void) {
 	 *	実験スペース
 	 */	
 
-
 	// while(1){
 	// 	fprintf(fp, "%d\r",ev3_color_sensor_get_reflect(COLOR_1));
 	// }
@@ -513,7 +512,7 @@ int WRO(void) {
         	BRAKE(C_MOTOR);
 			gyro_angle_standard += 90;
 
-			/* 点線1 */
+			/* 点線 */
 			gyrotrace_task_4_power_p_i_d_angle(20,2,0,0,gyro_angle_standard);
 			ev3_sta_cyc(GYROTRACE_TASK_4);
 			for(i=1; i<=8; i++){
@@ -521,16 +520,18 @@ int WRO(void) {
 			}
 
 			/* 直進 */
-			ev3_stp_cyc(GYROTRACE_TASK_4);
-			ev3_motor_reset_counts(B_MOTOR);
-			ev3_motor_set_power(B_MOTOR, -20);
-			while(-200<=ev3_motor_get_counts(B_MOTOR));
-			BRAKE(B_MOTOR);
+			perfect_BRAKE();
 			ev3_motor_reset_counts(C_MOTOR);
 			ev3_motor_set_power(C_MOTOR, 20);
 			while(200>=ev3_motor_get_counts(C_MOTOR));
+			BRAKE(C_MOTOR);
+			ev3_motor_reset_counts(B_MOTOR);
+			ev3_motor_set_power(B_MOTOR, -20);
+			while(-200<=ev3_motor_get_counts(B_MOTOR));
 
-			gyro_deceleration(800,gyro_angle_standard,true);
+			gyro_deceleration(700,gyro_angle_standard,true);
+
+			perfect_BRAKE();
 
 			/* 色読み */
 			while((WHITE_REFLECTED + BRAKE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
