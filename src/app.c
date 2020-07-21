@@ -291,7 +291,6 @@ int WRO(void) {
 	switch(road_priority){
 		case 1:
 			/* スタート1赤道路回収 */
-
 			/* バック */
 			gyro_deceleration(-500, gyro_angle_standard, -1);
 
@@ -303,9 +302,7 @@ int WRO(void) {
 			tone_line();
 
 			/* ブレーキ */
-			ev3_stp_cyc(GYROTRACE_TASK_4);
-			BRAKE(B_MOTOR);
-			BRAKE(C_MOTOR);
+			perfect_BRAKE();
 
 			/* バック */
 			ev3_motor_reset_counts(B_MOTOR);
@@ -497,13 +494,13 @@ int WRO(void) {
 			
 			/* 旋回 */
 			rotation(-90,gyro_angle_standard);
-			gyro_angle_standard = -90;
+			gyro_angle_standard += -90;
 
 			/* 壁合わせ */
 			gyro_angle_standard = wall_fix(1000);
 
 			/* ジャイロ直進 */
-			gyro_deceleration(1450, gyro_angle_standard, 0);
+			gyro_deceleration(1460, gyro_angle_standard, 0);
 
 			/* 旋回 */
 			ev3_motor_set_power(C_MOTOR,20);
@@ -528,28 +525,25 @@ int WRO(void) {
 			ev3_motor_reset_counts(B_MOTOR);
 			ev3_motor_set_power(B_MOTOR, -20);
 			while(-200<=ev3_motor_get_counts(B_MOTOR));
-
 			gyro_deceleration(700,gyro_angle_standard,true);
 
-			perfect_BRAKE();
-
-			/* 色読み */
+			/* 直進色読み */
 			while((WHITE_REFLECTED + BRAKE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
 			tone_line();
 			perfect_BRAKE();
 
-			/* 直進 */
+			/* バック */
+			gyro_deceleration(-100,gyro_angle_standard,false);
 
 			/* 旋回 */
+			rotation(90,gyro_angle_standard);
+			gyro_angle_standard += 90;
 
 			/* 壁合わせ */
-			// gyro_angle_standard = wall_fix(-0);
-			while(1);
+			gyro_angle_standard = wall_fix(500);
 
 			/* 車＆雪回収 */
 			collection_red_3_to_1();
-			
-
 
 			break;
 		case 6:
