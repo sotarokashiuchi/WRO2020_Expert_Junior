@@ -98,6 +98,10 @@ int WRO(void) {
 	fprintf(fp,"%d\n\r",ev3_battery_voltage_mV());
 	tslp_tsk(5000);
 
+	gyrotrace_task_4_power_p_i_d_angle(20, 2, 0, 0, gyro_angle_standard);
+	ev3_sta_cyc(GYROTRACE_TASK_4);
+	while(1);
+
 	// int32_t config_A = 0;
 	// int32_t config_B = 0;
 	// int32_t config_C = 0;
