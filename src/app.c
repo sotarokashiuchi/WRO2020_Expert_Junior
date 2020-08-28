@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
 
 #if defined(BUILD_MODULE)
 #include "module_cfg.h"
@@ -42,7 +43,8 @@ int put_blue_1_to_3(int);
 int put_blue_3_to_1(int);
 int put_green_1_to_3(int);
 int put_green_3_to_1(int);
-int  snow_car_put(int color_direction);
+int snow_car_put(int color_direction);
+//float *array_command(float *str_p);	//配列操作
 
 
 /* グローバル変数宣言 */
@@ -89,6 +91,7 @@ int WRO(void) {
 	int abrasive_priority = 0;
 	int sta_point = 0;
 	int max_1 = 0, max_2 = 0;
+	char str[64] = {};
 	
 	//青0　緑1　黄2　赤3
 
@@ -98,59 +101,65 @@ int WRO(void) {
 	fprintf(fp,"%d\n\r",ev3_battery_voltage_mV());
 	tslp_tsk(5000);
 
-	gyrotrace_task_4_power_p_i_d_angle(20, 2, 0, 0, gyro_angle_standard);
-	ev3_sta_cyc(GYROTRACE_TASK_4);
-	while(1);
-
-	// int32_t config_A = 0;
-	// int32_t config_B = 0;
-	// int32_t config_C = 0;
-	// int32_t config_D = 0;
-	// while(1){
-	// 	config_A = ev3_motor_get_counts(A_ARM);
-	// 	config_B = ev3_motor_get_counts(B_MOTOR);
-	// 	config_C = ev3_motor_get_counts(C_MOTOR);
-	// 	config_D = ev3_motor_get_counts(D_MOTOR);
-	// 	fprintf(fp, "A_%5d  B_%5d  C_%5d  D_%5d ",config_A, config_B, config_C, config_D);
-	// }
-
-	// while(false==ev3_button_is_pressed(ENTER_BUTTON));
-	
-	// while('0' != fgetc(fp));
-	// while(1){
-	// 	fprintf(fp, "%d\r",ev3_color_sensor_get_reflect(COLOR_1));
-	// }
-	
-	
-
-	
 	ev3_motor_reset_counts(B_MOTOR);
 	ev3_motor_reset_counts(C_MOTOR);
 	ev3_motor_reset_counts(A_ARM);
 	ev3_motor_reset_counts(D_MOTOR);
 
-	a_arm_down();
-	ev3_motor_reset_counts(A_ARM);
-	a_arm_up();
-	
 	/* 
 	 *	実験スペース
 	 */	
+	float rotation_angle;
+	false rotation_new;
+	false rotation_p;
+	false rotation_i;
+	false rotation_d;
 
-	// while(1){
-	// 	fprintf(fp, "%d\r",ev3_color_sensor_get_reflect(COLOR_1));
-	// }
-	// linetrace_task_4_power_p_i_d(20, 0.35, 0.56, 0.06);
-	
+	false rotation_p_gein;
+	false rotation_i_gein;
+	false rotation_d_gein;
+	float rotation_power;
+
+
 	/* purpguramu */
+	rotation(90,0);
+
+	// void rotation(int angul, int angul_cfg)
+	while(1){
+		rotation_old = rotation_new;
+		rotation_new = ev3_gyro_sensor_get_angle(GYRO_4) - rotation_angle;
+		rotation_integral += (rotation_new + rotation_old) / 2.0 *GYROTRACE_DELTA_T; 
+
+		rotation_p = rotation_p_gein * rotation_new;
+		rotation_i = rotation_i_gein * rotation_integral;
+		rotation_d = rotation_d_gein * (rotation_new - rotation_old) / GYROTRACE_DELTA_T;
+
+		if(rotation_new>=/* 目的の角度 */90){
+			// ev3_motor_set_power(C_MOTOR, (rotation_power)-(rotation_p + rotation_i + rotation_d));
+			// ev3_motor_set_power(B_MOTOR, -rotation_power);
+		}else{
+			ev3_motor_set_power(B_MOTOR, (-rotation_power)-(rotation_p + rotation_i + rotation_d));
+			ev3_motor_set_power(C_MOTOR, rotation_power);
+    }
+
+    tslp_tsk(1000);
+	sprintf(str,"%d",ev3_gyro_sensor_get_angle(GYRO_4));
+	ev3_lcd_draw_string(str,0,0);
+
+	while(1);
+	gyrotrace_task_4_power_p_i_d_angle(40, 2, 0, 0.5, 90);
+	ev3_sta_cyc(GYROTRACE_TASK_4);
+	while(1);
 
 
-	
 	// deceleration(,0);
 
 	/********************************************************************************************************************************************
 	 *	バイナリコード色読み
 	 ********************************************************************************************************************************************/
+	strcpy(str,"strt");
+	ev3_lcd_draw_string(str,0,0);
+
 	gyro_angle_standard = 0;
 	/* 直進 */
 	gyrotrace_task_4_power_p_i_d_angle(20, 2, 0, 0, gyro_angle_standard);
@@ -179,23 +188,26 @@ int WRO(void) {
 	/* スタート位置代入&表示 */
 	if((YELLOW_RGB + RED_RGB)/2 < sta_point_no[0]){
 		sta_point = 1;	//黄
-		fprintf(fp,"黄色\r\n");
+		//fprintf(fp,"黄色\r\n");
+		strcpy(str,"strt-color is Yellow.");
+		ev3_lcd_draw_string(str,0,10);
 	}else{
 		sta_point = 2;	//赤
 		fprintf(fp,"赤色\r\n");
+		strcpy(str,"strt-color is Red.");
+		ev3_lcd_draw_string(str,0,10);
 	}
 	tone_line();
 
 	/* 直進 */
 	ev3_motor_reset_counts(C_MOTOR);
-	while(90-(sta_point_no[1]/2) >= ev3_motor_get_counts(C_MOTOR));
+	while(20-(sta_point_no[1]/2) >= ev3_motor_get_counts(C_MOTOR));
 
 	/* バイナリコード色読み　配列に代入 */
 	ev3_motor_reset_counts(C_MOTOR);
 	while(560>=ev3_motor_get_counts(C_MOTOR)){
 		ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_2);
 		if((HT_WHITE_RGB + HT_BRAKE_RGB)/2 <= (val_2.r + val_2.g + val_2.b)){
-			tone_object();
 			switch(ev3_motor_get_counts(C_MOTOR)/70){
 				case 0:
 					binary_code[0][0]++;
@@ -222,12 +234,11 @@ int WRO(void) {
 					binary_code[3][1]++;
 					break;
 			}
+		tone_object();
 		}
 		tslp_tsk(7);
 	}
-	ev3_stp_cyc(GYROTRACE_TASK_4);
-	BRAKE(B_MOTOR);
-	BRAKE(C_MOTOR);
+	perfect_BRAKE();
 
 	/* 配列の最大値を求める */
 	for(i=0, max_1=0, max_2=0; i<=3; i++){
@@ -244,25 +255,28 @@ int WRO(void) {
 	for(i = 0; i<=3; i++){
 		if(max_1 == binary_code[i][0]){
 			binary_code[i][0] = 1;
-			fprintf(fp, "binary_code[%d][%d] i=%d\r\n",i,0,max_1);
+			//fprintf(fp, "binary_code[%d][%d] i=%d\r\n",i,0,max_1);
+			sprintf(str, "binary_code[%d][0]",i);
+			ev3_lcd_draw_string(str,0,20);
 		}else{
 			binary_code[i][0] = 0;
 		}
 
 		if(max_2 == binary_code[i][1]){
 			binary_code[i][1] = 1;
-			fprintf(fp, "binary_code[%d][%d] i=%d\r\n",i,1, max_2);
+			//fprintf(fp, "binary_code[%d][%d] i=%d\r\n",i,1, max_2);
+			sprintf(str, "binary_code[%d][1]",i);
+			ev3_lcd_draw_string(str,0,30);
 		}else{
 			binary_code[i][1] = 0;
 		}
 	}
 
+	perfect_BRAKE();
 	tslp_tsk(500);
 
-
-
 	/********************************************************************************************************************************************
-	 *	車と雪回収➡捨てる(start➡)					    *****************************************************************************************
+	 *	車と雪回収➡捨てる(start➡)						*****************************************************************************************
 	 *	start1 = 黄色のライン							 *****************************************************************************************
 	 *	start2 = 赤色のライン							 *****************************************************************************************
 	 *	1 = start1赤									*****************************************************************************************
@@ -273,21 +287,21 @@ int WRO(void) {
 	 *	6 = start2緑									*****************************************************************************************
 	 ********************************************************************************************************************************************/
 	/* 回収する道路を計算&優先度で決定 */
-	if(sta_point==1){
+	if(sta_point==1){				//スタート黄
 		if(0 == (binary_code[3][0]+binary_code[3][1])){
-			road_priority = 1;
+			road_priority = 1;		//赤3-1
 		}else if(0 == (binary_code[2][0]+binary_code[2][1])){
-			road_priority = 2;
+			road_priority = 2;		//黄1-3
 		}else{
-			road_priority = 3;
+			road_priority = 3;		//青3-1
 		}
-	}else{
-		if(0 == (binary_code[2][0]+binary_code[2][1])){
-			road_priority = 4;
+	}else{							//スタート赤
+		if(0 == (binary_code[3][0]+binary_code[3][1])){
+			road_priority = 4;		//赤1-3
 		}else if(0 == (binary_code[3][0]+binary_code[3][1])){
-			road_priority = 5;
+			road_priority = 5;		//黄3-1
 		}else{
-			road_priority = 6;
+			road_priority = 6;		//緑3-1
 		}
 	}
 
@@ -1230,4 +1244,7 @@ int  snow_car_put(int color_direction){
 	perfect_BRAKE();
 }
 
+// float *array_command(float *str_p){
+// 	strcpy(str_p);
+// }
 

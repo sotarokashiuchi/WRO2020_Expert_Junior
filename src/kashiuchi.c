@@ -136,31 +136,48 @@ void gyrotrace_task_4(void){
  *   回転
  */
 void rotation(int angul, int angul_cfg){
-    if(angul_cfg<angul){
-        ev3_motor_set_power(B_MOTOR,30);
-        ev3_motor_set_power(C_MOTOR,30);
-        while(angul-40>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
-        ev3_motor_set_power(B_MOTOR,15);
-        ev3_motor_set_power(C_MOTOR,15);
-        while(angul-20>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
-        ev3_motor_set_power(B_MOTOR,9);
-        ev3_motor_set_power(C_MOTOR,9);
-        while(angul-5>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
-        BRAKE(B_MOTOR);
-        BRAKE(C_MOTOR);
+
+    rotation_old = rotation_new;
+    rotation_new = ev3_gyro_sensor_get_angle(GYRO_4) - rotation_angle;
+    rotation_integral += (rotation_new + rotation_old) / 2.0 *GYROTRACE_DELTA_T; 
+
+    rotation_p = rotation_p_gein * rotation_new;
+    rotation_i = rotation_i_gein * rotation_integral;
+    rotation_d = rotation_d_gein * (rotation_new - rotation_old) / GYROTRACE_DELTA_T;
+
+    if(rotation_new>=/* 目的の角度 */){
+        ev3_motor_set_power(C_MOTOR, (rotation_power)-(rotation_p + rotation_i + rotation_d));
+        ev3_motor_set_power(B_MOTOR, -rotation_power);
     }else{
-        ev3_motor_set_power(B_MOTOR,-30);
-        ev3_motor_set_power(C_MOTOR,-30);
-        while(angul+40<=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
-        ev3_motor_set_power(B_MOTOR,-15);
-        ev3_motor_set_power(C_MOTOR,-15);
-        while(angul+25<=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
-        ev3_motor_set_power(B_MOTOR,-9);
-        ev3_motor_set_power(C_MOTOR,-9);
-        while(angul+10<=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
-        BRAKE(B_MOTOR);
-        BRAKE(C_MOTOR);
+        ev3_motor_set_power(B_MOTOR, (-rotation_power)-(rotation_p + rotation_i + rotation_d));
+        ev3_motor_set_power(C_MOTOR, rotation_power);
     }
+
+    // if(angul_cfg<angul){
+    //     ev3_motor_set_power(B_MOTOR,30);
+    //     ev3_motor_set_power(C_MOTOR,30);
+    //     while(angul-53>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
+    //     ev3_motor_set_power(B_MOTOR,15);
+    //     ev3_motor_set_power(C_MOTOR,15);
+    //     while(angul-33>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
+    //     ev3_motor_set_power(B_MOTOR,9);
+    //     ev3_motor_set_power(C_MOTOR,9);
+    //     while(angul-13>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
+    //     BRAKE(B_MOTOR);
+    //     BRAKE(C_MOTOR);
+    // }else{
+    //     ev3_motor_set_power(B_MOTOR,-30);
+    //     ev3_motor_set_power(C_MOTOR,-30);
+    //     while(angul+53<=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
+    //     ev3_motor_set_power(B_MOTOR,-15);
+    //     ev3_motor_set_power(C_MOTOR,-15);
+    //     while(angul+33<=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
+    //     ev3_motor_set_power(B_MOTOR,-9);
+    //     ev3_motor_set_power(C_MOTOR,-9);
+    //     while(angul+13<=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
+    //     BRAKE(B_MOTOR);
+    //     BRAKE(C_MOTOR);
+    // }
     tslp_tsk(1000);	
     fprintf(kashiuchi_fp,"最終%d\n\r",ev3_gyro_sensor_get_angle(GYRO_4));
 }
