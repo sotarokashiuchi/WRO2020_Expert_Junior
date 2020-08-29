@@ -136,48 +136,31 @@ void gyrotrace_task_4(void){
  *   回転
  */
 void rotation(int angul, int angul_cfg){
-
-    rotation_old = rotation_new;
-    rotation_new = ev3_gyro_sensor_get_angle(GYRO_4) - rotation_angle;
-    rotation_integral += (rotation_new + rotation_old) / 2.0 *GYROTRACE_DELTA_T; 
-
-    rotation_p = rotation_p_gein * rotation_new;
-    rotation_i = rotation_i_gein * rotation_integral;
-    rotation_d = rotation_d_gein * (rotation_new - rotation_old) / GYROTRACE_DELTA_T;
-
-    if(rotation_new>=/* 目的の角度 */){
-        ev3_motor_set_power(C_MOTOR, (rotation_power)-(rotation_p + rotation_i + rotation_d));
-        ev3_motor_set_power(B_MOTOR, -rotation_power);
+    if(angul_cfg<angul){
+        ev3_motor_set_power(B_MOTOR,30);
+        ev3_motor_set_power(C_MOTOR,30);
+        while(angul-53>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
+        ev3_motor_set_power(B_MOTOR,15);
+        ev3_motor_set_power(C_MOTOR,15);
+        while(angul-33>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
+        ev3_motor_set_power(B_MOTOR,9);
+        ev3_motor_set_power(C_MOTOR,9);
+        while(angul-13>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
+        BRAKE(B_MOTOR);
+        BRAKE(C_MOTOR);
     }else{
-        ev3_motor_set_power(B_MOTOR, (-rotation_power)-(rotation_p + rotation_i + rotation_d));
-        ev3_motor_set_power(C_MOTOR, rotation_power);
+        ev3_motor_set_power(B_MOTOR,-30);
+        ev3_motor_set_power(C_MOTOR,-30);
+        while(angul+53<=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
+        ev3_motor_set_power(B_MOTOR,-15);
+        ev3_motor_set_power(C_MOTOR,-15);
+        while(angul+33<=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
+        ev3_motor_set_power(B_MOTOR,-9);
+        ev3_motor_set_power(C_MOTOR,-9);
+        while(angul+13<=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
+        BRAKE(B_MOTOR);
+        BRAKE(C_MOTOR);
     }
-
-    // if(angul_cfg<angul){
-    //     ev3_motor_set_power(B_MOTOR,30);
-    //     ev3_motor_set_power(C_MOTOR,30);
-    //     while(angul-53>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
-    //     ev3_motor_set_power(B_MOTOR,15);
-    //     ev3_motor_set_power(C_MOTOR,15);
-    //     while(angul-33>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
-    //     ev3_motor_set_power(B_MOTOR,9);
-    //     ev3_motor_set_power(C_MOTOR,9);
-    //     while(angul-13>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
-    //     BRAKE(B_MOTOR);
-    //     BRAKE(C_MOTOR);
-    // }else{
-    //     ev3_motor_set_power(B_MOTOR,-30);
-    //     ev3_motor_set_power(C_MOTOR,-30);
-    //     while(angul+53<=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
-    //     ev3_motor_set_power(B_MOTOR,-15);
-    //     ev3_motor_set_power(C_MOTOR,-15);
-    //     while(angul+33<=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
-    //     ev3_motor_set_power(B_MOTOR,-9);
-    //     ev3_motor_set_power(C_MOTOR,-9);
-    //     while(angul+13<=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
-    //     BRAKE(B_MOTOR);
-    //     BRAKE(C_MOTOR);
-    // }
     tslp_tsk(1000);	
     fprintf(kashiuchi_fp,"最終%d\n\r",ev3_gyro_sensor_get_angle(GYRO_4));
 }
@@ -321,43 +304,28 @@ void a_arm_down(void){
 }
 
 
-
 /*
- *	アーム閉じる関数
+ *	Dアーム開ける関数
  */
-void a_arm_close(int level){
-    if(level==1){
-        if(-280<=ev3_motor_get_counts(A_ARM)){
-            ev3_motor_set_power(A_ARM, -30);
-            while(-300<=ev3_motor_get_counts(A_ARM));
-            BRAKE(A_ARM);
-        }else{
-            ev3_motor_set_power(A_ARM, 30);
-            while(-280>=ev3_motor_get_counts(A_ARM));
-            BRAKE(A_ARM);
-        }
-    }else if(level==2){
-
+void d_motor_car_open(int level){
+    if(level == 0){
+        ev3_motor_set_power(D_MOTOR, -85);
+        tslp_tsk(2500);
+        BRAKE(D_MOTOR);
+    }
+    if(level == 1){
+        ev3_motor_set_power(D_MOTOR, -85);
+        while(-100 <= ev3_motor_get_counts(D_MOTOR));
+        BRAKE(D_MOTOR);
     }
 }
 
 
 
 /*
- *	Dアーム上げる関数
+ *	Dアーム閉じる関数
  */
-void d_motor_car_up(void){
-    ev3_motor_set_power(D_MOTOR, -85);
-	tslp_tsk(2000);
-	BRAKE(D_MOTOR);
-}
-
-
-
-/*
- *	Dアーム下げる関数
- */
-void d_motor_car_down(void){
+void d_motor_car_close(void){
     ev3_motor_set_power(D_MOTOR, 30);
 	tslp_tsk(400);
 	BRAKE(D_MOTOR);

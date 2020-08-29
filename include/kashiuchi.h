@@ -72,20 +72,17 @@ void a_arm_up(void);
 
 
 
-void a_arm_close(int level);
-
-
 /*
- *	Dアーム上げる関数
+ *	Dアーム開ける関数
  */
-void d_motor_car_up(void);
+void d_motor_car_open(int);
 
 
 
 /*
- *	Dアーム下げる関数
+ *	Dアーム閉じる関数
  */
-void d_motor_car_down(void);
+void d_motor_car_close(void);
 
 
 
