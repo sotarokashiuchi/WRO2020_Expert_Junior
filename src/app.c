@@ -18,7 +18,7 @@
 
 /* 定義設定 */
 /*
-#define A_ARM           EV3_PORT_A      //雪アーム
+#define A_ARM 0          EV3_PORT_A      //雪アーム
 #define B_MOTOR         EV3_PORT_B      //右-
 #define C_MOTOR         EV3_PORT_C		//左+
 #define D_MOTOR			EV3_PORT_D      //雪,研磨剤出口＆車回収
@@ -26,6 +26,8 @@
 #define COLOR_2	     	EV3_PORT_2      //中央左
 #define HT_COLOR_3	    EV3_PORT_3      //右
 #define GYRO_4	     	EV3_PORT_4      //ジャイロセンサー
+false					0
+true					1
 :/
 
 /* 関数のプロトタイプ宣言 */
@@ -109,9 +111,10 @@ int WRO(void) {
 
 	/* 
 	 *	実験スペース
-	 */	
-
-
+	 */
+	a_arm(150);
+	a_arm(100);
+	while(1);
 	/* purpguramu */
 
 	// deceleration(,0);
@@ -129,7 +132,7 @@ int WRO(void) {
 	gyro_angle_standard = wall_fix(500);
 
 	/* 直進 */
-	gyrotrace_task_4_power_p_i_d_angle(20, 2, 0, 0, gyro_angle_standard);
+	gyrotrace_task_4_power_p_i_d_angle(20, 2, 0, 0.5, gyro_angle_standard);
 	ev3_sta_cyc(GYROTRACE_TASK_4);
 	while(400>=ev3_motor_get_counts(C_MOTOR));
 
@@ -529,7 +532,7 @@ int WRO(void) {
  *	赤道路車雪回収
  ********************************************************************************************************************************************/
 int collection_red_3_to_1(void){
-	a_arm_down();
+	a_arm(0);
 	d_motor_car_close();
 
 	/* ジャイロ直進 */
@@ -537,16 +540,16 @@ int collection_red_3_to_1(void){
 
 	/* 雪1回収 */
 	tslp_tsk(500);
-	a_arm_up();
-	a_arm_down();
+	a_arm(0);
+	a_arm(0);
 
 	/* 直進 */
 	gyro_deceleration(400, gyro_angle_standard, 0);
 
 	/* 雪２回収 */
 	tslp_tsk(200);
-	a_arm_up();
-	a_arm_down();
+	a_arm(0);
+	a_arm(0);
 
 	tslp_tsk(1000);
 
@@ -567,8 +570,8 @@ int collection_red_3_to_1(void){
 
 	/* 雪3回収 */
 	tslp_tsk(500);
-	a_arm_up();
-	a_arm_down();
+	a_arm(0);
+	a_arm(0);
 
 	tslp_tsk(2000);
 
@@ -590,7 +593,7 @@ int collection_red_3_to_1(void){
 
 	/* 雪4回収準備 */
 	tslp_tsk(200);
-	a_arm_down();
+	a_arm(0);
 
 	/* 点線3 */
 	ev3_motor_set_power(B_MOTOR, -20);
@@ -604,8 +607,8 @@ int collection_red_3_to_1(void){
 
 	/* 雪4回収 */
 	tslp_tsk(200);
-	a_arm_up();
-	a_arm_down();
+	a_arm(0);
+	a_arm(0);
 
 	/* 点線4 */
 	ev3_motor_set_power(B_MOTOR, -20);
@@ -619,8 +622,8 @@ int collection_red_3_to_1(void){
 
 	/* 雪5回収 */
 	tslp_tsk(200);
-	a_arm_up();
-	a_arm_down();
+	a_arm(0);
+	a_arm(0);
 	ev3_motor_set_power(A_ARM, 30);
 	while(-220>=ev3_motor_get_counts(A_ARM));
 	BRAKE(A_ARM);
@@ -644,7 +647,7 @@ int collection_red_3_to_1(void){
 	BRAKE(C_MOTOR);
 
 	/* 雪6回収準備 */
-	a_arm_down();
+	a_arm(0);
 
 	/* 点線7 */
 	ev3_motor_set_power(B_MOTOR, -20);
@@ -655,7 +658,7 @@ int collection_red_3_to_1(void){
 	BRAKE(C_MOTOR);
 	
 	/* 雪6回収 */
-	a_arm_up();
+	a_arm(0);
 
 	/* 車回収 */
 	d_motor_car_open(0);
@@ -681,7 +684,7 @@ while(1);
  ********************************************************************************************************************************************/
 int collection_yellow_3_to_1(void){
 	/* 雪回収準備 */
-	a_arm_down();
+	a_arm(0);
 
 	/* ジャイロ直進 */
 	ev3_motor_reset_counts(C_MOTOR);
@@ -692,8 +695,8 @@ int collection_yellow_3_to_1(void){
 
 	/* 雪1回収 */
 	tslp_tsk(500);
-	a_arm_up();
-	a_arm_down();
+	a_arm(0);
+	a_arm(0);
 
 	/* ジャイロ直進 */
 	gyrotrace_task_4_power_p_i_d_angle(20, 2, 0, 0, gyro_angle_standard);
@@ -703,8 +706,8 @@ int collection_yellow_3_to_1(void){
 
 	/* 雪2回収 */
 	tslp_tsk(500);
-	a_arm_up();
-	a_arm_down();
+	a_arm(0);
+	a_arm(0);
 
 	/* 右回転 */
 	ev3_motor_set_power(B_MOTOR, -12);
@@ -714,13 +717,13 @@ int collection_yellow_3_to_1(void){
 
 	/* 雪3回収 */
 	tslp_tsk(500);
-	a_arm_up();
+	a_arm(0);
 
 	/* Dアーム広げる */
 	ev3_motor_set_power(D_MOTOR, 85);
 
 	/* アーム少し閉じる */
-	a_arm_down();
+	a_arm(0);
 
 
 
@@ -732,7 +735,7 @@ int collection_yellow_3_to_1(void){
 	broken_line(250,false);
 
 	/* 雪回収準備 */
-	a_arm_down();
+	a_arm(0);
 
 	/* 点線3 */
 	broken_line(200,true);
@@ -744,7 +747,7 @@ int collection_yellow_3_to_1(void){
 	broken_line(0,false);
 
 	/* 雪5回収準備 */
-	a_arm_down();
+	a_arm(0);
 
 	/* 点線5 */
 	broken_line(200,true);
@@ -752,7 +755,7 @@ int collection_yellow_3_to_1(void){
 	/* 点線6 */
 	broken_line(0,false);
 
-	a_arm_down();
+	a_arm(0);
 
 	/* 点線6 */
 	broken_line(200,true);
@@ -761,7 +764,7 @@ int collection_yellow_3_to_1(void){
 	broken_line(200,false);
 
 	/* 雪5,6回収 */
-	a_arm_up();
+	a_arm(0);
 
 	while(1);
 
@@ -781,7 +784,7 @@ int collection_blue_3_to_1(void){
 
 	/* 準備 */
 	d_motor_car_close();
-	a_arm_down();
+	a_arm(0);
 
 	//直進
 	gyro_deceleration(300, gyro_angle_standard, -1);
@@ -803,15 +806,15 @@ int collection_blue_3_to_1(void){
 
 	/* 雪1回収 */
 	tslp_tsk(500);
-	a_arm_up();
-	a_arm_down();
+	a_arm(0);
+	a_arm(0);
 
 	//ライントレース
 	ev3_sta_cyc(LINETRACE_TASK_4);
 	while(500>=ev3_motor_get_counts(C_MOTOR));
 	perfect_BRAKE();
 
-	a_arm_down();
+	a_arm(0);
 
 	/* ライントレース */
 	ev3_sta_cyc(LINETRACE_TASK_4);
@@ -820,8 +823,8 @@ int collection_blue_3_to_1(void){
 
 	/* 雪2回収 */
 	tslp_tsk(500);
-	a_arm_up();
-	a_arm_down();
+	a_arm(0);
+	a_arm(0);
 
 	/* ライントレース */
 	ev3_sta_cyc(LINETRACE_TASK_4);
@@ -829,8 +832,8 @@ int collection_blue_3_to_1(void){
 	perfect_BRAKE();
 
 	/* 雪3回収 */
-	a_arm_up();
-	a_arm_down();
+	a_arm(0);
+	a_arm(0);
 
 	/* ライントレース */
 	ev3_sta_cyc(LINETRACE_TASK_4);
@@ -838,7 +841,7 @@ int collection_blue_3_to_1(void){
 	perfect_BRAKE();
 
 
-	a_arm_down();
+	a_arm(0);
 
 
 	return 0;
@@ -854,7 +857,7 @@ int collection_green_3_to_1(void){
 
 	/* 準備 */
 	d_motor_car_close();
-	a_arm_down();
+	a_arm(0);
 
 	//直進
 	gyro_deceleration(300, gyro_angle_standard, -1);
@@ -876,22 +879,22 @@ int collection_green_3_to_1(void){
 
 	/* 雪1回収 */
 	tslp_tsk(500);
-	a_arm_up();
-	a_arm_down();
+	a_arm(0);
+	a_arm(0);
 
 	ev3_sta_cyc(LINETRACE_TASK_4);
 	while(700>=ev3_motor_get_counts(C_MOTOR));
 	perfect_BRAKE();
 
-	a_arm_down();
+	a_arm(0);
 
 	ev3_sta_cyc(LINETRACE_TASK_4);
 	while(850>=ev3_motor_get_counts(C_MOTOR));
 	perfect_BRAKE();
 
 	/* 雪3回収 */
-	a_arm_up();
-	a_arm_down();
+	a_arm(0);
+	a_arm(0);
 
 	ev3_sta_cyc(LINETRACE_TASK_4);
 	while(1000>=ev3_motor_get_counts(C_MOTOR));
@@ -905,6 +908,16 @@ int collection_green_3_to_1(void){
 
 	return 0;
 }
+
+
+/********************************************************************************************************************************************
+ *	赤道路雪回収1-3
+ ********************************************************************************************************************************************/
+int collection_red_1_to_3(void){
+
+}
+
+
 
 
 /********************************************************************************************************************************************
@@ -1047,7 +1060,7 @@ int  snow_car_put(int color_direction){
     }
 	perfect_BRAKE();
 
-	a_arm_down();
+	a_arm(0);
 
 	/* 壁合わせ */
 	ev3_motor_set_power(B_MOTOR, 20);

@@ -60,15 +60,15 @@ int wall_fix(int angle);
 
 
 /*
- *	アーム下げる関数
+ *	アームリセット関数
  */
-void a_arm_down(void);
+void a_arm_reset(int);
 
 
 /*
- *	アーム上げる関数
+ *	アーム左右角度関数
  */
-void a_arm_up(void);
+void a_arm(int);
 
 
 

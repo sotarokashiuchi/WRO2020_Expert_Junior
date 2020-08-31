@@ -281,25 +281,36 @@ int wall_fix(int angle){
 
 
 /*
- *	アーム上げる関数
+ *	アームリセット関数
  */
-void a_arm_up(void){
-    ev3_motor_set_power(A_ARM, -30);
-    while(-500 <= ev3_motor_get_counts(A_ARM));
-	// tslp_tsk(300);
-	BRAKE(A_ARM);
+void a_arm_reset(int no){
+    if(no==false){
+        //右
+        ev3_motor_set_power(A_ARM,  85);
+        tslp_tsk(340);
+        BRAKE(A_ARM);
+        ev3_motor_reset_counts(A_ARM);
+    }else{
+        //左
+        ev3_motor_set_power(A_ARM, -85);
+        tslp_tsk(340);
+        BRAKE(A_ARM);
+    }
 }
 
 
 
-
-
 /*
- *	アーム下げる関数
+ *	アーム左右角度関数
  */
-void a_arm_down(void){
-    ev3_motor_set_power(A_ARM, 30);
-	tslp_tsk(800);
+void a_arm(int angle){
+    if(angle >= (ev3_motor_get_counts(A_ARM)*(-1))){
+        ev3_motor_set_power(A_ARM, -85);
+        while(angle >= ev3_motor_get_counts(A_ARM)*(-1));
+    }else{
+        ev3_motor_set_power(A_ARM,  85);
+        while(angle <= ev3_motor_get_counts(A_ARM)*(-1));
+    }
 	BRAKE(A_ARM);
 }
 
