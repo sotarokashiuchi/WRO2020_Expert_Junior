@@ -204,10 +204,10 @@ int deceleration(int angul, int stp){
 int gyro_deceleration(int angul, int gyro_angle_standard, int stp){
     if(angul<0){
         ev3_motor_reset_counts(C_MOTOR);
-        gyrotrace_task_4_power_p_i_d_angle(-30, 2, 0, 0, gyro_angle_standard);
+        gyrotrace_task_4_power_p_i_d_angle(-30, 2, 0, 0.5, gyro_angle_standard);
         ev3_sta_cyc(GYROTRACE_TASK_4);
         while(angul+40<=ev3_motor_get_counts(C_MOTOR));
-        gyrotrace_task_4_power_p_i_d_angle(-10, 2, 0, 0, gyro_angle_standard);
+        gyrotrace_task_4_power_p_i_d_angle(-10, 2, 0, 0.5, gyro_angle_standard);
         ev3_sta_cyc(GYROTRACE_TASK_4);
         if(stp==0){
             while(angul>=ev3_motor_get_counts(C_MOTOR));
@@ -217,10 +217,10 @@ int gyro_deceleration(int angul, int gyro_angle_standard, int stp){
         }
     }else{
         ev3_motor_reset_counts(C_MOTOR);
-        gyrotrace_task_4_power_p_i_d_angle(30, 2, 0, 0, gyro_angle_standard);
+        gyrotrace_task_4_power_p_i_d_angle(30, 2, 0, 0.5, gyro_angle_standard);
         ev3_sta_cyc(GYROTRACE_TASK_4);
         while(angul-40>=ev3_motor_get_counts(C_MOTOR));
-        gyrotrace_task_4_power_p_i_d_angle(10, 2, 0, 0, gyro_angle_standard);
+        gyrotrace_task_4_power_p_i_d_angle(10, 2, 0, 0.5, gyro_angle_standard);
         ev3_sta_cyc(GYROTRACE_TASK_4);
         if(stp==0){
             while(angul>=ev3_motor_get_counts(C_MOTOR));
@@ -303,6 +303,7 @@ void a_arm_reset(int no){
 /*
  *	アーム左右角度関数
  */
+//max値250角度
 void a_arm(int angle){
     if(angle >= (ev3_motor_get_counts(A_ARM)*(-1))){
         ev3_motor_set_power(A_ARM, -85);

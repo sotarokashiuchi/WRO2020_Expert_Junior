@@ -112,11 +112,10 @@ int WRO(void) {
 	/* 
 	 *	実験スペース
 	 */
-	a_arm(150);
-	a_arm(100);
-	while(1);
 	/* purpguramu */
 
+	rotation(90,0);
+	while(1);
 	// deceleration(,0);
 
 	/********************************************************************************************************************************************
@@ -532,17 +531,19 @@ int WRO(void) {
  *	赤道路車雪回収
  ********************************************************************************************************************************************/
 int collection_red_3_to_1(void){
-	a_arm(0);
-	d_motor_car_close();
-
-	/* ジャイロ直進 */
+	ev3_motor_reset_counts(C_MOTOR);
+	gyrotrace_task_4_power_p_i_d_angle(30, 2, 0, 0.5, gyro_angle_standard);
+	ev3_sta_cyc(GYROTRACE_TASK_4);
+	a_arm_reset(false);
+	a_arm_reset(true);
+	while(1000 >= ev3_motor_get_counts(C_MOTOR));
+	a_arm(50);
+	while(1360 >= ev3_motor_get_counts(C_MOTOR));
+	a_arm_reset(true);
+	perfect_BRAKE();
+	while(1);
+	
 	gyro_deceleration(850, gyro_angle_standard, 0);
-
-	/* 雪1回収 */
-	tslp_tsk(500);
-	a_arm(0);
-	a_arm(0);
-
 	/* 直進 */
 	gyro_deceleration(400, gyro_angle_standard, 0);
 
