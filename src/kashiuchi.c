@@ -321,8 +321,8 @@ void a_arm(int angle){
  */
 void d_motor_car_open(int level){
     if(level == 0){
-        ev3_motor_set_power(D_MOTOR, -85);
-        tslp_tsk(2500);
+        ev3_motor_set_power(D_MOTOR, -100);
+        tslp_tsk(250);
         BRAKE(D_MOTOR);
     }
     if(level == 1){
