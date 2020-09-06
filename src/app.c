@@ -122,7 +122,18 @@ int WRO(void) {
 	// while(1);
 	// ev3_motor_set_power(C_MOTOR,-30);
 	// while(-10 <= ev3_motor_get_counts(C_MOTOR))
-	rotation(-180, gyro_angle_standard);
+
+	ev3_motor_set_power(B_MOTOR,-30);
+    ev3_motor_set_power(C_MOTOR, 30);
+	tslp_tsk(10000);
+	perfect_BRAKE();
+
+	// ev3_motor_set_power(B_MOTOR,-10);
+    // ev3_motor_set_power(C_MOTOR,-10);
+    // while(-360<=ev3_gyro_sensor_get_angle(GYRO_4));
+	// perfect_BRAKE();
+
+	// rotation(-360, gyro_angle_standard);
 	
 	while(1);
 
