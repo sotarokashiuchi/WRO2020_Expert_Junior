@@ -229,6 +229,7 @@ int gyro_deceleration(int angul, int gyro_angle_standard, int stp){
             BRAKE(C_MOTOR);
         }
     }
+    return angul;
 }
 
 
