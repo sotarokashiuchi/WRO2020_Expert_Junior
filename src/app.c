@@ -390,7 +390,7 @@ int WRO(void) {
 			break;
 		case 3:
 			/* スタート黄-青道路回収青3-1 */
-			gyro_deceleration(1220, gyro_angle_standard, 0);
+			gyro_deceleration(1200, gyro_angle_standard, 0);
 			rotation(-90, gyro_angle_standard);
 			gyro_angle_standard = wall_fix(500);
 
@@ -702,60 +702,29 @@ int collection_yellow_3_to_1(void){
 int collection_blue_3_to_1(void){
 	int tire_angul = 0;
 	a_arm_reset(false);
+	a_arm(125);
 	gyrotrace_task_4_power_p_i_d_angle(30, 2, 0, 0.5, gyro_angle_standard);
+	ev3_motor_reset_counts(B_MOTOR);
 	tire_angul += gyro_deceleration(350, gyro_angle_standard, 0);
 	ev3_motor_set_power(B_MOTOR,-20);
 	ev3_motor_set_power(C_MOTOR,-20);
 	while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
-	tone_line();
-	
 	perfect_BRAKE();
-	while(1);
+	tone_line();
 	d_motor_car_open(0);
 	linetrace_task_4_power_p_i_d(30, 0.35, 0.56, 0.06);
 	ev3_sta_cyc(LINETRACE_TASK_4);
-	while(180>=ev3_motor_get_counts(C_MOTOR));
+	tire_angul += 380;
+	while(tire_angul>=(ev3_motor_get_counts(C_MOTOR)+(ev3_motor_get_counts(B_MOTOR)*-1))/2);
+	a_arm(200);
+	tire_angul += 600;
+	while(tire_angul>=(ev3_motor_get_counts(C_MOTOR)+(ev3_motor_get_counts(B_MOTOR)*-1))/2);
+	a_arm_reset(true);
+	tire_angul += 600;
+	while(tire_angul>=(ev3_motor_get_counts(C_MOTOR)+(ev3_motor_get_counts(B_MOTOR)*-1))/2);
 	perfect_BRAKE();
-
-	/* 雪1回収 */
-	tslp_tsk(500);
-	a_arm(0);
-	a_arm(0);
-
-	//ライントレース
-	ev3_sta_cyc(LINETRACE_TASK_4);
-	while(500>=ev3_motor_get_counts(C_MOTOR));
-	perfect_BRAKE();
-
-	a_arm(0);
-
-	/* ライントレース */
-	ev3_sta_cyc(LINETRACE_TASK_4);
-	while(600>=ev3_motor_get_counts(C_MOTOR));
-	perfect_BRAKE();
-
-	/* 雪2回収 */
-	tslp_tsk(500);
-	a_arm(0);
-	a_arm(0);
-
-	/* ライントレース */
-	ev3_sta_cyc(LINETRACE_TASK_4);
-	while(800>=ev3_motor_get_counts(C_MOTOR));
-	perfect_BRAKE();
-
-	/* 雪3回収 */
-	a_arm(0);
-	a_arm(0);
-
-	/* ライントレース */
-	ev3_sta_cyc(LINETRACE_TASK_4);
-	while(1100>=ev3_motor_get_counts(C_MOTOR));
-	perfect_BRAKE();
-
-
-	a_arm(0);
-
+	while(1);
+	
 
 	return 0;
 }
