@@ -56,6 +56,7 @@ FILE *fp2 = NULL;
 ER r1;
 ER r = E_OK;
 int gyro_angle_standard = 0;
+int car_p = 0;
 
 int main_task(void) {
 
@@ -136,6 +137,16 @@ int WRO(void) {
 	// rotation(-360, gyro_angle_standard);
 	
 	// linetrace_task_4_power_p_i_d(15, 0.35, 0.56, 0.06);
+	
+	// linetrace_task_4_power_p_i_d(30, 0.35, 0, 0.1);
+	// ev3_sta_cyc(LINETRACE_TASK_4);
+	
+	ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_2);
+	sprintf(str, "R=%d, G=%d, B=%d",val_2.r, val_2.g, val_2.b);
+	ev3_lcd_draw_string(str,0,80);
+
+	while(1);
+	
 
 	// deceleration(,0);
 
@@ -572,8 +583,25 @@ int collection_red_3_to_1(void){
 	gyrotrace_task_4_power_p_i_d_angle(30, 2, 0, 0.5, gyro_angle_standard);
 	ev3_sta_cyc(GYROTRACE_TASK_4);
 	d_motor_car_open(0);
-	tire_angul += 1080;
+
+	tire_angul += 950;
 	while(tire_angul >= ev3_motor_get_counts(C_MOTOR));
+	perfect_BRAKE();
+	while(1);
+	//ハイッテク
+	
+	// ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_2);
+	tslp_tsk(7);
+	if(1){
+		car_p = 5;
+	}
+	// sprintf(str, "R=%d, G=%d, B=%d",val_2.r, val_2.g, val_2.b);
+	// ev3_lcd_draw_string(str,0,80);
+
+	tire_angul += 130;
+	while(tire_angul >= ev3_motor_get_counts(C_MOTOR));
+
+	//1080
 	a_arm_reset(true);
 	tire_angul += 500;
 	while(tire_angul >= ev3_motor_get_counts(C_MOTOR));
@@ -584,13 +612,16 @@ int collection_red_3_to_1(void){
 	// rotation(-180, gyro_angle_standard);
 	ev3_motor_set_power(B_MOTOR, 10);
     ev3_motor_set_power(C_MOTOR, 10);
-    while(140>=ev3_gyro_sensor_get_angle(GYRO_4));
+	while(140>=ev3_gyro_sensor_get_angle(GYRO_4));
 	perfect_BRAKE();
 	gyro_angle_standard += 180;
-	gyro_deceleration(1000, gyro_angle_standard, -1);
+	gyro_deceleration(1500, gyro_angle_standard, -1);
 	while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
 	tone_line();
-	perfect_BRAKE();
+	a_arm_reset(false);
+	gyro_deceleration(-150, gyro_angle_standard, 0);
+	rotation(-90,gyro_angle_standard);
+	wall_fix(1000);
 	while(1);
 
 	return 0;
@@ -712,7 +743,7 @@ int collection_blue_3_to_1(void){
 	perfect_BRAKE();
 	tone_line();
 	d_motor_car_open(0);
-	linetrace_task_4_power_p_i_d(30, 0.35, 0.56, 0.06);
+	linetrace_task_4_power_p_i_d(20, 0.35, 0, 0.1);
 	ev3_sta_cyc(LINETRACE_TASK_4);
 	tire_angul += 380;
 	while(tire_angul>=(ev3_motor_get_counts(C_MOTOR)+(ev3_motor_get_counts(B_MOTOR)*-1))/2);
