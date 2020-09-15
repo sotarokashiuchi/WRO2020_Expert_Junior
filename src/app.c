@@ -46,7 +46,7 @@ int put_blue_1_to_3(int);
 int put_blue_3_to_1(int);
 int put_green_1_to_3(int);
 int put_green_3_to_1(int);
-int snow_car_put(int color_direction);
+int car_put(int color_direction);
 //float *array_command(float *str_p);	//配列操作
 
 
@@ -110,40 +110,11 @@ int WRO(void) {
 	ev3_motor_reset_counts(A_ARM);
 	ev3_motor_reset_counts(D_MOTOR);
 
-	/* 
-	 *	実験スペース
-	 */
-	/* purpguramu */
-	
-	// gyrotrace_task_4_power_p_i_d_angle(100, 2, 0, 0, gyro_angle_standard);
-	// ev3_sta_cyc(GYROTRACE_TASK_4);
-	// tslp_tsk(240000);
-	// ev3_stp_cyc(GYROTRACE_TASK_4);
-	// perfect_BRAKE();
-	// while(1);
-	// ev3_motor_set_power(C_MOTOR,-30);
-	// while(-10 <= ev3_motor_get_counts(C_MOTOR))
+	/* 実験スペース */
+	car_put(1);
+	while(1);
 
-	// ev3_motor_set_power(B_MOTOR,-30);
-    // ev3_motor_set_power(C_MOTOR, 30);
-	// tslp_tsk(10000);
-	// perfect_BRAKE();
 
-	// ev3_motor_set_power(B_MOTOR,-10);
-    // ev3_motor_set_power(C_MOTOR,-10);
-    // while(-360<=ev3_gyro_sensor_get_angle(GYRO_4));
-	// perfect_BRAKE();
-
-	// rotation(-360, gyro_angle_standard);
-	
-	// linetrace_task_4_power_p_i_d(15, 0.35, 0.56, 0.06);
-	
-	// linetrace_task_4_power_p_i_d(30, 0.35, 0, 0.1);
-	// ev3_sta_cyc(LINETRACE_TASK_4);
-	
-	// ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_2);
-	// sprintf(str, "R=%d, G=%d, B=%d",val_2.r, val_2.g, val_2.b);
-	// ev3_lcd_draw_string(str,0,80);
 
 	/********************************************************************************************************************************************
 	 *	バイナリコード色読み
@@ -810,9 +781,6 @@ int put_green_1_to_3(int);
 int put_green_3_to_1(int);
 
 
-
-
-
 /********************************************************************************************************************************************
  *	点線ライントレース
  ********************************************************************************************************************************************/
@@ -826,90 +794,27 @@ int broken_line(int tire_angul,int tire_brake){
 	if(tire_brake==0){
 		perfect_BRAKE();
 	}
-	
-	// int i=0;
-	// int gyro_angle = 0;
-	
-	// if(0==line_gein_cfg){
-	// 	linetrace_task_4_power_p_i_d(15, 0.4, 0, 0.06);	
-	// }
-	
-	// while((BRAKE_REFLECTED + WHITE_REFLECTED)/2+10<=ev3_color_sensor_get_reflect(COLOR_2) && (BRAKE_REFLECTED + WHITE_REFLECTED)/2+10<=ev3_color_sensor_get_reflect(COLOR_1));
-	// tone_line();
-	// ev3_stp_cyc(GYROTRACE_TASK_4);
-	// ev3_motor_reset_counts(C_MOTOR);
-	// ev3_sta_cyc(LINETRACE_TASK_4);
-	// while(130>=ev3_motor_get_counts(C_MOTOR));
-	// tone_line();
-	
-	// ev3_stp_cyc(LINETRACE_TASK_4);
-	
-	// ev3_motor_set_power(B_MOTOR, -15);
-	// ev3_motor_set_power(C_MOTOR,  15);
-	// while(200>=ev3_motor_get_counts(C_MOTOR));
-	
 	return 0;
 }
 
 
 /********************************************************************************************************************************************
- *	雪&車置く
+ *	車置く
  ********************************************************************************************************************************************/
-int  snow_car_put(int color_direction){
-	if(color_direction==1){
-		//黄道路
-		/* 直進 */
-		gyro_deceleration(1200, gyro_angle_standard, 0);
-		
-		tslp_tsk(1000);
-		/* 回転 */
-		rotation(-90, gyro_angle_standard);
-		gyro_angle_standard += -90;
-			
-	
-	}else{
-		//赤道路
-		/* 直進 */
-		gyro_deceleration(480, gyro_angle_standard, 0);
-
-		tslp_tsk(1000);
-
-		/* 回転 */
-		rotation(90, gyro_angle_standard);
-		gyro_angle_standard += 90;
-		
-	}
-	tslp_tsk(1000);
-	/* 直進 */
+int  car_put(int color_direction){
+	wall_fix(500);
+	gyro_deceleration(500, gyro_angle_standard, 0);
+	rotation(90, gyro_angle_standard);
+	gyro_angle_standard += 90;
 	gyro_deceleration(100, gyro_angle_standard, -1);
-    
-	/* 色読み */
-	while((WHITE_REFLECTED + BRAKE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
-	tone_line();
-
-	gyro_deceleration(100, gyro_angle_standard, 0);
-
-	tslp_tsk(1000);
-
-	/* バック */
-	ev3_motor_set_power(B_MOTOR, 9);
-	ev3_motor_set_power(C_MOTOR, -30);
-
-	if(gyro_angle_standard<-180){
-        while((-180)-5>=ev3_gyro_sensor_get_angle(GYRO_4)-gyro_angle_standard);
-    }else{
-        while((-180)+10<=ev3_gyro_sensor_get_angle(GYRO_4)-gyro_angle_standard);
-    }
+	while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+	gyro_deceleration(360, gyro_angle_standard, 0);
 	perfect_BRAKE();
+	while(1);
+	a_arm_reset(false);
+	d_motor_car_open(0);
+	gyro_deceleration(-500, gyro_angle_standard, 0);
+		
 
-	a_arm(0);
-
-	/* 壁合わせ */
-	ev3_motor_set_power(B_MOTOR, 20);
-	ev3_motor_set_power(C_MOTOR, -20);
-	
-	tslp_tsk(5000);
-	perfect_BRAKE();
+	return 0;
 }
-
-
