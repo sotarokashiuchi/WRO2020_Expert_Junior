@@ -57,6 +57,8 @@ ER r1;
 ER r = E_OK;
 int gyro_angle_standard = 0;
 int car_p = 0;
+rgb_raw_t val_1, val_2;
+char str[64] = {};
 
 int main_task(void) {
 
@@ -87,7 +89,6 @@ int WRO(void) {
 	ev3_speaker_set_volume(100);
 
 	/* 変数 */
-	rgb_raw_t val_1, val_2;
 	int i=0, j=0, x=0;
 	int binary_code[4][2] = {{0}};
 	int sta_point_no[2] = {0};
@@ -95,7 +96,7 @@ int WRO(void) {
 	int abrasive_priority = 0;
 	int sta_point = 0;
 	int max_1 = 0, max_2 = 0;
-	char str[64] = {};
+	
 	
 	//青0　緑1　黄2　赤3
 
@@ -111,6 +112,11 @@ int WRO(void) {
 	ev3_motor_reset_counts(D_MOTOR);
 
 	/* 実験スペース */
+	// while(1){
+	// 	ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_2);
+	// 	sprintf(str, "R=%03d, G=%03d, B=%03d",val_2.r, val_2.g, val_2.b);
+	// 	ev3_lcd_draw_string(str,0,80);
+	// }
 	car_put(1);
 	while(1);
 
@@ -808,12 +814,23 @@ int  car_put(int color_direction){
 	gyro_angle_standard += 90;
 	gyro_deceleration(100, gyro_angle_standard, -1);
 	while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
-	gyro_deceleration(360, gyro_angle_standard, 0);
-	perfect_BRAKE();
-	while(1);
-	a_arm_reset(false);
+	gyro_deceleration(250, gyro_angle_standard, 0);
+	a_arm_reset(true);
 	d_motor_car_open(0);
-	gyro_deceleration(-500, gyro_angle_standard, 0);
+	gyro_deceleration(-105, gyro_angle_standard, 0);
+	
+	tslp_tsk(1000);
+	ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_2);
+	tslp_tsk(1000);
+	sprintf(str,"G=%03d",val_2.g);
+	ev3_lcd_draw_string(str,0,0);
+	if(val_2.g>=100){
+		car_p = true;
+		tone_object();
+	}else{
+		car_p = false;
+	}
+
 		
 
 	return 0;
