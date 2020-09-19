@@ -114,9 +114,26 @@ int WRO(void) {
 	/* 実験スペース */
 	// while(1){
 	// 	ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_2);
+	// 	sprintf(str, "GYRO=%03d",ev3_gyro_sensor_get_angle(GYRO_4));
+	// 	ev3_lcd_draw_string(str,0,80);
+	// }
+
+	// while(1){
+	// 	ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_2);
 	// 	sprintf(str, "R=%03d, G=%03d, B=%03d",val_2.r, val_2.g, val_2.b);
 	// 	ev3_lcd_draw_string(str,0,80);
 	// }
+
+	// for(i=0; i<=10; i++){
+	// 	ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_2);
+	// 	tslp_tsk(7);
+	// 	sprintf(str,"R=%03d G=%03d B=%03d",val_2.r, val_2.g, val_2.b);
+	// 	ev3_lcd_draw_string(str,0,(i*10));
+	// }
+	// tslp_tsk(15);
+	
+
+	while(1);
 	car_put(1);
 	while(1);
 
@@ -808,6 +825,8 @@ int broken_line(int tire_angul,int tire_brake){
  *	車置く
  ********************************************************************************************************************************************/
 int  car_put(int color_direction){
+	int i_c;
+	int max_c = 0;
 	wall_fix(500);
 	gyro_deceleration(500, gyro_angle_standard, 0);
 	rotation(90, gyro_angle_standard);
@@ -820,18 +839,40 @@ int  car_put(int color_direction){
 	gyro_deceleration(-105, gyro_angle_standard, 0);
 	
 	tslp_tsk(1000);
-	ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_2);
-	tslp_tsk(1000);
-	sprintf(str,"G=%03d",val_2.g);
+	for(i_c=0; i_c<=10; i_c++){
+		ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_2);
+		tslp_tsk(7);
+		if(max_c<val_2.g){
+			max_c = val_2.g;
+		}
+	}
+	tslp_tsk(15);
+	sprintf(str,"B=%03d",max_c);
 	ev3_lcd_draw_string(str,0,0);
-	if(val_2.g>=100){
+	if(max_c>=80){
 		car_p = true;
 		tone_object();
 	}else{
 		car_p = false;
 	}
 
-		
+	switch(car_p){
+		case true:
+			gyro_deceleration(-300, gyro_angle_standard, 0);
+			a_arm_reset(false);
+			ev3_motor_reset_counts(C_MOTOR);
+			ev3_motor_set_power(C_MOTOR, 85);
+			while(30>=ev3_motor_get_counts(C_MOTOR));
+			BRAKE(C_MOTOR);
+			ev3_motor_reset_counts(B_MOTOR);
+			ev3_motor_set_power(B_MOTOR, -85);
+			while(-30<=ev3_motor_get_counts(B_MOTOR));
+			BRAKE(B_MOTOR);
+		break;	
+		case false:
+
+		break;
+	}
 
 	return 0;
 }
