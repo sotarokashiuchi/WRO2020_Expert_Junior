@@ -131,13 +131,7 @@ int WRO(void) {
 	// 	ev3_lcd_draw_string(str,0,(i*10));
 	// }
 	// tslp_tsk(15);
-	
-
-	while(1);
-	car_put(1);
-	while(1);
-
-
+	// while(1);
 
 	/********************************************************************************************************************************************
 	 *	バイナリコード色読み
@@ -455,6 +449,12 @@ int WRO(void) {
 			break;
 		case 2:
 			/* Dispenser黄道路回収 */
+			gyro_deceleration(100, gyro_angle_standard, 0);
+			rotation(-90, gyro_angle_standard);
+			gyro_angle_standard -= 90;
+			gyro_deceleration(2000, gyro_angle_standard, -1);
+			while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+			perfect_BRAKE();
 			break;
 		case 3:
 			/* Dispenser緑道路回収 */
@@ -573,25 +573,8 @@ int collection_red_3_to_1(void){
 	gyrotrace_task_4_power_p_i_d_angle(30, 2, 0, 0.5, gyro_angle_standard);
 	ev3_sta_cyc(GYROTRACE_TASK_4);
 	d_motor_car_open(0);
-
-	tire_angul += 950;
+	tire_angul += 1080;
 	while(tire_angul >= ev3_motor_get_counts(C_MOTOR));
-	perfect_BRAKE();
-	while(1);
-	//ハイッテク
-	
-	// ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_2);
-	tslp_tsk(7);
-	if(1){
-		car_p = 0;
-	}
-	// sprintf(str, "R=%d, G=%d, B=%d",val_2.r, val_2.g, val_2.b);
-	// ev3_lcd_draw_string(str,0,80);
-
-	tire_angul += 130;
-	while(tire_angul >= ev3_motor_get_counts(C_MOTOR));
-
-	//1080
 	a_arm_reset(true);
 	tire_angul += 500;
 	while(tire_angul >= ev3_motor_get_counts(C_MOTOR));
@@ -609,11 +592,11 @@ int collection_red_3_to_1(void){
 	while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
 	tone_line();
 	a_arm_reset(false);
-	gyro_deceleration(-150, gyro_angle_standard, 0);
+	gyro_deceleration(-200, gyro_angle_standard, 0);
 	rotation(-90,gyro_angle_standard);
-	wall_fix(1000);
-	while(1);
+	gyro_angle_standard = wall_fix(1000);
 
+	car_put(0);
 	return 0;
 }
 
@@ -827,7 +810,6 @@ int broken_line(int tire_angul,int tire_brake){
 int  car_put(int color_direction){
 	int i_c;
 	int max_c = 0;
-	wall_fix(500);
 	gyro_deceleration(500, gyro_angle_standard, 0);
 	rotation(90, gyro_angle_standard);
 	gyro_angle_standard += 90;
@@ -838,18 +820,14 @@ int  car_put(int color_direction){
 	d_motor_car_open(0);
 	gyro_deceleration(-105, gyro_angle_standard, 0);
 	
-	tslp_tsk(1000);
-	for(i_c=0; i_c<=10; i_c++){
+	for(i_c=0; i_c<=12; i_c++){
 		ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_2);
 		tslp_tsk(7);
-		if(max_c<val_2.g){
-			max_c = val_2.g;
-		}
+		sprintf(str,"R=%03d G=%03d B=%03d",val_2.r, val_2.g, val_2.b);
+		ev3_lcd_draw_string(str,0,(i_c*10));
 	}
 	tslp_tsk(15);
-	sprintf(str,"B=%03d",max_c);
-	ev3_lcd_draw_string(str,0,0);
-	if(max_c>=80){
+	if(val_2.b>=80){
 		car_p = true;
 		tone_object();
 	}else{
@@ -862,17 +840,40 @@ int  car_put(int color_direction){
 			a_arm_reset(false);
 			ev3_motor_reset_counts(C_MOTOR);
 			ev3_motor_set_power(C_MOTOR, 85);
-			while(30>=ev3_motor_get_counts(C_MOTOR));
+			while(80>=ev3_motor_get_counts(C_MOTOR));
 			BRAKE(C_MOTOR);
 			ev3_motor_reset_counts(B_MOTOR);
 			ev3_motor_set_power(B_MOTOR, -85);
-			while(-30<=ev3_motor_get_counts(B_MOTOR));
+			while(-80<=ev3_motor_get_counts(B_MOTOR));
 			BRAKE(B_MOTOR);
-		break;	
-		case false:
+			gyro_deceleration(200, gyro_angle_standard, 0);
+			a_arm(125);
+			gyro_deceleration(-300, gyro_angle_standard, 0);
+			while(1);
+		break;
 
+		case false:
+			a_arm_reset(false);
+			gyro_deceleration(-360, gyro_angle_standard, 0);
+			a_arm_reset(true);
+			ev3_motor_reset_counts(B_MOTOR);
+			ev3_motor_set_power(B_MOTOR, -85);
+			while(-120<=ev3_motor_get_counts(B_MOTOR));
+			BRAKE(B_MOTOR);
+			ev3_motor_reset_counts(C_MOTOR);
+			ev3_motor_set_power(C_MOTOR, 85);
+			while(120>=ev3_motor_get_counts(C_MOTOR));
+			BRAKE(C_MOTOR);
+			gyro_deceleration(200, gyro_angle_standard, 0);
+			a_arm(125);
+			gyro_deceleration(-300, gyro_angle_standard, 0);
 		break;
 	}
-
+	rotation(-90, gyro_angle_standard);
+	gyro_angle_standard -= 90;
+	gyro_deceleration(-500, gyro_angle_standard, -1);
+	perfect_BRAKE();
+	while(1);
+	gyro_angle_standard = wall_fix(1000);
 	return 0;
 }
