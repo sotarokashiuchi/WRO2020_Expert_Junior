@@ -136,7 +136,7 @@ void gyrotrace_task_4(void){
  *   回転
  */
 void rotation(int angul, int angul_cfg){
-    if(angul_cfg<angul){
+    if(0 < angul){
         ev3_motor_set_power(B_MOTOR,30);
         ev3_motor_set_power(C_MOTOR,30);
         while(angul-53>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
