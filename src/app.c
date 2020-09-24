@@ -412,7 +412,7 @@ int WRO(void) {
 			perfect_BRAKE();
 			rotation(90, gyro_angle_standard);
 			gyro_angle_standard += 90;
-			wall_fix(500);
+			gyro_angle_standard = wall_fix(500);
 
 			collection_yellow_3_to_1();
 			break;
@@ -553,17 +553,17 @@ int collection_red_3_to_1(void){
 	while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
 	tone_line();
 	a_arm_reset(false);
-	// gyro_deceleration(-200, gyro_angle_standard, 0);
+	gyro_deceleration(-200, gyro_angle_standard, 0);
 	rotation(-90,gyro_angle_standard);
 	gyro_angle_standard = wall_fix(1000);
-	gyro_deceleration(500, gyro_angle_standard, 0);
-	rotation(-90, gyro_angle_standard);
-	gyro_angle_standard -= 90;
-	gyro_deceleration(200, gyro_angle_standard, 0);
-	gyro_deceleration(-200, gyro_angle_standard, 0);
-	rotation(-90, gyro_angle_standard);
-	gyro_angle_standard -= 90;
-	gyro_angle_standard = wall_fix(500);
+	// gyro_deceleration(500, gyro_angle_standard, 0);
+	// rotation(-90, gyro_angle_standard);
+	// gyro_angle_standard -= 90;
+	// gyro_deceleration(200, gyro_angle_standard, 0);
+	// gyro_deceleration(-200, gyro_angle_standard, 0);
+	// rotation(-90, gyro_angle_standard);
+	// gyro_angle_standard -= 90;
+	// gyro_angle_standard = wall_fix(500);
 
 	car_put(0);
 	return 0;
