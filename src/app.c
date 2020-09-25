@@ -52,6 +52,7 @@ int put_blue_3_to_1(int);
 int put_green_1_to_3(int);
 int put_green_3_to_1(int);
 int car_put(int color_direction);
+void dispenser_recovery(int);
 //float *array_command(float *str_p);	//配列操作
 
 
@@ -124,11 +125,6 @@ int WRO(void) {
 	// 	ev3_lcd_draw_string(str,0,80);
 	// }
 
-	// while(1){
-	// 	ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_2);
-	// 	sprintf(str, "R=%03d, G=%03d, B=%03d",val_2.r, val_2.g, val_2.b);
-	// 	ev3_lcd_draw_string(str,0,80);
-	// }
 
 	// for(i=0; i<=10; i++){
 	// 	ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_2);
@@ -139,9 +135,14 @@ int WRO(void) {
 	// tslp_tsk(15);
 	// while(1);
 
-	// gyro_angle_standard = wall_fix(500);
-	// collection_yellow_3_to_1();
+	// linetrace_task_4_power_p_i_d(15, 0.35, 0, 0.06);
+	// linetrace_task_4_power_p_i_d(10, 0.35, 0, 0.06);
+	// ev3_sta_cyc(LINETRACE_TASK_4);
 	// while(1);
+
+	gyro_angle_standard = wall_fix(500);
+	dispenser_recovery(0);
+	while(1);
 
 	/********************************************************************************************************************************************
 	 *	バイナリコード色読み
@@ -465,6 +466,7 @@ int WRO(void) {
 	switch(abrasive_priority){
 		case 1:
 			/* 青緑1研磨座撒く */
+
 			break;
 		case 2:
 			/* 青黄1研磨座撒く */
@@ -875,4 +877,42 @@ int  car_put(int color_direction){
 	d_motor_car_open(1);
 	gyro_angle_standard = wall_fix(1000);
 	return 0;
+}
+
+
+void dispenser_recovery(int b_b){
+	/* 一つ目 */
+	gyro_deceleration(930, gyro_angle_standard, 0);
+	rotation(90, gyro_angle_standard);
+	gyro_angle_standard += 90;
+	ev3_motor_reset_counts(C_MOTOR);
+	gyrotrace_task_4_power_p_i_d_angle(15, 2, 0, 0.5, gyro_angle_standard);
+	ev3_sta_cyc(GYROTRACE_TASK_4);
+	while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+	ev3_stp_cyc(LINETRACE_TASK_4);
+	ev3_motor_reset_counts(C_MOTOR);
+	ev3_motor_reset_counts(B_MOTOR);
+	linetrace_task_4_power_p_i_d(15, 0.35, 0, 0.06);
+	ev3_sta_cyc(LINETRACE_TASK_4);
+	while(200>=(ev3_motor_get_counts(C_MOTOR)+(ev3_motor_get_counts(B_MOTOR)*-1))/2);
+	perfect_BRAKE();
+	ev3_motor_reset_counts(C_MOTOR);
+	ev3_motor_reset_counts(B_MOTOR);
+	ev3_motor_set_power(B_MOTOR, 5);
+	ev3_motor_set_power(C_MOTOR,-5);
+	while(-50<=ev3_motor_get_counts(C_MOTOR));
+
+	/* 二つ目 */
+	gyro_deceleration(-200, gyro_angle_standard, 0);
+	rotation(-90, gyro_angle_standard);
+	gyro_angle_standard -= 90;
+	gyro_deceleration(300, gyro_angle_standard,0);
+	rotation(90, gyro_angle_standard);
+	gyro_angle_standard += 90;
+	ev3_motor_reset_counts(C_MOTOR);
+	gyrotrace_task_4_power_p_i_d_angle(15, 2, 0, 0.5, gyro_angle_standard);
+	ev3_sta_cyc(GYROTRACE_TASK_4);
+	while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+	ev3_stp_cyc(LINETRACE_TASK_4);
+	perfect_BRAKE();
 }
