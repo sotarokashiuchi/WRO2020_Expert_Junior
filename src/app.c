@@ -48,9 +48,8 @@ int put_red_3_to_1(int);
 int put_yellow_1_to_3(int);
 int put_yellow_3_to_1(int);
 int put_blue_1_to_3(int);
-int put_blue_3_to_1(int);
 int put_green_1_to_3(int);
-int put_green_3_to_1(int);
+int put_green_blue_3_to_1(void);
 int car_put(int color_direction);
 void dispenser_recovery(int);
 //float *array_command(float *str_p);	//配列操作
@@ -139,6 +138,11 @@ int WRO(void) {
 	// linetrace_task_4_power_p_i_d(10, 0.35, 0, 0.06);
 	// ev3_sta_cyc(LINETRACE_TASK_4);
 	// while(1);
+
+	// d_motor_car_close();
+	// ev3_motor_reset_counts(D_MOTOR);
+	// d_motor_car_open(1);
+	// a_arm_reset(false);
 
 
 	/********************************************************************************************************************************************
@@ -464,7 +468,31 @@ int WRO(void) {
 	switch(abrasive_priority){
 		case 1:
 			/* 青緑1研磨座撒く */
+			gyro_deceleration(120, gyro_angle_standard, 0);
+			rotation(-90, gyro_angle_standard);
+			gyro_angle_standard -= 90;
+			gyro_deceleration(1710, gyro_angle_standard, 0);
+			rotation(90, gyro_angle_standard);
+			gyro_angle_standard = wall_fix(500);
 
+			put_green_blue_3_to_1();
+
+			rotation(90, gyro_angle_standard);
+			gyro_angle_standard += 90;
+			gyro_deceleration(150, gyro_angle_standard, -1);
+			while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+			gyro_deceleration(250, gyro_angle_standard, 0);
+			rotation(90, gyro_angle_standard);
+			d_motor_car_open(2);
+			gyro_angle_standard = wall_fix(1000);
+			gyro_deceleration(1700, gyro_angle_standard, 0);
+			rotation(90, gyro_angle_standard);
+			gyro_angle_standard += 90;
+			gyro_deceleration(1500, gyro_angle_standard, 0);
+			rotation(90, gyro_angle_standard);
+			gyro_angle_standard = wall_fix(1000);
+
+			put_green_blue_3_to_1();
 			break;
 		case 2:
 			/* 青黄1研磨座撒く */
@@ -767,11 +795,6 @@ int put_yellow_3_to_1(int);
 int put_blue_1_to_3(int);
 
 
-/********************************************************************************************************************************************
- *	青道路研磨剤撒く3-1
- ********************************************************************************************************************************************/
-int put_blue_3_to_1(int);
-
 
 /********************************************************************************************************************************************
  *	緑道路研磨剤撒く1-3
@@ -780,9 +803,42 @@ int put_green_1_to_3(int);
 
 
 /********************************************************************************************************************************************
- *	緑道路研磨剤撒く3-1
+ *	緑to青道路研磨剤撒く3-1
  ********************************************************************************************************************************************/
-int put_green_3_to_1(int);
+int put_green_blue_3_to_1(void){
+	int tire_angul = 0;
+	a_arm_reset(true);
+	gyrotrace_task_4_power_p_i_d_angle(30, 2, 0, 0.5, gyro_angle_standard);
+	ev3_motor_reset_counts(B_MOTOR);
+	tire_angul += gyro_deceleration(350, gyro_angle_standard, 0);
+	ev3_motor_set_power(B_MOTOR,-20);
+	ev3_motor_set_power(C_MOTOR,-20);
+	while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+	perfect_BRAKE();
+	tone_line();
+	a_arm(125);
+	
+	linetrace_task_4_power_p_i_d(35, 0.35, 0, 0.1);
+	ev3_sta_cyc(LINETRACE_TASK_4);
+	tire_angul += 200;
+	while(tire_angul>=(ev3_motor_get_counts(C_MOTOR)+(ev3_motor_get_counts(B_MOTOR)*-1))/2);
+	kennmazai_put(1);
+
+	tire_angul += 850;
+	while(tire_angul>=(ev3_motor_get_counts(C_MOTOR)+(ev3_motor_get_counts(B_MOTOR)*-1))/2);
+	kennmazai_put(0);
+	tire_angul += 500;
+	while(tire_angul>=(ev3_motor_get_counts(C_MOTOR)+(ev3_motor_get_counts(B_MOTOR)*-1))/2);
+	gyro_angle_standard -= 90;
+	ev3_stp_cyc(LINETRACE_TASK_4);
+	gyro_deceleration(100, gyro_angle_standard, 0);
+	rotation(-90, gyro_angle_standard);
+	gyro_angle_standard -= 90;
+	gyro_deceleration(950, gyro_angle_standard, 0);
+	kennmazai_put(0);
+	kennmazai_put(0);
+	return 0;
+}
 
 
 /********************************************************************************************************************************************

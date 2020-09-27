@@ -87,6 +87,13 @@ void d_motor_car_close(void);
 
 
 /*
+ *	研磨材置く関数
+ */
+void kennmazai_put(int);
+
+
+
+/*
  *	音関数
  */
 void tone_object(void);

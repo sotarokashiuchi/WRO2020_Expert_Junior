@@ -288,13 +288,13 @@ void a_arm_reset(int no){
     if(no==false){
         //右
         ev3_motor_set_power(A_ARM,  85);
-        tslp_tsk(340);
+        tslp_tsk(360);
         BRAKE(A_ARM);
         ev3_motor_reset_counts(A_ARM);
     }else{
         //左
         ev3_motor_set_power(A_ARM, -85);
-        tslp_tsk(340);
+        tslp_tsk(360);
         BRAKE(A_ARM);
     }
 }
@@ -331,6 +331,11 @@ void d_motor_car_open(int level){
         while(-100 <= ev3_motor_get_counts(D_MOTOR));
         BRAKE(D_MOTOR);
     }
+    if(level == 2){
+        ev3_motor_set_power(D_MOTOR, -85);
+        while(-220 <= ev3_motor_get_counts(D_MOTOR));
+        BRAKE(D_MOTOR);
+    }
 }
 
 
@@ -339,10 +344,28 @@ void d_motor_car_open(int level){
  *	Dアーム閉じる関数
  */
 void d_motor_car_close(void){
-    ev3_motor_set_power(D_MOTOR, 30);
+    ev3_motor_set_power(D_MOTOR, 85);
 	tslp_tsk(400);
 	BRAKE(D_MOTOR);
 }
+
+
+void kennmazai_put(int faset){
+    // if(faset==1){
+    //     ev3_motor_set_power(D_MOTOR, 85);
+    //     tslp_tsk(400);
+    //     BRAKE(D_MOTOR);
+    //     ev3_motor_reset_counts(D_MOTOR);
+    // }
+    ev3_motor_set_power(D_MOTOR, -85);
+    while(-220<=ev3_motor_get_counts(D_MOTOR));
+    BRAKE(D_MOTOR);
+    tslp_tsk(200);
+    ev3_motor_set_power(D_MOTOR, 85);
+    tslp_tsk(200);
+    BRAKE(D_MOTOR);
+}
+
 
 
 
