@@ -118,32 +118,10 @@ int WRO(void) {
 	ev3_motor_reset_counts(D_MOTOR);
 
 	/* 実験スペース */
-	// while(1){
-	// 	ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_2);
-	// 	sprintf(str, "GYRO=%03d",ev3_gyro_sensor_get_angle(GYRO_4));
-	// 	ev3_lcd_draw_string(str,0,80);
-	// }
-
-
-	// for(i=0; i<=10; i++){
-	// 	ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_2);
-	// 	tslp_tsk(7);
-	// 	sprintf(str,"R=%03d G=%03d B=%03d",val_2.r, val_2.g, val_2.b);
-	// 	ev3_lcd_draw_string(str,0,(i*10));
-	// }
-	// tslp_tsk(15);
-	// while(1);
-
 	// linetrace_task_4_power_p_i_d(15, 0.35, 0, 0.06);
 	// linetrace_task_4_power_p_i_d(10, 0.35, 0, 0.06);
 	// ev3_sta_cyc(LINETRACE_TASK_4);
 	// while(1);
-
-	// d_motor_car_close();
-	// ev3_motor_reset_counts(D_MOTOR);
-	// d_motor_car_open(1);
-	// a_arm_reset(false);
-
 
 	/********************************************************************************************************************************************
 	 *	バイナリコード色読み
@@ -153,7 +131,6 @@ int WRO(void) {
 	gyro_angle_standard = 0;
 	d_motor_car_close();
 	ev3_motor_reset_counts(D_MOTOR);		//Dモータリセット
-	d_motor_car_open(1);
 
 	gyro_angle_standard = wall_fix(500);
 
@@ -405,7 +382,7 @@ int WRO(void) {
 			break;
 		case 2:
 			/* Dispenser黄道路回収 */
-			gyro_deceleration(100, gyro_angle_standard, 0);
+			gyro_deceleration(150, gyro_angle_standard, 0);
 			rotation(-90, gyro_angle_standard);
 			gyro_angle_standard -= 90;
 			gyro_deceleration(3000, gyro_angle_standard, -1);
@@ -493,6 +470,10 @@ int WRO(void) {
 			gyro_angle_standard = wall_fix(1000);
 
 			put_green_blue_3_to_1();
+			rotation(90, gyro_angle_standard, -1);
+			while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+			perfect_BRAKE();
+			
 			break;
 		case 2:
 			/* 青黄1研磨座撒く */
@@ -926,7 +907,6 @@ int  car_put(int color_direction){
 	gyro_angle_standard -= 90;
 	gyro_deceleration(-400, gyro_angle_standard, 0);
 	d_motor_car_close();
-	d_motor_car_open(1);
 	gyro_angle_standard = wall_fix(1000);
 	return 0;
 }
@@ -990,5 +970,5 @@ void dispenser_recovery(int b_b){
 	gyro_angle_standard -= 90;
 	gyro_deceleration(-950, gyro_angle_standard, -1);
 	ev3_stp_cyc(GYROTRACE_TASK_4);
-	wall_fix(1000);
+	gyro_angle_standard = wall_fix(1000);
 }
