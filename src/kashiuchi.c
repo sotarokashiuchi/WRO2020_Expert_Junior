@@ -201,36 +201,43 @@ int deceleration(int angul, int stp){
 /*
  *   ジャイロ減速
  */
-int gyro_deceleration(int angul, int gyro_angle_standard, int stp){
+int gyro_deceleration(int angul, int gyro_angle_standard, int stp, int power){
     if(angul<0){
         ev3_motor_reset_counts(C_MOTOR);
+        if(power==0){
+            gyrotrace_task_4_power_p_i_d_angle(-85, 2, 0, 0.5, gyro_angle_standard);
+            ev3_sta_cyc(GYROTRACE_TASK_4);
+            while(angul+150<=ev3_motor_get_counts(C_MOTOR));
+        }
         gyrotrace_task_4_power_p_i_d_angle(-30, 2, 0, 0.5, gyro_angle_standard);
         ev3_sta_cyc(GYROTRACE_TASK_4);
         while(angul+40<=ev3_motor_get_counts(C_MOTOR));
         gyrotrace_task_4_power_p_i_d_angle(-10, 2, 0, 0.5, gyro_angle_standard);
         ev3_sta_cyc(GYROTRACE_TASK_4);
-        if(stp==0){
-            while(angul>=ev3_motor_get_counts(C_MOTOR));
-            ev3_stp_cyc(GYROTRACE_TASK_4);
-            BRAKE(B_MOTOR);
-            BRAKE(C_MOTOR);
-        }
     }else{
         ev3_motor_reset_counts(C_MOTOR);
+        if(power==0){
+            gyrotrace_task_4_power_p_i_d_angle(85, 2, 0, 0.5, gyro_angle_standard);
+            ev3_sta_cyc(GYROTRACE_TASK_4);
+            while(angul-150>=ev3_motor_get_counts(C_MOTOR));
+        }
         gyrotrace_task_4_power_p_i_d_angle(30, 2, 0, 0.5, gyro_angle_standard);
         ev3_sta_cyc(GYROTRACE_TASK_4);
         while(angul-40>=ev3_motor_get_counts(C_MOTOR));
         gyrotrace_task_4_power_p_i_d_angle(10, 2, 0, 0.5, gyro_angle_standard);
         ev3_sta_cyc(GYROTRACE_TASK_4);
-        if(stp==0){
-            while(angul>=ev3_motor_get_counts(C_MOTOR));
-            ev3_stp_cyc(GYROTRACE_TASK_4);
-            BRAKE(B_MOTOR);
-            BRAKE(C_MOTOR);
-        }
+    }
+
+    if(stp==0){
+        while(angul>=ev3_motor_get_counts(C_MOTOR));
+        ev3_stp_cyc(GYROTRACE_TASK_4);
+        BRAKE(B_MOTOR);
+        BRAKE(C_MOTOR);
     }
     return angul;
 }
+
+
 
 
 /*

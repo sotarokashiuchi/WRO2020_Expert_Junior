@@ -42,7 +42,7 @@ int deceleration(int angul, int stp);
 /*
  *   ジャイロ減速
  */
-int gyro_deceleration(int angul, int gyro_angle_standard, int stp);
+int gyro_deceleration(int angul, int gyro_angle_standard, int stp, int power);
 
 
 /*

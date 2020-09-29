@@ -122,6 +122,9 @@ int WRO(void) {
 	// linetrace_task_4_power_p_i_d(10, 0.35, 0, 0.06);
 	// ev3_sta_cyc(LINETRACE_TASK_4);
 	// while(1);
+	gyrotrace_task_4_power_p_i_d_angle(85, 7, 0, 0.5, gyro_angle_standard);
+    ev3_sta_cyc(GYROTRACE_TASK_4);
+	while(1);
 
 	/********************************************************************************************************************************************
 	 *	バイナリコード色読み
@@ -282,7 +285,7 @@ int WRO(void) {
 	switch(road_priority){
 		case 1:
 			/* スタート黄-赤道路回収3-1 */
-			gyro_deceleration(-500, gyro_angle_standard, -1);
+			gyro_deceleration(-500, gyro_angle_standard, -1, 0);
 			/* ライン読み */
 			do{
 				ev3_color_sensor_get_rgb_raw(COLOR_1, &val_1);
@@ -290,7 +293,7 @@ int WRO(void) {
 			ev3_motor_reset_counts(C_MOTOR);
 			tone_line();
 
-			gyro_deceleration(-70, gyro_angle_standard, 0);
+			gyro_deceleration(-70, gyro_angle_standard, 0, -1);
 			perfect_BRAKE();
 			rotation(-90,gyro_angle_standard);
 			gyro_angle_standard = -90;
@@ -306,7 +309,7 @@ int WRO(void) {
 			break;
 		case 3:
 			/* スタート黄-青道路回収青3-1 */
-			gyro_deceleration(1200, gyro_angle_standard, 0);
+			gyro_deceleration(1200, gyro_angle_standard, 0, -1);
 			rotation(-90, gyro_angle_standard);
 			gyro_angle_standard = wall_fix(500);
 
@@ -319,7 +322,7 @@ int WRO(void) {
 			break;
 		case 5:
 			/* スタート赤-黄道路回収3-1 */
-			gyro_deceleration(-500, gyro_angle_standard, -1);
+			gyro_deceleration(-500, gyro_angle_standard, -1, -1);
 			/* ライン読み */
 			do{
 				ev3_color_sensor_get_rgb_raw(COLOR_1, &val_1);
@@ -327,7 +330,7 @@ int WRO(void) {
 			ev3_motor_reset_counts(C_MOTOR);
 			tone_line();
 
-			gyro_deceleration(-480, gyro_angle_standard, 0);
+			gyro_deceleration(-480, gyro_angle_standard, 0, -1);
 			perfect_BRAKE();
 			rotation(-90,gyro_angle_standard);
 			gyro_angle_standard = -90;
@@ -337,7 +340,7 @@ int WRO(void) {
 			break;
 		case 6:
 			/* スタート赤-緑道路回収 */
-			gyro_deceleration(740, gyro_angle_standard, 0);
+			gyro_deceleration(740, gyro_angle_standard, 0, -1);
 			rotation(-90, gyro_angle_standard);
 			gyro_angle_standard = wall_fix(500);
 
@@ -382,12 +385,12 @@ int WRO(void) {
 			break;
 		case 2:
 			/* Dispenser黄道路回収 */
-			gyro_deceleration(150, gyro_angle_standard, 0);
+			gyro_deceleration(150, gyro_angle_standard, 0, -1);
 			rotation(-90, gyro_angle_standard);
 			gyro_angle_standard -= 90;
-			gyro_deceleration(3000, gyro_angle_standard, -1);
+			gyro_deceleration(3000, gyro_angle_standard, -1, -1);
 			while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
-			gyro_deceleration(300, gyro_angle_standard, 0);
+			gyro_deceleration(300, gyro_angle_standard, 0, -1);
 			perfect_BRAKE();
 			rotation(90, gyro_angle_standard);
 			gyro_angle_standard += 90;
@@ -445,10 +448,10 @@ int WRO(void) {
 	switch(abrasive_priority){
 		case 1:
 			/* 青緑1研磨座撒く */
-			gyro_deceleration(120, gyro_angle_standard, 0);
+			gyro_deceleration(120, gyro_angle_standard, 0, -1);
 			rotation(-90, gyro_angle_standard);
 			gyro_angle_standard -= 90;
-			gyro_deceleration(1710, gyro_angle_standard, 0);
+			gyro_deceleration(1710, gyro_angle_standard, 0, -1);
 			rotation(90, gyro_angle_standard);
 			gyro_angle_standard = wall_fix(500);
 
@@ -456,21 +459,21 @@ int WRO(void) {
 
 			rotation(90, gyro_angle_standard);
 			gyro_angle_standard += 90;
-			gyro_deceleration(150, gyro_angle_standard, -1);
+			gyro_deceleration(150, gyro_angle_standard, -1, -1);
 			while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
-			gyro_deceleration(250, gyro_angle_standard, 0);
+			gyro_deceleration(250, gyro_angle_standard, 0, -1);
 			rotation(90, gyro_angle_standard);
 			d_motor_car_open(2);
 			gyro_angle_standard = wall_fix(1000);
-			gyro_deceleration(1700, gyro_angle_standard, 0);
+			gyro_deceleration(1700, gyro_angle_standard, 0, -1);
 			rotation(90, gyro_angle_standard);
 			gyro_angle_standard += 90;
-			gyro_deceleration(1500, gyro_angle_standard, 0);
+			gyro_deceleration(1500, gyro_angle_standard, 0, -1);
 			rotation(90, gyro_angle_standard);
 			gyro_angle_standard = wall_fix(1000);
 
 			put_green_blue_3_to_1();
-			rotation(90, gyro_angle_standard, -1);
+			rotation(90, gyro_angle_standard);
 			while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
 			perfect_BRAKE();
 			
@@ -549,7 +552,7 @@ int collection_red_3_to_1(void){
 	tire_angul += 500;
 	while(tire_angul >= ev3_motor_get_counts(C_MOTOR));
 	a_arm(50);
-	tire_angul += gyro_deceleration(500, gyro_angle_standard, 0);
+	tire_angul += gyro_deceleration(500, gyro_angle_standard, 0, -1);
 	d_motor_car_close();
 	a_arm_reset(true);
 	// rotation(-180, gyro_angle_standard);
@@ -558,18 +561,18 @@ int collection_red_3_to_1(void){
 	while(140>=ev3_gyro_sensor_get_angle(GYRO_4));
 	perfect_BRAKE();
 	gyro_angle_standard += 180;
-	gyro_deceleration(1950, gyro_angle_standard, -1);
+	gyro_deceleration(1950, gyro_angle_standard, -1, 0);
 	while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
 	tone_line();
 	a_arm_reset(false);
-	gyro_deceleration(-200, gyro_angle_standard, 0);
+	gyro_deceleration(-200, gyro_angle_standard, 0, -1);
 	rotation(-90,gyro_angle_standard);
 	gyro_angle_standard = wall_fix(1000);
-	// gyro_deceleration(500, gyro_angle_standard, 0);
+	// gyro_deceleration(500, gyro_angle_standard, 0, -1);
 	// rotation(-90, gyro_angle_standard);
 	// gyro_angle_standard -= 90;
-	// gyro_deceleration(200, gyro_angle_standard, 0);
-	// gyro_deceleration(-200, gyro_angle_standard, 0);
+	// gyro_deceleration(200, gyro_angle_standard, 0, -1);
+	// gyro_deceleration(-200, gyro_angle_standard, 0, -1);
 	// rotation(-90, gyro_angle_standard);
 	// gyro_angle_standard -= 90;
 	// gyro_angle_standard = wall_fix(500);
@@ -618,7 +621,7 @@ int collection_yellow_3_to_1(void){
 	tire_angul += 480;
 	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
 	a_arm_reset(false);
-	gyro_deceleration(750, gyro_angle_standard, 0);
+	gyro_deceleration(750, gyro_angle_standard, 0, -1);
 	a_arm(125);
 	d_motor_car_close();
 
@@ -631,7 +634,7 @@ int collection_yellow_3_to_1(void){
 	while(-200<=ev3_motor_get_counts(B_MOTOR));
 	BRAKE(B_MOTOR);
 
-	gyro_deceleration(900, gyro_angle_standard, -1);
+	gyro_deceleration(900, gyro_angle_standard, -1, -1);
 	while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
 	ev3_motor_reset_counts(C_MOTOR);
 	while(50>=ev3_motor_get_counts(C_MOTOR));
@@ -642,7 +645,7 @@ int collection_yellow_3_to_1(void){
 	rotation(90, gyro_angle_standard);
 	gyro_angle_standard += 90;
 	gyro_angle_standard = wall_fix(1000);
-	gyro_deceleration(1500, gyro_angle_standard, 0);
+	gyro_deceleration(1500, gyro_angle_standard, 0, -1);
 	a_arm_reset(false);
 	
 	ev3_motor_reset_counts(B_MOTOR);
@@ -650,7 +653,7 @@ int collection_yellow_3_to_1(void){
 	while(-350<=ev3_motor_get_counts(B_MOTOR));
 	BRAKE(B_MOTOR);
 	gyro_angle_standard -= 90;
-	gyro_deceleration(-200, gyro_angle_standard, 0);
+	gyro_deceleration(-200, gyro_angle_standard, 0, -1);
 	rotation(-90, gyro_angle_standard);
 	gyro_angle_standard -= 90;
 	gyro_angle_standard = wall_fix(500);
@@ -670,7 +673,7 @@ int collection_blue_3_to_1(void){
 	a_arm(125);
 	gyrotrace_task_4_power_p_i_d_angle(30, 2, 0, 0.5, gyro_angle_standard);
 	ev3_motor_reset_counts(B_MOTOR);
-	tire_angul += gyro_deceleration(350, gyro_angle_standard, 0);
+	tire_angul += gyro_deceleration(350, gyro_angle_standard, 0, -1);
 	ev3_motor_set_power(B_MOTOR,-20);
 	ev3_motor_set_power(C_MOTOR,-20);
 	while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
@@ -707,7 +710,7 @@ int collection_green_3_to_1(void){
 	a_arm(0);
 
 	//直進
-	gyro_deceleration(300, gyro_angle_standard, -1);
+	gyro_deceleration(300, gyro_angle_standard, -1, -1);
 	ev3_stp_cyc(GYROTRACE_TASK_4);
 	//ライントレース
 	linetrace_task_4_power_p_i_d(15, 0.35, 0, 0.06);
@@ -791,7 +794,7 @@ int put_green_blue_3_to_1(void){
 	a_arm_reset(true);
 	gyrotrace_task_4_power_p_i_d_angle(30, 2, 0, 0.5, gyro_angle_standard);
 	ev3_motor_reset_counts(B_MOTOR);
-	tire_angul += gyro_deceleration(350, gyro_angle_standard, 0);
+	tire_angul += gyro_deceleration(350, gyro_angle_standard, 0, -1);
 	ev3_motor_set_power(B_MOTOR,-20);
 	ev3_motor_set_power(C_MOTOR,-20);
 	while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
@@ -812,10 +815,10 @@ int put_green_blue_3_to_1(void){
 	while(tire_angul>=(ev3_motor_get_counts(C_MOTOR)+(ev3_motor_get_counts(B_MOTOR)*-1))/2);
 	gyro_angle_standard -= 90;
 	ev3_stp_cyc(LINETRACE_TASK_4);
-	gyro_deceleration(100, gyro_angle_standard, 0);
+	gyro_deceleration(100, gyro_angle_standard, 0, -1);
 	rotation(-90, gyro_angle_standard);
 	gyro_angle_standard -= 90;
-	gyro_deceleration(950, gyro_angle_standard, 0);
+	gyro_deceleration(950, gyro_angle_standard, 0, -1);
 	kennmazai_put(0);
 	kennmazai_put(0);
 	return 0;
@@ -845,15 +848,15 @@ int broken_line(int tire_angul,int tire_brake){
 int  car_put(int color_direction){
 	int i_c;
 	int max_c = 0;
-	gyro_deceleration(500, gyro_angle_standard, 0);
+	gyro_deceleration(500, gyro_angle_standard, 0, -1);
 	rotation(90, gyro_angle_standard);
 	gyro_angle_standard += 90;
-	gyro_deceleration(100, gyro_angle_standard, -1);
+	gyro_deceleration(100, gyro_angle_standard, -1, -1);
 	while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
-	gyro_deceleration(250, gyro_angle_standard, 0);
+	gyro_deceleration(250, gyro_angle_standard, 0, -1);
 	a_arm_reset(true);
 	d_motor_car_open(0);
-	gyro_deceleration(-105, gyro_angle_standard, 0);
+	gyro_deceleration(-105, gyro_angle_standard, 0, -1);
 	
 	for(i_c=0; i_c<=12; i_c++){
 		ht_nxt_color_sensor_measure_rgb(HT_COLOR_3, &val_2);
@@ -871,7 +874,7 @@ int  car_put(int color_direction){
 
 	switch(car_p){
 		case true:
-			gyro_deceleration(-300, gyro_angle_standard, 0);
+			gyro_deceleration(-300, gyro_angle_standard, 0, -1);
 			a_arm_reset(false);
 			ev3_motor_reset_counts(C_MOTOR);
 			ev3_motor_set_power(C_MOTOR, 85);
@@ -881,14 +884,14 @@ int  car_put(int color_direction){
 			ev3_motor_set_power(B_MOTOR, -85);
 			while(-80<=ev3_motor_get_counts(B_MOTOR));
 			BRAKE(B_MOTOR);
-			gyro_deceleration(200, gyro_angle_standard, 0);
+			gyro_deceleration(200, gyro_angle_standard, 0, -1);
 			a_arm(125);
-			gyro_deceleration(-300, gyro_angle_standard, 0);
+			gyro_deceleration(-300, gyro_angle_standard, 0, -1);
 		break;
 
 		case false:
 			a_arm_reset(false);
-			gyro_deceleration(-360, gyro_angle_standard, 0);
+			gyro_deceleration(-360, gyro_angle_standard, 0, -1);
 			a_arm_reset(true);
 			ev3_motor_reset_counts(B_MOTOR);
 			ev3_motor_set_power(B_MOTOR, -85);
@@ -898,14 +901,14 @@ int  car_put(int color_direction){
 			ev3_motor_set_power(C_MOTOR, 85);
 			while(120>=ev3_motor_get_counts(C_MOTOR));
 			BRAKE(C_MOTOR);
-			gyro_deceleration(200, gyro_angle_standard, 0);
+			gyro_deceleration(200, gyro_angle_standard, 0, -1);
 			a_arm(125);
-			gyro_deceleration(-300, gyro_angle_standard, 0);
+			gyro_deceleration(-300, gyro_angle_standard, 0, -1);
 		break;
 	}
 	rotation(-90, gyro_angle_standard);
 	gyro_angle_standard -= 90;
-	gyro_deceleration(-400, gyro_angle_standard, 0);
+	gyro_deceleration(-400, gyro_angle_standard, 0, -1);
 	d_motor_car_close();
 	gyro_angle_standard = wall_fix(1000);
 	return 0;
@@ -914,7 +917,7 @@ int  car_put(int color_direction){
 
 void dispenser_recovery(int b_b){
 	/* 一つ目 */
-	gyro_deceleration(930, gyro_angle_standard, 0);
+	gyro_deceleration(920, gyro_angle_standard, 0, -1);
 	rotation(90, gyro_angle_standard);
 	gyro_angle_standard += 90;
 	ev3_motor_reset_counts(C_MOTOR);
@@ -937,10 +940,10 @@ void dispenser_recovery(int b_b){
 	tslp_tsk(500);
 
 	/* 二つ目 */
-	gyro_deceleration(-200, gyro_angle_standard, 0);
+	gyro_deceleration(-200, gyro_angle_standard, 0, -1);
 	rotation(-90, gyro_angle_standard);
 	gyro_angle_standard -= 90;
-	gyro_deceleration(370, gyro_angle_standard,0);
+	gyro_deceleration(370, gyro_angle_standard, 0, -1);
 	rotation(90, gyro_angle_standard);
 	gyro_angle_standard += 90;
 	ev3_motor_reset_counts(C_MOTOR);
@@ -962,13 +965,13 @@ void dispenser_recovery(int b_b){
 	while(-50<=ev3_motor_get_counts(C_MOTOR));
 	perfect_BRAKE();
 	tslp_tsk(500);
-	gyro_deceleration(-100, gyro_angle_standard, -1);
+	gyro_deceleration(-100, gyro_angle_standard, -1, -1);
 	while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
-	gyro_deceleration(-100, gyro_angle_standard, 0);
+	gyro_deceleration(-100, gyro_angle_standard, 0, -1);
 	perfect_BRAKE();
 	rotation(-90, gyro_angle_standard);
 	gyro_angle_standard -= 90;
-	gyro_deceleration(-950, gyro_angle_standard, -1);
+	gyro_deceleration(-950, gyro_angle_standard, -1, -1);
 	ev3_stp_cyc(GYROTRACE_TASK_4);
 	gyro_angle_standard = wall_fix(1000);
 }
