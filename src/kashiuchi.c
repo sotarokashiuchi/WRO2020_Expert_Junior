@@ -30,7 +30,7 @@
     static float line_i_gein; //0.56             //Iゲイン
     static float line_d_gein; //0.04       //Dゲイン
 
-	float line_p=0, line_i=0, line_d=0;
+	static float line_p=0, line_i=0, line_d=0;
 	static float line_old = 0, line_new = 0;
 	static float line_integral = 0;
     //i=p/0.2
@@ -45,6 +45,10 @@
         line_new = 0;
         line_old = 0;
         line_integral = 0;
+
+        line_p = 0;
+        line_i = 0;
+        line_d = 0;
         
     }
     
@@ -60,9 +64,10 @@
     static float gyro_d_gein; //0             //Dゲイン
     static float gyro_angle = 0;
 
-	float gyro_p=0, gyro_i=0, gyro_d;
-	int gyro_old = 0, gyro_new = 0;
-	float gyro_integral = 0;
+	static float gyro_p=0, gyro_i=0, gyro_d;
+	static int gyro_old = 0, gyro_new = 0;
+	static float gyro_integral = 0;
+    static float gyro_total = 0;
 
     gyrotrace_task_4_power_p_i_d_angle(int power, float p, float i, float d, int angle){
         gyro_power = power;
@@ -70,6 +75,16 @@
         gyro_i_gein = i;
         gyro_d_gein = d;
         gyro_angle = angle;
+
+        gyro_old = 0;
+        gyro_new = 0;
+        gyro_integral = 0;
+
+        gyro_p = 0;
+        gyro_i = 0;
+        gyro_d = 0;
+
+        gyro_total = 0;
     }
 
 /*****************************************************************************************************************************************
@@ -122,11 +137,13 @@ void gyrotrace_task_4(void){
     gyro_i = gyro_i_gein * gyro_integral;
     gyro_d = gyro_d_gein * (gyro_new - gyro_old) / GYROTRACE_DELTA_T;
 
-    if(gyro_new>=0){
-        ev3_motor_set_power(C_MOTOR, (gyro_power)-(gyro_p + gyro_i + gyro_d));
+    gyro_total = (gyro_p + gyro_i + gyro_d);
+
+    if(gyro_total>=0){
+        ev3_motor_set_power(C_MOTOR, (gyro_power)-(gyro_total));
         ev3_motor_set_power(B_MOTOR, -gyro_power);
     }else{
-        ev3_motor_set_power(B_MOTOR, (-gyro_power)-(gyro_p + gyro_i + gyro_d));
+        ev3_motor_set_power(B_MOTOR, (-gyro_power)-(gyro_total));
         ev3_motor_set_power(C_MOTOR, gyro_power);
     }
 }
@@ -205,7 +222,7 @@ int gyro_deceleration(int angul, int gyro_angle_standard, int stp, int power){
     if(angul<0){
         ev3_motor_reset_counts(C_MOTOR);
         if(power==0){
-            gyrotrace_task_4_power_p_i_d_angle(-85, 2, 0, 0.5, gyro_angle_standard);
+            gyrotrace_task_4_power_p_i_d_angle(-85, 7, 10, 0.5, gyro_angle_standard);
             ev3_sta_cyc(GYROTRACE_TASK_4);
             while(angul+150<=ev3_motor_get_counts(C_MOTOR));
         }
@@ -217,7 +234,7 @@ int gyro_deceleration(int angul, int gyro_angle_standard, int stp, int power){
     }else{
         ev3_motor_reset_counts(C_MOTOR);
         if(power==0){
-            gyrotrace_task_4_power_p_i_d_angle(85, 2, 0, 0.5, gyro_angle_standard);
+            gyrotrace_task_4_power_p_i_d_angle(85, 6, 1, 2, gyro_angle_standard);
             ev3_sta_cyc(GYROTRACE_TASK_4);
             while(angul-150>=ev3_motor_get_counts(C_MOTOR));
         }
