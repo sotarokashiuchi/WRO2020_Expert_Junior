@@ -45,6 +45,10 @@ int deceleration(int angul, int stp);
 int gyro_deceleration(int angul, int gyro_angle_standard, int stp, int power);
 
 
+
+int gyro_deceleration_power(int power, int gyro_angle_standard, int reset);
+
+
 /*
  *   線合わせ
  */
