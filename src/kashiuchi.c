@@ -138,6 +138,9 @@ void gyrotrace_task_4(void){
     gyro_integral += (gyro_new + gyro_old) / 2.0 *GYROTRACE_DELTA_T; 
 
     gyro_p = gyro_p_gein * gyro_new;
+    // if(gyro_new==0){
+    //     gyro_integral = 0;
+    // }
     gyro_i = gyro_i_gein * gyro_integral;
     gyro_d = gyro_d_gein * (gyro_new - gyro_old) / GYROTRACE_DELTA_T;
 
@@ -182,8 +185,8 @@ void rotation(int angul, int angul_cfg){
         BRAKE(B_MOTOR);
         BRAKE(C_MOTOR);
     }
-    tslp_tsk(1000);	
-    fprintf(kashiuchi_fp,"最終%d\n\r",ev3_gyro_sensor_get_angle(GYRO_4));
+    tslp_tsk(100);	
+    // fprintf(kashiuchi_fp,"最終%d\n\r",ev3_gyro_sensor_get_angle(GYRO_4));
 }
 
 
@@ -226,7 +229,7 @@ int gyro_deceleration(int angul, int gyro_angle_standard, int stp, int power){
     if(angul<0){
         ev3_motor_reset_counts(C_MOTOR);
         if(power==0){
-            gyrotrace_task_4_power_p_i_d_angle(-85, 6, 1, 2, gyro_angle_standard);
+            gyrotrace_task_4_power_p_i_d_angle(-85, 15, 16, 1, gyro_angle_standard);
             ev3_sta_cyc(GYROTRACE_TASK_4);
             while(angul+150<=ev3_motor_get_counts(C_MOTOR));
         }
@@ -238,7 +241,7 @@ int gyro_deceleration(int angul, int gyro_angle_standard, int stp, int power){
     }else{
         ev3_motor_reset_counts(C_MOTOR);
         if(power==0){
-            gyrotrace_task_4_power_p_i_d_angle(85, 6, 1, 2, gyro_angle_standard);
+            gyrotrace_task_4_power_p_i_d_angle(85, 15, 16, 1, gyro_angle_standard);
             ev3_sta_cyc(GYROTRACE_TASK_4);
             while(angul-150>=ev3_motor_get_counts(C_MOTOR));
         }
@@ -272,7 +275,7 @@ int gyro_deceleration_power(int power, int gyro_angle_standard, int reset){
     }else if(power==30 || power==-30){
         gyrotrace_task_4_power_p_i_d_angle(power, 2, 0, 0.5, gyro_angle_standard);
     }else if(power==85 || power==-85){
-        gyrotrace_task_4_power_p_i_d_angle(power, 6, 1, 2, gyro_angle_standard);
+        gyrotrace_task_4_power_p_i_d_angle(power, 15, 16, 1, gyro_angle_standard);
     }
     ev3_sta_cyc(GYROTRACE_TASK_4);
     return 0;
