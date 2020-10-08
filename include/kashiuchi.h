@@ -22,6 +22,8 @@ extern void gyrotrace_task_4(void);
 
 extern void gyrotrace_task_4_power_p_i_d_angle(int power, float p, float i, float d, int angle);
 
+extern void gyrotrace_b_task_4(void);
+
 
 
 

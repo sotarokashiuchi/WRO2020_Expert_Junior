@@ -52,6 +52,7 @@ int put_green_1_to_3(int);
 int put_green_blue_3_to_1(void);
 int car_put(void);
 void dispenser_recovery(int);
+
 //float *array_command(float *str_p);	//配列操作
 
 
@@ -123,9 +124,10 @@ int WRO(void) {
 	d_motor_car_close();
 	ev3_motor_reset_counts(D_MOTOR);		//Dモータリセット
 
-	// ev3_lcd_set_font(1);
+	ev3_lcd_set_font(1);
 
 	/* 実験スペース */
+	ev3_sta_cyc(GYRO_LOG_TASK_10);
 
 	// ev3_lcd_set_font(1);
 	
@@ -155,6 +157,7 @@ int WRO(void) {
 	// 	sprintf(str, "GYRO=%3d",(ev3_gyro_sensor_get_angle(GYRO_4)-gyro_angle_standard));
 	// 	ev3_lcd_draw_string(str,0,0);
 	// }
+
 	/********************************************************************************************************************************************
 	 *	バイナリコード色読み
 	 ********************************************************************************************************************************************/
@@ -613,7 +616,7 @@ int collection_red_3_to_1(void){
 	while(150>=ev3_gyro_sensor_get_angle(GYRO_4));
 	perfect_BRAKE();
 	gyro_angle_standard += 180;
-	gyro_deceleration(1950, gyro_angle_standard, -1, 0);
+	gyro_deceleration(1950, gyro_angle_standard, -1, -1);
 	while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
 	tone_line();
 	a_arm_reset(false);
@@ -1030,3 +1033,10 @@ void dispenser_recovery(int b_b){
 	ev3_stp_cyc(GYROTRACE_TASK_4);
 	gyro_angle_standard = wall_fix(1000);
 }
+
+
+void gyro_log(void){
+	sprintf(str, "GYRO=%5d",(ev3_gyro_sensor_get_angle(GYRO_4)-gyro_angle_standard));
+	ev3_lcd_draw_string(str,0,0);
+}
+

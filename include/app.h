@@ -45,4 +45,5 @@
 #ifndef TOPPERS_MACRO_ONLY
 /* app.c */
 extern int	main_task(void);
+extern void gyro_log(void);
 #endif /* TOPPERS_MACRO_ONLY */
