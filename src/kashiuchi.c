@@ -180,32 +180,38 @@ void gyrotrace_b_task_4(void){
  *   回転
  */
 void rotation(int angul, int angul_cfg){
+    ulong_t pastTime,nowTime = 0;
+    get_tim(&pastTime);
     if(0 < angul){
-        ev3_motor_set_power(B_MOTOR,30);
-        ev3_motor_set_power(C_MOTOR,30);
+        ev3_motor_set_power(B_MOTOR,85);
+        ev3_motor_set_power(C_MOTOR,85);
         while(angul-53>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
         ev3_motor_set_power(B_MOTOR,15);
         ev3_motor_set_power(C_MOTOR,15);
         while(angul-33>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
         ev3_motor_set_power(B_MOTOR,9);
         ev3_motor_set_power(C_MOTOR,9);
-        while(angul-13>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
+        while(angul-13>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg || (nowTime-pastTime)<=500){
+        	get_tim(&nowTime);
+        }
         BRAKE(B_MOTOR);
         BRAKE(C_MOTOR);
     }else{
-        ev3_motor_set_power(B_MOTOR,-30);
-        ev3_motor_set_power(C_MOTOR,-30);
+        ev3_motor_set_power(B_MOTOR,-85);
+        ev3_motor_set_power(C_MOTOR,-85);
         while(angul+53<=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
         ev3_motor_set_power(B_MOTOR,-15);
         ev3_motor_set_power(C_MOTOR,-15);
         while(angul+33<=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
         ev3_motor_set_power(B_MOTOR,-9);
         ev3_motor_set_power(C_MOTOR,-9);
-        while(angul+13<=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
+        while(angul+13<=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg || (nowTime-pastTime)<=500){
+            get_tim(&nowTime);
+        }
         BRAKE(B_MOTOR);
         BRAKE(C_MOTOR);
     }
-    tslp_tsk(100);	
+    tslp_tsk(100);
     // fprintf(kashiuchi_fp,"最終%d\n\r",ev3_gyro_sensor_get_angle(GYRO_4));
 }
 
@@ -343,7 +349,7 @@ int wall_fix(int angle){
     tslp_tsk(angle);
     BRAKE(B_MOTOR);
     BRAKE(C_MOTOR);
-    tslp_tsk(500);
+    tslp_tsk(100);
 
     return ev3_gyro_sensor_get_angle(GYRO_4);
 }
