@@ -705,7 +705,10 @@ int collection_yellow_3_to_1(void){
 	gyro_deceleration(1500, gyro_angle_standard, 0, 0);
 	a_arm_reset(false);
 	
-	rotation(-90, gyro_angle_standard);
+	ev3_motor_reset_counts(B_MOTOR);
+	ev3_motor_set_power(B_MOTOR, -85);
+	while(-350<=ev3_motor_get_counts(B_MOTOR));
+	BRAKE(B_MOTOR);
 	gyro_angle_standard -= 90;
 	gyro_deceleration(-200, gyro_angle_standard, 0, -1);
 	rotation(-90, gyro_angle_standard);
