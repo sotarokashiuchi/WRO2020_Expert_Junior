@@ -191,7 +191,7 @@ void rotation(int angul, int angul_cfg){
         while(angul-33>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
         ev3_motor_set_power(B_MOTOR,9);
         ev3_motor_set_power(C_MOTOR,9);
-        while(angul-13>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg || (nowTime-pastTime)<=500){
+        while((angul-13>=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg) || ((nowTime-pastTime)<=500)){
         	get_tim(&nowTime);
         }
         BRAKE(B_MOTOR);
@@ -205,7 +205,7 @@ void rotation(int angul, int angul_cfg){
         while(angul+33<=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg);
         ev3_motor_set_power(B_MOTOR,-9);
         ev3_motor_set_power(C_MOTOR,-9);
-        while(angul+13<=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg || (nowTime-pastTime)<=500){
+        while((angul+13<=ev3_gyro_sensor_get_angle(GYRO_4)-angul_cfg) || ((nowTime-pastTime)<=500)){
             get_tim(&nowTime);
         }
         BRAKE(B_MOTOR);
@@ -419,16 +419,23 @@ void d_motor_car_open(int level){
 /*
  *	Dアーム閉じる関数
  */
-void d_motor_car_close(void){
-    ev3_motor_set_power(D_MOTOR, 85);
-	tslp_tsk(300);
-	BRAKE(D_MOTOR);
+void d_motor_car_close(int level){
+    if(level==0){
+        ev3_motor_set_power(D_MOTOR, 85);
+        tslp_tsk(300);
+        BRAKE(D_MOTOR);
+    }
+    if(level==1){
+        ev3_motor_set_power(D_MOTOR, 85);
+        tslp_tsk(150);
+        BRAKE(D_MOTOR);
+    }
 }
 
 
 void kennmazai_put(int faset){
     ev3_motor_set_power(D_MOTOR, -85);
-    while(-150<=ev3_motor_get_counts(D_MOTOR));
+    while(-170<=ev3_motor_get_counts(D_MOTOR));
     BRAKE(D_MOTOR);
     ev3_motor_set_power(D_MOTOR, 85);
     tslp_tsk(170);

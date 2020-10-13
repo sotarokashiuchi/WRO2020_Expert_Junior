@@ -88,7 +88,7 @@ void d_motor_car_open(int);
 /*
  *	Dアーム閉じる関数
  */
-void d_motor_car_close(void);
+void d_motor_car_close(int);
 
 
 
