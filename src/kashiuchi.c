@@ -286,7 +286,7 @@ int gyro_deceleration(int angul, int gyro_angle_standard, int stp, int power){
 
 
 /*
- *   ジャイロ減速
+ *   ジャイロ
  */
 int gyro_deceleration_power(int power, int gyro_angle_standard, int reset){
     if(reset==0){
