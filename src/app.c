@@ -134,7 +134,7 @@ int WRO(void) {
 
 
 	gyro_angle_standard = wall_fix(1000);
-	put_green_blue_3_to_1();
+	put_red_3_to_1(1);
 	while(1);
 	// while(1);
 
@@ -403,13 +403,37 @@ int put_red_1_to_3(int);
 
 
 /********************************************************************************************************************************************
- *	赤道路研磨剤撒く3-1
+ *	側面道路3-1
  ********************************************************************************************************************************************/
-int put_red_3_to_1(int){
-	gyro_deceleration(500, gyro_angle_standard, 0, 0);
+int put_red_3_to_1(int point){
+	int tire_angul = 0;
+	gyro_deceleration(1700, gyro_angle_standard, 0, 0);
 	kennmazai_put(0);
 	rotation(90, gyro_angle_standard);
-	gyro_deceleration(1000, gyro_angle_standard, 0, 0);
+	gyro_angle_standard += 90;
+	gyro_deceleration_power(85, gyro_angle_standard, 0);
+	tire_angul += 568;
+	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
+	kennmazai_put(0);
+	tire_angul += 568;
+	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
+	kennmazai_put(0);
+	kennmazai_put(0);
+	
+	if(point == 0){
+		/* 黄色　長い */
+		gyro_deceleration(1650, gyro_angle_standard, -1, 0);
+		while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+		perfect_BRAKE();
+	}else{
+		/* 赤色　短い */
+		tire_angul += 1600;
+		while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
+		while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+		gyro_deceleration(300, gyro_angle_standard, 0, 0);
+	}
+	rotation(90, gyro_angle_standard);
+	gyro_angle_standard = wall_fix(500);
 }
 
 
