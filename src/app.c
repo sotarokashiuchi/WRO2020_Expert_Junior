@@ -43,8 +43,8 @@ int collection_yellow_3_to_1(void);
 int collection_blue_3_to_1(void);
 int collection_green_3_to_1(void);
 int collection_red_1_to_3(void);
-int put_red_1_to_3(int);
-int put_red_3_to_1(int);
+int put_red_yellow_1_to_3(int);
+int put_red_yellow_3_to_1(int);
 int put_yellow_1_to_3(int);
 int put_yellow_3_to_1(int);
 int put_blue_1_to_3(int);
@@ -125,18 +125,14 @@ int WRO(void) {
 	d_motor_car_close(0);
 	ev3_motor_reset_counts(D_MOTOR);		//Dモータリセット
 
+	gyro_angle_standard = wall_fix(1000);
+
 	// ev3_lcd_set_font(1);
 
 	/* 実験スペース */
 	// ev3_sta_cyc(GYRO_LOG_TASK_10);
 
 	// ev3_lcd_set_font(1);
-
-
-	gyro_angle_standard = wall_fix(1000);
-	put_red_3_to_1(1);
-	while(1);
-	// while(1);
 
 	/********************************************************************************************************************************************
 	 *	バイナリコード色読み
@@ -287,7 +283,17 @@ int WRO(void) {
 	/********************************************************************************************************************************************
 	 *	研磨剤回収
 	 ********************************************************************************************************************************************/
-
+	if(sta_point == 1){
+		//黄
+		gyro_deceleration(-700, gyro_angle_standard, 0, 0);
+		rotation(-90, gyro_angle_standard);
+		gyro_angle_standard = wall_fix(1000);
+		dispenser_recovery(0);
+	}else{
+		//赤
+		dispenser_recovery(0);
+	}
+	while(1);
 
 	/********************************************************************************************************************************************
 	 *	研磨剤を撒く									 *****************************************************************************************
@@ -396,16 +402,34 @@ int WRO(void) {
 
 
 /********************************************************************************************************************************************
- *	赤道路研磨剤撒く1-3
+ *	側面道路研磨剤撒く1-3
  ********************************************************************************************************************************************/
-int put_red_1_to_3(int);
+int put_red_yellow_1_to_3(int point){
+	int tire_angul = 0;
+	gyro_deceleration_power(85, gyro_angle_standard, 0);
+	tire_angul += 500;
+	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
+	kennmazai_put(0);
+	tire_angul += 2000;
+	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
+	gyro_deceleration(200, gyro_angle_standard, 0, 0);
+	kennmazai_put(0);
+	rotation(-90, gyro_angle_standard);
+	gyro_angle_standard += -90;
+	gyro_deceleration(1100, gyro_angle_standard, -1, 0);
+	while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+	perfect_BRAKE();
+	tone_line();
+	kennmazai_put(0);
+	kennmazai_put(0);
+}
 
 
 
 /********************************************************************************************************************************************
- *	側面道路3-1
+ *	側面道路研磨剤撒く3-1
  ********************************************************************************************************************************************/
-int put_red_3_to_1(int point){
+int put_red_yellow_3_to_1(int point){
 	int tire_angul = 0;
 	gyro_deceleration(1700, gyro_angle_standard, 0, 0);
 	kennmazai_put(0);
@@ -425,11 +449,13 @@ int put_red_3_to_1(int point){
 		gyro_deceleration(1650, gyro_angle_standard, -1, 0);
 		while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
 		perfect_BRAKE();
+		tone_line();
 	}else{
 		/* 赤色　短い */
 		tire_angul += 1600;
 		while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
 		while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+		tone_line();
 		gyro_deceleration(300, gyro_angle_standard, 0, 0);
 	}
 	rotation(90, gyro_angle_standard);
@@ -499,11 +525,9 @@ int put_green_blue_3_to_1(void){
 
 void dispenser_recovery(int b_b){
 	/* 一つ目 */
-	a_arm(165);
-
 	gyro_deceleration(900, gyro_angle_standard, 0, -1);
-	rotation(90, gyro_angle_standard);
-	gyro_angle_standard += 90;
+	rotation(-90, gyro_angle_standard);
+	gyro_angle_standard += -90;
 	gyro_deceleration(1, gyro_angle_standard, -1, -1);
 	// ev3_motor_reset_counts(C_MOTOR);
 	// gyrotrace_task_4_power_p_i_d_angle(15, 2, 0, 0.5, gyro_angle_standard);
