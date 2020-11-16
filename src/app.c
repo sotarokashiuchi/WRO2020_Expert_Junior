@@ -45,7 +45,7 @@ int collection_blue_3_to_1(void);
 int collection_green_3_to_1(void);
 int collection_red_1_to_3(void);
 int put_red_yellow_1_to_3(int);
-int put_red_yellow_3_to_1(int);
+int put_red_yellow_3_to_1(int, int);
 int put_yellow_1_to_3(int);
 int put_yellow_3_to_1(int);
 int put_blue_1_to_3(int);
@@ -135,7 +135,7 @@ int WRO(void) {
 
 	/* 実験スペース */
 	// ev3_sta_cyc(GYRO_LOG_TASK_10);
-	
+
 	// ev3_lcd_set_font(1);
 
 	/********************************************************************************************************************************************
@@ -406,6 +406,22 @@ int WRO(void) {
 			break;
 		case 2:
 			/* 青黄1研磨座撒く */
+			gyro_deceleration(120, gyro_angle_standard, 0, 0);
+			rotation(90, gyro_angle_standard);
+			gyro_angle_standard += 90;
+			gyro_deceleration(3400, gyro_angle_standard, 0, 0);
+			rotation(-90, gyro_angle_standard);
+			gyro_angle_standard += -90;
+			gyro_deceleration(1250, gyro_angle_standard, -1, 0);
+			while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+			perfect_BRAKE();
+			tone_line();
+			rotation(180, gyro_angle_standard);
+			gyro_angle_standard = wall_fix(1000);
+
+			put_red_yellow_3_to_1(-1, 3);
+
+			put_green_blue_3_to_1();
 			break;
 		case 3:
 			/* 青赤1研磨座撒く */
@@ -418,9 +434,9 @@ int WRO(void) {
 			break;
 		case 6:
 			/* 黄赤1研磨座撒く */
-			put_red_yellow_3_to_1(-1);
+			put_red_yellow_3_to_1(-1, 1);
 
-			put_red_yellow_3_to_1(-1);
+			put_red_yellow_3_to_1(-1, 1);
 			break;
 
 		case 7:
@@ -443,11 +459,36 @@ int WRO(void) {
 			rotation(90, gyro_angle_standard);
 			gyro_angle_standard = wall_fix(1000);
 
-			put_red_yellow_3_to_1(-1);
+			put_red_yellow_3_to_1(-1, 1);
+			gyro_deceleration(250, gyro_angle_standard, 0, 0);
+			rotation(-90, gyro_angle_standard);
+			gyro_angle_standard = wall_fix(1000);
 			break;
 		case 8:
 			/* 青黄2研磨座撒く */
+			gyro_deceleration(120, gyro_angle_standard, 0, 0);
+			rotation(90, gyro_angle_standard);
+			gyro_angle_standard += 90;
+			gyro_deceleration(2000, gyro_angle_standard, 0, 0);
 
+			rotation(-90, gyro_angle_standard);
+			gyro_angle_standard = wall_fix(1000);
+			
+			put_green_blue_3_to_1();
+			rotation(90, gyro_angle_standard);
+			gyro_angle_standard += 90;
+			gyro_deceleration(500, gyro_angle_standard, -1, 0);
+			while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+			perfect_BRAKE();
+			tone_line();
+			rotation(90, gyro_angle_standard);
+			gyro_angle_standard = wall_fix(1000);
+
+			gyro_deceleration(120, gyro_angle_standard, 0, 0);
+			rotation(90, gyro_angle_standard);
+			gyro_angle_standard += 90;
+			gyro_deceleration(300, gyro_angle_standard, 0, 0);
+			put_red_yellow_1_to_3(0);
 			break;
 		case 9:
 			/* 青赤2研磨座撒く */
@@ -460,7 +501,7 @@ int WRO(void) {
 			break;
 		case 12:
 			/* 黄赤2研磨座撒く */
-			put_red_yellow_3_to_1(-1);
+			put_red_yellow_3_to_1(-1, 1);
 
 			gyro_deceleration(1700, gyro_angle_standard, 0, 0);
 			rotation(90, gyro_angle_standard);
@@ -476,7 +517,7 @@ int WRO(void) {
 			rotation(90, gyro_angle_standard);
 			gyro_angle_standard += 90;
 			
-			gyro_deceleration(300, gyro_angle_standard, 0, 0);
+			gyro_deceleration(350, gyro_angle_standard, 0, 0);
 			put_red_yellow_1_to_3(0);
 			break;
 	}
@@ -520,7 +561,7 @@ int put_red_yellow_1_to_3(int point){
 /********************************************************************************************************************************************
  *	側面道路研磨剤撒く3-1
  ********************************************************************************************************************************************/
-int put_red_yellow_3_to_1(int point){
+int put_red_yellow_3_to_1(int point, int level){
 	int tire_angul = 0;
 	gyro_deceleration(1700, gyro_angle_standard, 0, 0);
 	kennmazai_put(0);
@@ -530,27 +571,40 @@ int put_red_yellow_3_to_1(int point){
 	tire_angul += 568;
 	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
 	kennmazai_put(0);
-	tire_angul += 568;
-	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
-	kennmazai_put(0);
-	kennmazai_put(0);
-	
-	if(point == 0){
-		/* 黄色　長い */
-		gyro_deceleration(1650, gyro_angle_standard, -1, 0);
-		while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
-		perfect_BRAKE();
-		tone_line();
-	}else{
-		/* 赤色　短い */
-		tire_angul += 1600;
+
+	if(level == 0 || level == 1){
+		tire_angul += 568;
 		while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
-		while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
-		tone_line();
-		gyro_deceleration(300, gyro_angle_standard, 0, 0);
+		kennmazai_put(0);
+		kennmazai_put(0);
+		if(point == 0){
+			/* 黄色　長い */
+			gyro_deceleration(1650, gyro_angle_standard, -1, 0);
+			while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+			perfect_BRAKE();
+			tone_line();
+		}else{
+			/* 赤色　短い */
+			tire_angul += 1600;
+			while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
+			while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+			tone_line();
+			gyro_deceleration(300, gyro_angle_standard, 0, 0);
+		}
+		if(level == 1){
+			rotation(90, gyro_angle_standard);
+			gyro_angle_standard = wall_fix(1000);
+		}
+	}else if(level == 2 || level == 3){
+		gyro_deceleration(500, gyro_angle_standard, 0, 0);
+		kennmazai_put(0);
+		kennmazai_put(0);
+		if(level == 3){
+			rotation(90, gyro_angle_standard);
+			gyro_angle_standard = wall_fix(1000);
+		}
+		
 	}
-	rotation(90, gyro_angle_standard);
-	gyro_angle_standard = wall_fix(1000);
 }
 
 
