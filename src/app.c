@@ -49,7 +49,7 @@ int put_red_yellow_3_to_1(int, int);
 int put_yellow_1_to_3(int);
 int put_yellow_3_to_1(int);
 int put_blue_1_to_3(int);
-int put_green_1_to_3(int);
+int move_green_blue_1_to_red_yellow_3(int);
 int put_green_blue_3_to_1(void);
 int car_put(void);
 void dispenser_recovery(int);
@@ -385,14 +385,8 @@ int WRO(void) {
 
 			put_green_blue_3_to_1();
 
-			rotation(90, gyro_angle_standard);
-			gyro_angle_standard += 90;
-			gyro_deceleration_power(85, gyro_angle_standard, 0);
-			while(150 >= ev3_motor_get_counts(C_MOTOR));
-			while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
-			gyro_deceleration(250, gyro_angle_standard, 0, 0);
-			rotation(90, gyro_angle_standard);
-			gyro_angle_standard = wall_fix(1000);
+			move_green_blue_1_to_red_yellow_3(0);
+
 			gyro_deceleration(1700, gyro_angle_standard, 0, 0);
 			rotation(90, gyro_angle_standard);
 			gyro_angle_standard += 90;
@@ -425,6 +419,15 @@ int WRO(void) {
 			break;
 		case 3:
 			/* 青赤1研磨座撒く */
+			put_red_yellow_3_to_1(1, 1);
+			gyro_deceleration(1700, gyro_angle_standard, 0, 0);
+			rotation(90, gyro_angle_standard);
+			gyro_angle_standard += 90;
+			gyro_deceleration(1610, gyro_angle_standard, 0,0);
+			rotation(90, gyro_angle_standard);
+			gyro_angle_standard = wall_fix(1000);
+
+			put_green_blue_3_to_1();
 			break;
 		case 4:
 			/* 緑黄1研磨座撒く */
@@ -450,14 +453,7 @@ int WRO(void) {
 			gyro_angle_standard = wall_fix(1000);
 			put_green_blue_3_to_1();
 
-			rotation(90, gyro_angle_standard);
-			gyro_angle_standard += 90;
-			gyro_deceleration(500, gyro_angle_standard, -1, 0);
-			while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
-			perfect_BRAKE();
-			tone_line();
-			rotation(90, gyro_angle_standard);
-			gyro_angle_standard = wall_fix(1000);
+			move_green_blue_1_to_red_yellow_3(1);
 
 			put_red_yellow_3_to_1(-1, 1);
 			gyro_deceleration(250, gyro_angle_standard, 0, 0);
@@ -475,14 +471,7 @@ int WRO(void) {
 			gyro_angle_standard = wall_fix(1000);
 			
 			put_green_blue_3_to_1();
-			rotation(90, gyro_angle_standard);
-			gyro_angle_standard += 90;
-			gyro_deceleration(500, gyro_angle_standard, -1, 0);
-			while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
-			perfect_BRAKE();
-			tone_line();
-			rotation(90, gyro_angle_standard);
-			gyro_angle_standard = wall_fix(1000);
+			move_green_blue_1_to_red_yellow_3(1);
 
 			gyro_deceleration(120, gyro_angle_standard, 0, 0);
 			rotation(90, gyro_angle_standard);
@@ -492,9 +481,43 @@ int WRO(void) {
 			break;
 		case 9:
 			/* 青赤2研磨座撒く */
+			gyro_deceleration(120, gyro_angle_standard, 0, 0);
+			rotation(90, gyro_angle_standard);
+			gyro_angle_standard += 90;
+			gyro_deceleration(2000, gyro_angle_standard, 0, 0);
+			rotation(-90, gyro_angle_standard);
+			gyro_angle_standard = wall_fix(1000);
+
+			put_green_blue_3_to_1();
+			
+			move_green_blue_1_to_red_yellow_3(1);
+
+			put_red_yellow_3_to_1(-1, 1);
 			break;
 		case 10:
 			/* 緑黄2研磨座撒く */
+			gyro_deceleration(120, gyro_angle_standard, 0, 0);
+			rotation(90, gyro_angle_standard);
+			gyro_angle_standard += 90;
+			gyro_deceleration(300, gyro_angle_standard, 0, 0);
+			put_red_yellow_1_to_3(0);
+
+			rotation(180, gyro_angle_standard);
+			gyro_angle_standard = wall_fix(1000);
+			gyro_deceleration(120, gyro_angle_standard, 0, 0);
+			rotation(90, gyro_angle_standard);
+			gyro_angle_standard += 90;
+			gyro_deceleration(2000, gyro_angle_standard, 0, 0);
+			rotation(-90, gyro_angle_standard);
+			gyro_angle_standard = wall_fix(1000);
+
+			put_green_blue_3_to_1();
+
+			move_green_blue_1_to_red_yellow_3(0);
+			gyro_deceleration(120, gyro_angle_standard, 0, 0);
+			rotation(-90, gyro_angle_standard);
+			gyro_angle_standard += -90;
+			gyro_deceleration(2000, gyro_angle_standard, 0, 0);
 			break;
 		case 11:
 			/* 緑赤2研磨座撒く */
@@ -627,10 +650,7 @@ int put_blue_1_to_3(int);
 
 
 
-/********************************************************************************************************************************************
- *	緑道路研磨剤撒く1-3
- ********************************************************************************************************************************************/
-int put_green_1_to_3(int);
+
 
 
 /********************************************************************************************************************************************
@@ -665,6 +685,31 @@ int put_green_blue_3_to_1(void){
 	kennmazai_put(0);
 	kennmazai_put(0);
 	return 0;
+}
+
+/********************************************************************************************************************************************
+ *	緑道路研磨剤撒く1-3
+ ********************************************************************************************************************************************/
+int move_green_blue_1_to_red_yellow_3(int point){
+	rotation(90, gyro_angle_standard);
+	gyro_angle_standard += 90;
+	if(point == 0){
+		//黄色
+		rotation(90, gyro_angle_standard);
+		gyro_angle_standard += 90;
+		gyro_deceleration_power(85, gyro_angle_standard, 0);
+		while(150 >= ev3_motor_get_counts(C_MOTOR));
+		while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+		gyro_deceleration(250, gyro_angle_standard, 0, 0);
+	}else{
+		//赤色
+		gyro_deceleration(500, gyro_angle_standard, -1, 0);
+		while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+		perfect_BRAKE();
+		tone_line();
+	}
+	rotation(90, gyro_angle_standard);
+	gyro_angle_standard = wall_fix(1000);
 }
 
 
