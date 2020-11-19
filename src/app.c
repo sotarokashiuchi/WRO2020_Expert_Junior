@@ -65,6 +65,7 @@ ER r1;
 ER r = E_OK;
 int gyro_angle_standard = 0;
 int car_p = 0;
+// int kennmazai_put_f = 0;	//false = 0 = put
 rgb_raw_t val_1, val_2;
 char str[64] = {};
 int roda_f = 0;
@@ -431,9 +432,39 @@ int WRO(void) {
 			break;
 		case 4:
 			/* 緑黄1研磨座撒く */
+			gyro_deceleration(1700, gyro_angle_standard, 0, 0);
+			rotation(90, gyro_angle_standard);
+			gyro_angle_standard += 90;
+			gyro_deceleration_power(85, gyro_angle_standard, 0);
+			gyro_deceleration(1500, gyro_angle_standard, 0, 0);
+			rotation(90, gyro_angle_standard);
+			gyro_angle_standard = wall_fix(1000);
+
+			put_green_blue_3_to_1();
+
+			move_green_blue_1_to_red_yellow_3(0);
+
+			put_red_yellow_3_to_1(0, 1);
 			break;
 		case 5:
 			/* 緑赤1研磨座撒く */
+			gyro_deceleration(1700, gyro_angle_standard, 0, 0);
+			rotation(90, gyro_angle_standard);
+			gyro_angle_standard += 90;
+			gyro_deceleration_power(85, gyro_angle_standard, 0);
+			gyro_deceleration(1500, gyro_angle_standard, 0, 0);
+			rotation(90, gyro_angle_standard);
+			gyro_angle_standard = wall_fix(1000);
+
+			put_green_blue_3_to_1();
+
+			move_green_blue_1_to_red_yellow_3(0);
+
+			gyro_deceleration(120, gyro_angle_standard, 0, 0);
+			rotation(90, gyro_angle_standard);
+			gyro_angle_standard += 90;
+			gyro_deceleration(700, gyro_angle_standard, 0, 0);
+			put_red_yellow_1_to_3(1);
 			break;
 		case 6:
 			/* 黄赤1研磨座撒く */
@@ -521,6 +552,11 @@ int WRO(void) {
 			break;
 		case 11:
 			/* 緑赤2研磨座撒く */
+			put_red_yellow_3_to_1(1, 3);
+
+			put_green_blue_3_to_1();
+
+			move_green_blue_1_to_red_yellow_3(0);
 			break;
 		case 12:
 			/* 黄赤2研磨座撒く */
@@ -571,7 +607,7 @@ int put_red_yellow_1_to_3(int point){
 	kennmazai_put(0);
 	rotation(-90, gyro_angle_standard);
 	gyro_angle_standard += -90;
-	gyro_deceleration(1100, gyro_angle_standard, -1, 0);
+	gyro_deceleration(1000, gyro_angle_standard, -1, 0);
 	while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
 	perfect_BRAKE();
 	tone_line();
@@ -695,8 +731,6 @@ int move_green_blue_1_to_red_yellow_3(int point){
 	gyro_angle_standard += 90;
 	if(point == 0){
 		//黄色
-		rotation(90, gyro_angle_standard);
-		gyro_angle_standard += 90;
 		gyro_deceleration_power(85, gyro_angle_standard, 0);
 		while(150 >= ev3_motor_get_counts(C_MOTOR));
 		while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
