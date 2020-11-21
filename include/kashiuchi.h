@@ -30,7 +30,7 @@ extern void gyrotrace_b_task_4(void);
 /*
  *   回転
  */
-void rotation(int angul, int angul_cfg);
+int rotation(int angul, int angul_cfg);
 
 
 

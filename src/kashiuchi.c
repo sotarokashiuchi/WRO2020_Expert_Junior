@@ -179,7 +179,7 @@ void gyrotrace_b_task_4(void){
 /*
  *   回転
  */
-void rotation(int angul, int angul_cfg){
+int rotation(int angul, int angul_cfg){
     ulong_t pastTime,nowTime = 0;
     get_tim(&pastTime);
     if(0 < angul){
@@ -212,6 +212,7 @@ void rotation(int angul, int angul_cfg){
         BRAKE(C_MOTOR);
     }
     tslp_tsk(100);
+    return angul;
     // fprintf(kashiuchi_fp,"最終%d\n\r",ev3_gyro_sensor_get_angle(GYRO_4));
 }
 
