@@ -34,7 +34,6 @@ true					1
 2 = 黄
 3 = 緑
 4 = 青
-GYRO PID 2, 0, 0.5
 */
 
 /* 関数のプロトタイプ宣言 */
@@ -771,7 +770,7 @@ void dispenser_recovery(int b_b){
 		gyro_deceleration(550, gyro_angle_standard, 0, -1);
 	}else{
 		//青先回収
-		gyro_deceleration(880, gyro_angle_standard, 0, -1);		
+		gyro_deceleration(900, gyro_angle_standard, 0, -1);		
 	}
 	perfect_BRAKE();
 	tslp_tsk(500);

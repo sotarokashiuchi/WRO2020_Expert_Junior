@@ -254,7 +254,7 @@ int gyro_deceleration(int angul, int gyro_angle_standard, int stp, int power){
     if(angul<0){
         ev3_motor_reset_counts(C_MOTOR);
         if(power==0){
-            gyrotrace_task_4_power_p_i_d_angle(-85, 15, 0, 1, gyro_angle_standard);
+            gyrotrace_task_4_power_p_i_d_angle(-85, 15, 16, 1, gyro_angle_standard);
             ev3_sta_cyc(GYROTRACE_B_TASK_4);
             while(angul+150<=ev3_motor_get_counts(C_MOTOR));
         }
@@ -266,7 +266,7 @@ int gyro_deceleration(int angul, int gyro_angle_standard, int stp, int power){
     }else{
         ev3_motor_reset_counts(C_MOTOR);
         if(power==0){
-            gyrotrace_task_4_power_p_i_d_angle(85, 15, 0, 1, gyro_angle_standard);
+            gyrotrace_task_4_power_p_i_d_angle(85, 15, 16, 1, gyro_angle_standard);
             ev3_sta_cyc(GYROTRACE_TASK_4);
             while(angul-150>=ev3_motor_get_counts(C_MOTOR));
         }
@@ -298,7 +298,7 @@ int gyro_deceleration_power(int power, int gyro_angle_standard, int reset){
     }else if(power==30 || power==-30){
         gyrotrace_task_4_power_p_i_d_angle(power, 2, 0, 0.5, gyro_angle_standard);
     }else if(power==85 || power==-85){
-        gyrotrace_task_4_power_p_i_d_angle(power, 15, 0, 1, gyro_angle_standard);
+        gyrotrace_task_4_power_p_i_d_angle(power, 15, 16, 1, gyro_angle_standard);
     }
     if(power>=0){
         ev3_sta_cyc(GYROTRACE_TASK_4);
