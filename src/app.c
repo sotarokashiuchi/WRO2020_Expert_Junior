@@ -34,6 +34,7 @@ true					1
 2 = 黄
 3 = 緑
 4 = 青
+GYRO PID 2, 0, 0.5
 */
 
 /* 関数のプロトタイプ宣言 */
@@ -45,7 +46,7 @@ int collection_blue_3_to_1(void);
 int collection_green_3_to_1(void);
 int collection_red_1_to_3(void);
 int put_red_yellow_1_to_3(int);
-int put_red_yellow_3_to_1(int, int);
+int put_red_yellow_3_to_1(int, int, int);
 int line_color(int, int);
 int put_yellow_3_to_1(int);
 int goal(int);
@@ -142,6 +143,12 @@ int WRO(void) {
 	// ev3_lcd_set_font(1);
 	// ev3_speaker_play_file(&memfile, SOUND_MANUAL_STOP);
 	// tslp_tsk(10000);
+
+
+	// gyro_deceleration(200, gyro_angle_standard, -1, 0);
+	// line_color(0, 0);
+	// goal(0);
+	// while(1);
 	
 
 	/********************************************************************************************************************************************
@@ -307,15 +314,19 @@ int WRO(void) {
 		//黄
 		gyro_deceleration(300, gyro_angle_standard, 0, 0);
 		gyro_angle_standard += rotation(180, gyro_angle_standard);
-		gyro_deceleration(700, gyro_angle_standard, -1, 0);
+		gyro_deceleration(1000, gyro_angle_standard, -1, 0);
 	}else{
 		//赤
 		gyro_deceleration(-1050, gyro_angle_standard, 0, 0);
 		gyro_angle_standard += rotation(-90, gyro_angle_standard);
-		int tire_angul = 0;
+		gyro_angle_standard = wall_fix(1000);
 		gyro_deceleration(1700, gyro_angle_standard, 0, 0);
 		gyro_angle_standard += rotation(90, gyro_angle_standard);
 		gyro_deceleration(3100, gyro_angle_standard, -1, 0);
+		line_color(0, 0);
+		gyro_deceleration(200, gyro_angle_standard, 0, 0);
+		gyro_deceleration(-300, gyro_angle_standard, 0, 0);
+		gyro_deceleration(1, gyro_angle_standard, -1, 0);
 	}
 	line_color(0, 0);
 	gyro_angle_standard += rotation(90, gyro_angle_standard);
@@ -398,6 +409,7 @@ int WRO(void) {
 			gyro_angle_standard = wall_fix(1000);
 			put_green_blue_3_to_1();
 
+			gyro_deceleration(100, gyro_angle_standard, 0, 0);
 			gyro_angle_standard += rotation(90, gyro_angle_standard);
 			gyro_deceleration(500, gyro_angle_standard, -1, 0);
 			line_color(0, 0);
@@ -407,16 +419,17 @@ int WRO(void) {
 			/* 青黄1研磨座撒く */
 			gyro_deceleration(120, gyro_angle_standard, 0, 0);
 			gyro_angle_standard += rotation(90, gyro_angle_standard);
-			gyro_deceleration(3400, gyro_angle_standard, 0, 0);
+			gyro_deceleration(3450, gyro_angle_standard, 0, 0);
 			gyro_angle_standard += rotation(-90, gyro_angle_standard);
 			gyro_deceleration(1250, gyro_angle_standard, -1, 0);
 			line_color(0, 0);
-			gyro_angle_standard += rotation(180, gyro_angle_standard);
+			gyro_angle_standard += rotation(-180, gyro_angle_standard);
 			gyro_angle_standard = wall_fix(1000);
 
-			put_red_yellow_3_to_1(-1, 3);
+			put_red_yellow_3_to_1(-1, 3, -1);
 
 			put_green_blue_3_to_1();
+			gyro_deceleration(100, gyro_angle_standard, 0, 0);
 			gyro_angle_standard += rotation(90, gyro_angle_standard);
 			gyro_deceleration(600, gyro_angle_standard, -1, 0);
 			line_color(0, 0);
@@ -424,14 +437,15 @@ int WRO(void) {
 			break;
 		case 3:
 			/* 青赤1研磨座撒く */
-			put_red_yellow_3_to_1(1, 1);
+			put_red_yellow_3_to_1(1, 1, -1);
 			gyro_deceleration(1700, gyro_angle_standard, 0, 0);
 			gyro_angle_standard += rotation(90, gyro_angle_standard);
-			gyro_deceleration(1610, gyro_angle_standard, 0,0);
+			gyro_deceleration(1550, gyro_angle_standard, 0,0);
 			gyro_angle_standard += rotation(90, gyro_angle_standard);
 			gyro_angle_standard = wall_fix(1000);
 
 			put_green_blue_3_to_1();
+			gyro_deceleration(100, gyro_angle_standard, 0, 0);
 			gyro_angle_standard += rotation(90, gyro_angle_standard);
 			gyro_deceleration(600, gyro_angle_standard, -1, 0);
 			line_color(0, 0);
@@ -447,7 +461,7 @@ int WRO(void) {
 			gyro_angle_standard = wall_fix(1000);
 			put_green_blue_3_to_1();
 			move_green_blue_1_to_red_yellow_3(0);
-			put_red_yellow_3_to_1(0, 0);
+			put_red_yellow_3_to_1(0, 0, 0);
 			goal(0);
 			break;
 		case 5:
@@ -473,8 +487,9 @@ int WRO(void) {
 			break;
 		case 6:
 			/* 黄赤1研磨座撒く */
-			put_red_yellow_3_to_1(-1, 1);
-			put_red_yellow_3_to_1(-1, 1);
+			put_red_yellow_3_to_1(-1, 1, -1);
+			put_red_yellow_3_to_1(-1, 1, 0);
+			goal(0);
 			break;
 		case 7:
 			/* 青緑2研磨座撒く */
@@ -485,7 +500,8 @@ int WRO(void) {
 			gyro_angle_standard = wall_fix(1000);
 			put_green_blue_3_to_1();
 			move_green_blue_1_to_red_yellow_3(1);
-			put_red_yellow_3_to_1(-1, 1);
+			put_red_yellow_3_to_1(-1, 1, 0);
+			goal(0);
 			break;
 		case 8:
 			/* 青黄2研磨座撒く */
@@ -499,7 +515,7 @@ int WRO(void) {
 
 			gyro_deceleration(120, gyro_angle_standard, 0, 0);
 			gyro_angle_standard += rotation(90, gyro_angle_standard);
-			gyro_deceleration(300, gyro_angle_standard, 0, 0);
+			gyro_deceleration(400, gyro_angle_standard, 0, 0);
 			put_red_yellow_1_to_3(0);
 			goal(1);
 			break;
@@ -515,7 +531,8 @@ int WRO(void) {
 			
 			move_green_blue_1_to_red_yellow_3(1);
 
-			put_red_yellow_3_to_1(-1, 1);
+			put_red_yellow_3_to_1(-1, 1, 0);
+			goal(0);
 			break;
 		case 10:
 			/* 緑黄2研磨座撒く */
@@ -528,11 +545,12 @@ int WRO(void) {
 			gyro_angle_standard = wall_fix(1000);
 			gyro_deceleration(120, gyro_angle_standard, 0, 0);
 			gyro_angle_standard += rotation(90, gyro_angle_standard);
-			gyro_deceleration(2000, gyro_angle_standard, 0, 0);
+			gyro_deceleration(1900, gyro_angle_standard, 0, 0);
 			gyro_angle_standard += rotation(-90, gyro_angle_standard);
 			gyro_angle_standard = wall_fix(1000);
 			put_green_blue_3_to_1();
 
+			gyro_deceleration(100, gyro_angle_standard, 0, 0);
 			gyro_angle_standard += rotation(90, gyro_angle_standard);
 			gyro_deceleration(100, gyro_angle_standard, -1, 0);
 			line_color(0, 0);
@@ -540,7 +558,7 @@ int WRO(void) {
 			break;
 		case 11:
 			/* 緑赤2研磨座撒く */
-			put_red_yellow_3_to_1(1, 3);
+			put_red_yellow_3_to_1(1, 3, -1);
 			put_green_blue_3_to_1();
 
 			gyro_angle_standard += rotation(90, gyro_angle_standard);
@@ -550,7 +568,7 @@ int WRO(void) {
 			break;
 		case 12:
 			/* 黄赤2研磨座撒く */
-			put_red_yellow_3_to_1(-1, 1);
+			put_red_yellow_3_to_1(-1, 1, -1);
 
 			gyro_deceleration(1700, gyro_angle_standard, 0, 0);
 			gyro_angle_standard += rotation(90, gyro_angle_standard);
@@ -558,15 +576,13 @@ int WRO(void) {
 			line_color(0, 0);
 			gyro_angle_standard += rotation(90, gyro_angle_standard);
 			gyro_angle_standard = wall_fix(1000);
-			gyro_deceleration(120, gyro_angle_standard,0, 0);
+			gyro_deceleration(120, gyro_angle_standard ,0, 0);
 			gyro_angle_standard += rotation(90, gyro_angle_standard);
-			gyro_deceleration(350, gyro_angle_standard, 0, 0);
+			gyro_deceleration(400, gyro_angle_standard, 0, 0);
 			put_red_yellow_1_to_3(0);
 			goal(1);
 			break;
 	}
-
-
 	return 0;
 }
 
@@ -602,7 +618,7 @@ int put_red_yellow_1_to_3(int point){
 /********************************************************************************************************************************************
  *	側面道路研磨剤撒く3-1
  ********************************************************************************************************************************************/
-int put_red_yellow_3_to_1(int point, int level){
+int put_red_yellow_3_to_1(int point, int level, int stop){
 	int tire_angul = 0;
 	gyro_deceleration(1700, gyro_angle_standard, 0, 0);
 	kennmazai_put(0);
@@ -620,12 +636,18 @@ int put_red_yellow_3_to_1(int point, int level){
 		if(point == 0){
 			/* 黄色　長い */
 			gyro_deceleration(1650, gyro_angle_standard, -1, 0);
-			line_color(0, 0);
+			line_color(0, -1);
+			if(stop == 0){
+				return 0;
+			}
 		}else{
 			/* 赤色　短い */
 			tire_angul += 1600;
 			while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
 			line_color(0, -1);
+			if(stop == 0){
+				return 0;
+			}
 			gyro_deceleration(300, gyro_angle_standard, 0, 0);
 		}
 		if(level == 1){
@@ -672,13 +694,17 @@ int put_yellow_3_to_1(int);
 int goal(int point){
 	if(point == 0){
 		//右回転
-		gyro_deceleration(300, gyro_angle_standard, 0, 0);
-		gyro_angle_standard += rotation(90, gyro_angle_standard);
+		gyro_deceleration(200, gyro_angle_standard, 0, 0);
+		ev3_motor_set_power(C_MOTOR, 85);
+		gyro_angle_standard += 90;
+		while((gyro_angle_standard-15) >= ev3_gyro_sensor_get_angle(GYRO_4));
 		gyro_angle_standard = wall_fix(1000);
 	}else{
 		//左回転
-		gyro_deceleration(300, gyro_angle_standard, 0, 0);
-		gyro_angle_standard += rotation(-90, gyro_angle_standard);
+		gyro_deceleration(150, gyro_angle_standard, 0, 0);
+		ev3_motor_set_power(B_MOTOR, -85);
+		gyro_angle_standard += -90;
+		while((gyro_angle_standard+15) <= ev3_gyro_sensor_get_angle(GYRO_4));
 		gyro_angle_standard = wall_fix(1000);
 	}
 }
@@ -745,7 +771,7 @@ void dispenser_recovery(int b_b){
 		gyro_deceleration(550, gyro_angle_standard, 0, -1);
 	}else{
 		//青先回収
-		gyro_deceleration(900, gyro_angle_standard, 0, -1);		
+		gyro_deceleration(880, gyro_angle_standard, 0, -1);		
 	}
 	perfect_BRAKE();
 	tslp_tsk(500);
