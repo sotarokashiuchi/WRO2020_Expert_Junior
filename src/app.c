@@ -34,6 +34,7 @@ true					1
 2 = 黄
 3 = 緑
 4 = 青
+GYRO PID 2, 0, 0.5
 */
 
 /* 関数のプロトタイプ宣言 */
@@ -144,10 +145,10 @@ int WRO(void) {
 	// tslp_tsk(10000);
 
 
-	// gyro_deceleration(200, gyro_angle_standard, -1, 0);
-	// line_color(0, 0);
-	// goal(0);
-	// while(1);
+	gyro_angle_standard = wall_fix(1000);
+	collection_green_3_to_1();
+	while(1);
+	collection_blue_3_to_1();
 	
 
 	/********************************************************************************************************************************************
@@ -306,6 +307,164 @@ int WRO(void) {
 		abrasive_priority += 6;
 	}
 
+	// /********************************************************************************************************************************************
+	//  *	車と雪回収➡捨てる(start➡)						*****************************************************************************************
+	//  *	start1 = 黄色のライン							 *****************************************************************************************
+	//  *	start2 = 赤色のライン							 *****************************************************************************************
+	//  *	1 = start1赤									*****************************************************************************************
+	//  *	2 = start1黄									*****************************************************************************************
+	//  *	3 = start1青									*****************************************************************************************
+	//  *	4 = start2黄									*****************************************************************************************
+	//  *	5 = start2赤									*****************************************************************************************
+	//  *	6 = start2緑									*****************************************************************************************
+	//  ********************************************************************************************************************************************/
+	// /* 回収する道路を計算&優先度で決定 */
+	// if(sta_point==1){				//スタート黄
+	// 	if(0 == (binary_code[3][0]+binary_code[3][1])){
+	// 		road_priority = 1;		//赤3-1
+	// 	}else if(0 == (binary_code[2][0]+binary_code[2][1])){
+	// 		road_priority = 2;		//黄1-3
+	// 	}else{
+	// 		road_priority = 3;		//青3-1
+	// 	}
+	// }else{							//スタート赤
+	// 	if(0 == (binary_code[3][0]+binary_code[3][1])){
+	// 		road_priority = 4;		//赤1-3
+	// 	}else if(0 == (binary_code[2][0]+binary_code[2][1])){
+	// 		road_priority = 5;		//黄3-1
+	// 	}else{
+	// 		road_priority = 6;		//緑3-1
+	// 	}
+	// }
+
+	// /* 計算通りに雪と車回収 */
+	// switch(road_priority){
+	// 	case 1:
+	// 		/* スタート黄-赤道路回収3-1 */
+	// 		gyro_deceleration(-500, gyro_angle_standard, -1, 0);
+	// 		/* ライン読み */
+	// 		do{
+	// 			ev3_color_sensor_get_rgb_raw(COLOR_1, &val_1);
+	// 		}while(50<=(val_1.b));
+	// 		ev3_motor_reset_counts(C_MOTOR);
+	// 		tone_line();
+
+	// 		gyro_deceleration(-70, gyro_angle_standard, 0, -1);
+	// 		perfect_BRAKE();
+	// 		rotation(-90,gyro_angle_standard);
+	// 		gyro_angle_standard = -90;
+	// 		gyro_angle_standard = wall_fix(500);
+
+	// 		/* 車＆雪回収 */
+	// 		collection_red_3_to_1();
+	// 		break;
+	// 	case 2:
+	// 		/* スタート黄-黄道路回収1-3 */
+			
+	// 		collection_yellow_3_to_1();
+	// 		break;
+	// 	case 3:
+	// 		/* スタート黄-青道路回収青3-1 */
+	// 		gyro_deceleration(1200, gyro_angle_standard, 0, -1);
+	// 		rotation(-90, gyro_angle_standard);
+	// 		gyro_angle_standard = wall_fix(500);
+
+	// 		collection_blue_3_to_1();
+	// 		break;
+	// 	case 4:
+	// 		/* スタート赤-赤道路回収1-3 */
+
+	// 		collection_red_1_to_3();
+	// 		break;
+	// 	case 5:
+	// 		/* スタート赤-黄道路回収3-1 */
+	// 		gyro_deceleration(-500, gyro_angle_standard, -1, -1);
+	// 		/* ライン読み */
+	// 		do{
+	// 			ev3_color_sensor_get_rgb_raw(COLOR_1, &val_1);
+	// 		}while(50<=(val_1.b));
+	// 		ev3_motor_reset_counts(C_MOTOR);
+	// 		tone_line();
+
+	// 		gyro_deceleration(-480, gyro_angle_standard, 0, -1);
+	// 		perfect_BRAKE();
+	// 		rotation(-90,gyro_angle_standard);
+	// 		gyro_angle_standard = -90;
+	// 		gyro_angle_standard = wall_fix(500);
+
+	// 		collection_yellow_3_to_1();
+	// 		break;
+	// 	case 6:
+	// 		/* スタート赤-緑道路回収 */
+	// 		gyro_deceleration(740, gyro_angle_standard, 0, -1);
+	// 		rotation(-90, gyro_angle_standard);
+	// 		gyro_angle_standard = wall_fix(500);
+
+	// 		collection_green_3_to_1();
+	// 		break;
+	// }
+
+
+	// /********************************************************************************************************************************************
+	//  *	車と雪回収➡捨てる(Dispenser➡)					*****************************************************************************************
+	//  *	1 = Dispenser赤									*****************************************************************************************
+	//  *	2 = Dispenser黄									*****************************************************************************************
+	//  *	3 = Dispenser緑									*****************************************************************************************
+	//  *	4 = Dispenser青									*****************************************************************************************
+	//  ********************************************************************************************************************************************/
+	// /* 回収する道路を計算 */
+	// if(0 == (binary_code[3][0]+binary_code[3][1])){
+	// 	if(roda_f=1){
+	// 		road_priority = 1;
+	// 	}
+	// }
+	// if(0 == (binary_code[2][0]+binary_code[2][1])){
+	// 	if(roda_f=1){
+	// 		road_priority = 2;
+	// 	}
+	// }
+	// if(0 == (binary_code[1][0]+binary_code[1][1])){
+	// 	if(roda_f=1){
+	// 		road_priority = 3;
+	// 	}
+	// }
+	// if(0 == (binary_code[0][0]+binary_code[0][1])){
+	// 	if(roda_f=1){
+	// 		road_priority = 4;
+	// 	}		
+	// }
+
+	// /* 計算通りに雪と車回収 */
+	// switch(road_priority){
+	// 	case 1:
+	// 		/* Dispenser赤道路回収 */
+	// 		break;
+	// 	case 2:
+	// 		/* Dispenser黄道路回収 */
+	// 		a_arm(130);
+	// 		gyro_deceleration(150, gyro_angle_standard, 0, -1);
+	// 		rotation(-90, gyro_angle_standard);
+	// 		gyro_angle_standard -= 90;
+	// 		gyro_deceleration_power(85, gyro_angle_standard, 0);
+	// 		while(3000 >= ev3_motor_get_counts(C_MOTOR));
+	// 		while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+	// 		gyro_deceleration(300, gyro_angle_standard, 0, 0);
+	// 		rotation(90, gyro_angle_standard);
+	// 		gyro_angle_standard += 90;
+	// 		gyro_angle_standard = wall_fix(500);
+
+	// 		collection_yellow_3_to_1();
+	// 		dispenser_recovery(0);
+	// 		break;
+	// 	case 3:
+	// 		/* Dispenser緑道路回収 */
+	// 		break;
+	// 	case 4:
+	// 		/* Dispenser青道路回収 */
+	// 		break;
+	// }
+
+
 	/********************************************************************************************************************************************
 	 *	研磨剤回収
 	 ********************************************************************************************************************************************/
@@ -370,6 +529,10 @@ int WRO(void) {
 			dispenser_recovery(1);
 		}
 	}
+
+
+	
+	
 
 
 	/********************************************************************************************************************************************
@@ -587,6 +750,76 @@ int WRO(void) {
 
 
 /********************************************************************************************************************************************
+ *	緑道路車雪回収 3-1
+ ********************************************************************************************************************************************/
+int collection_green_3_to_1(void){
+	int tire_angul = 0;
+	// a_arm_reset(true);
+	a_arm(165);
+	tire_angul += 300;
+	gyro_deceleration(tire_angul, gyro_angle_standard, 0, 0);
+	gyro_angle_standard += rotation(-45, gyro_angle_standard);
+	gyro_deceleration_power(85, gyro_angle_standard, 0);
+	a_arm_reset(false);
+	tire_angul += 0;
+	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
+	a_arm_reset(true);
+	tire_angul = ev3_motor_get_counts(C_MOTOR);
+	tire_angul += 100;
+	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
+	gyro_deceleration(150, gyro_angle_standard, 0, 0);
+	a_arm_reset(false);
+	gyro_deceleration(150, gyro_angle_standard, 0, 0);
+	gyro_angle_standard += rotation(-45, gyro_angle_standard);
+	a_arm_reset(true);
+	gyro_deceleration(350, gyro_angle_standard, -1, 0);
+	line_color(0, 0);
+	a_arm(230);
+	ev3_motor_set_power(B_MOTOR,-30);
+	while(-70<=(ev3_gyro_sensor_get_angle(GYRO_4)-gyro_angle_standard));
+	perfect_BRAKE();
+	gyro_angle_standard -= 90;
+	gyro_deceleration(700, gyro_angle_standard, 0, 0);
+	return 0;
+}
+
+
+/********************************************************************************************************************************************
+ *	青道路車雪回収 3-1
+ ********************************************************************************************************************************************/
+int collection_blue_3_to_1(void){
+	int tire_angul = 0;
+	// a_arm_reset(true);
+	a_arm(165);
+	tire_angul += 300;
+	gyro_deceleration(tire_angul, gyro_angle_standard, 0, 0);
+	gyro_angle_standard += rotation(-45, gyro_angle_standard);
+	gyro_deceleration_power(85, gyro_angle_standard, 0);
+	a_arm_reset(false);
+	tire_angul += 0;
+	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
+	a_arm_reset(true);
+	tire_angul = ev3_motor_get_counts(C_MOTOR);
+	tire_angul += 100;
+	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
+	gyro_deceleration(150, gyro_angle_standard, 0, 0);
+	a_arm_reset(false);
+	gyro_deceleration(150, gyro_angle_standard, 0, 0);
+	gyro_angle_standard += rotation(-45, gyro_angle_standard);
+	a_arm_reset(true);
+	gyro_deceleration(350, gyro_angle_standard, -1, 0);
+	line_color(0, 0);
+	a_arm(230);
+	ev3_motor_set_power(B_MOTOR,-30);
+	while(-70<=(ev3_gyro_sensor_get_angle(GYRO_4)-gyro_angle_standard));
+	perfect_BRAKE();
+	gyro_angle_standard -= 90;
+	gyro_deceleration(700, gyro_angle_standard, 0, 0);
+	return 0;
+}
+
+
+/********************************************************************************************************************************************
  *	側面道路研磨剤撒く1-3
  ********************************************************************************************************************************************/
 int put_red_yellow_1_to_3(int point){
@@ -770,7 +1003,7 @@ void dispenser_recovery(int b_b){
 		gyro_deceleration(550, gyro_angle_standard, 0, -1);
 	}else{
 		//青先回収
-		gyro_deceleration(900, gyro_angle_standard, 0, -1);		
+		gyro_deceleration(880, gyro_angle_standard, 0, -1);		
 	}
 	perfect_BRAKE();
 	tslp_tsk(500);
@@ -839,4 +1072,6 @@ void gyro_log(void){
 	sprintf(str, "GYRO=%5d",(ev3_gyro_sensor_get_angle(GYRO_4)-gyro_angle_standard));
 	ev3_lcd_draw_string(str,0,0);
 }
+
+
 
