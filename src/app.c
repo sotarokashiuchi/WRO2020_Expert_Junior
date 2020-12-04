@@ -42,6 +42,7 @@ int WRO(void);
 int broken_line(int tire_angul,int tire_brake);
 int collection_red_3_to_1(void);
 int collection_yellow_3_to_1(void);
+int collection_yellow_1_to_3(void);
 int collection_blue_3_to_1(void);
 int collection_green_3_to_1(void);
 int collection_red_1_to_3(void);
@@ -143,12 +144,12 @@ int WRO(void) {
 	// ev3_lcd_set_font(1);
 	// ev3_speaker_play_file(&memfile, SOUND_MANUAL_STOP);
 	// tslp_tsk(10000);
-
-
+	
 	gyro_angle_standard = wall_fix(1000);
-	collection_green_3_to_1();
+	gyro_deceleration(120, gyro_angle_standard, 0, 0);
+	gyro_angle_standard = rotation(90, gyro_angle_standard);
+	collection_yellow_1_to_3();
 	while(1);
-	collection_blue_3_to_1();
 	
 
 	/********************************************************************************************************************************************
@@ -806,17 +807,131 @@ int collection_blue_3_to_1(void){
 	a_arm_reset(false);
 	gyro_deceleration(150, gyro_angle_standard, 0, 0);
 	gyro_angle_standard += rotation(-45, gyro_angle_standard);
-	a_arm_reset(true);
+	a_arm(165);
 	gyro_deceleration(350, gyro_angle_standard, -1, 0);
 	line_color(0, 0);
-	a_arm(230);
 	ev3_motor_set_power(B_MOTOR,-30);
 	while(-70<=(ev3_gyro_sensor_get_angle(GYRO_4)-gyro_angle_standard));
 	perfect_BRAKE();
 	gyro_angle_standard -= 90;
-	gyro_deceleration(700, gyro_angle_standard, 0, 0);
+	gyro_deceleration_power(85, gyro_angle_standard, 0);
+	a_arm_reset(false);
+	tire_angul = ev3_motor_get_counts(C_MOTOR);
+	gyro_deceleration((700-tire_angul), gyro_angle_standard, 0, 0);
 	return 0;
 }
+
+
+/********************************************************************************************************************************************
+ *	黄道路車雪回収
+ ********************************************************************************************************************************************/
+int collection_yellow_3_to_1(void){
+	roda_f = 2;
+	int tire_angul = 0;
+	a_arm_reset(false);
+		
+	gyro_deceleration_power(30, gyro_angle_standard, 0);
+	tire_angul += 1200;
+	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
+	a_arm(165);
+	tire_angul += 180;
+	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
+	ev3_stp_cyc(GYROTRACE_TASK_4);
+	ev3_motor_set_power(B_MOTOR, -10);
+	ev3_motor_set_power(C_MOTOR, 30);
+	while(gyro_angle_standard+75>=ev3_gyro_sensor_get_angle(GYRO_4));
+	perfect_BRAKE();
+	tslp_tsk(500);
+	d_motor_car_open(false);
+	gyro_angle_standard += 90;
+	gyro_deceleration_power(30, gyro_angle_standard, -1);
+	ev3_sta_cyc(GYROTRACE_TASK_4);
+	a_arm_reset(false);
+	tire_angul += 600;
+	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
+	a_arm(165);
+	tire_angul += 700;
+	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
+	a_arm_reset(true);
+	tire_angul += 480;
+	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
+	a_arm_reset(false);
+	gyro_deceleration(750, gyro_angle_standard, 0, -1);
+	a_arm(165);
+	d_motor_car_close(1);
+
+	ev3_motor_reset_counts(C_MOTOR);
+	ev3_motor_set_power(C_MOTOR, 85);
+	while(200>=ev3_motor_get_counts(C_MOTOR));
+	BRAKE(C_MOTOR);
+	ev3_motor_reset_counts(B_MOTOR);
+	ev3_motor_set_power(B_MOTOR, -85);
+	while(-200<=ev3_motor_get_counts(B_MOTOR));
+	BRAKE(B_MOTOR);
+
+	gyro_deceleration(900, gyro_angle_standard, -1, 0);
+	while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+	perfect_BRAKE();
+	tone_line();
+	
+	a_arm_reset(true);
+	rotation(95, gyro_angle_standard);
+	gyro_angle_standard += 90;
+	gyro_angle_standard = wall_fix(1000);
+
+	gyro_deceleration(100, gyro_angle_standard, 0, 0);
+	ev3_motor_reset_counts(C_MOTOR);
+	ev3_motor_set_power(C_MOTOR, 85);
+	while(200>=ev3_motor_get_counts(C_MOTOR));
+	BRAKE(C_MOTOR);
+	ev3_motor_reset_counts(B_MOTOR);
+	ev3_motor_set_power(B_MOTOR, -85);
+	while(-200<=ev3_motor_get_counts(B_MOTOR));
+	BRAKE(B_MOTOR);
+
+
+	gyro_deceleration(1300, gyro_angle_standard, 0, 0);
+	a_arm_reset(false);
+	
+	rotation(-90, gyro_angle_standard);
+	gyro_angle_standard -= 90;
+	gyro_deceleration(100, gyro_angle_standard, -1, -1);
+	while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
+	perfect_BRAKE();
+	tone_line();
+	gyro_deceleration(-200, gyro_angle_standard, 0, -1);
+	rotation(-90, gyro_angle_standard);
+	gyro_angle_standard -= 90;
+	gyro_angle_standard = wall_fix(500);
+
+	// car_put();
+	return 0;
+}
+
+/********************************************************************************************************************************************
+ *	黄道路車雪回収1-3
+ ********************************************************************************************************************************************/
+int collection_yellow_1_to_3(void){
+	int tire_angul = 0;
+	gyro_deceleration_power(85, gyro_angle_standard, 0);
+	a_arm_reset(true);
+	tire_angul += 900;
+	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
+	a_arm_reset(false);
+	tire_angul += 200;
+	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
+	a_arm(165);
+	tire_angul += 1350;
+	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
+	a_arm_reset(false);
+	tire_angul += 100;
+	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
+	a_arm(165);
+	gyro_deceleration(200, gyro_angle_standard, 0, 0);
+	
+	return 0;
+}
+
 
 
 /********************************************************************************************************************************************
