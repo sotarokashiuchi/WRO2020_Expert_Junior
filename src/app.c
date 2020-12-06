@@ -57,6 +57,8 @@ int car_put(void);
 void dispenser_recovery(int);
 void dispenser(void);
 int snow_put(int);
+void collection_road_yello(int);
+void collection_road_red(int);
 
 
 /* グローバル変数宣言 */
@@ -74,6 +76,7 @@ int roda_f = 0;
 int car_no = 1;
 ulong_t pastTime,nowTime = 0;
 memfile_t memfile;
+int binary_code[4][2] = {{0}};
 
 int main_task(void) {
 
@@ -105,7 +108,7 @@ int WRO(void) {
 
 	/* 変数 */
 	int i=0, j=0, x=0;
-	int binary_code[4][2] = {{0}};
+
 	int sta_point_no[2] = {0};
 	int road_priority = 0;
 	int abrasive_priority = 0;
@@ -316,30 +319,6 @@ int WRO(void) {
 		line_color(0, 0);
 		gyro_angle_standard += rotation(90, gyro_angle_standard);
 		gyro_angle_standard = wall_fix(1000);
-	}else{
-		//赤
-		gyro_deceleration(100, gyro_angle_standard, 0, 0);
-		ev3_motor_reset_counts(B_MOTOR);
-		ev3_motor_set_power(B_MOTOR, -85);
-		while(-180<=ev3_motor_get_counts(B_MOTOR));
-		BRAKE(B_MOTOR);
-		ev3_motor_reset_counts(C_MOTOR);
-		ev3_motor_set_power(C_MOTOR, 85);
-		while(180>=ev3_motor_get_counts(C_MOTOR));
-		BRAKE(C_MOTOR);
-		if(0 == (binary_code[3][0]+binary_code[3][1])){
-			collection_red_1_to_3();
-		}else{
-			//雪ない
-			gyro_deceleration(2000, gyro_angle_standard, 0, 0);
-			gyro_angle_standard += rotation(-90, gyro_angle_standard);
-			gyro_deceleration(1500, gyro_angle_standard, 0, 0);
-			gyro_angle_standard += rotation(90, gyro_angle_standard);
-			gyro_deceleration(100, gyro_angle_standard, -1, 0);
-			line_color(0, 0);
-			gyro_angle_standard += rotation(90, gyro_angle_standard);
-			gyro_angle_standard = wall_fix(1000);
-		}
 	}
 	
 
@@ -351,89 +330,50 @@ int WRO(void) {
 	*	3 = 青道路回収									*****************************************************************************************
 	*	4 = 緑道路回収									*****************************************************************************************
 	********************************************************************************************************************************************/
-	/* 回収する道路を計算&優先度で決定 */
-	int road_no;
-	for(road_no = 1; road_no <= 2; road_no++){
-		if(road_no == 1){
-			if(0 == (binary_code[3][0]+binary_code[3][1])){
-				if(sta_point == 1){
-					//黄で赤回収
-					road_priority = 1;
-				}
-			}else if(0 == (binary_code[2][0]+binary_code[2][1])){
-				//黄回収
-				road_priority = 2;
-			}else if(0 == (binary_code[1][0]+binary_code[1][1])){
-				//青回収
-				road_priority = 3;
-			}else{
-				//緑回収
-				road_priority = 4;
-			}
+	/* 1回目　回収する道路を計算&優先度で決定 */
+	if(sta_point==1){				//スタート黄
+		if(0 == (binary_code[3][0]+binary_code[3][1])){
+			collection_road_yello(1);		//赤3-1
+		}else if(0 == (binary_code[2][0]+binary_code[2][1])){
+			collection_road_yello(2);		//黄1-3
 		}else{
-			if(roda_f != 2){
-				//黄回収
-				if(0 == (binary_code[2][0]+binary_code[2][1])){
-					road_priority = 2;
-				}
-			}else{
-				if(0 == (binary_code[1][0]+binary_code[1][1])){
-					if(roda_f != 3){
-						//青回収
-						road_priority = 3;
-					}
-				}else{
-					if(roda_f != 4){
-						//緑回収
-						road_priority = 4;
-					}
-				}
-			}
+			collection_road_yello(4);		//青3-1
 		}
-		sprintf(str, "Point no1 road_priority=%d",road_priority);
-		ev3_lcd_draw_string(str,0,str_p*10);
-		str_p += 1;
-
-
-		/* 計算通りに雪と車回収 */
-		switch(road_priority){
-			case 1:
-				/* 赤道路 */
-				collection_red_3_to_1();
-				break;
-			case 2:
-				/* 黄道路 */
-				gyro_deceleration(120, gyro_angle_standard, 0, 0);
-				gyro_angle_standard += rotation(90, gyro_angle_standard);
-				gyro_deceleration(430, gyro_angle_standard, 0, 0);
-				collection_yellow_1_to_3();
-				break;
-			case 3:
-				/* 青道路 */
-				gyro_deceleration(120, gyro_angle_standard, 0, 0);
-				gyro_angle_standard += rotation(90, gyro_angle_standard);
-				gyro_deceleration(1700, gyro_angle_standard, 0, 0);
-				gyro_angle_standard += rotation(-90, gyro_angle_standard);
-				gyro_angle_standard = wall_fix(500);
-				collection_blue_3_to_1();
-				break;
-			case 4:
-				/* 緑道路 */
-				gyro_deceleration(1700, gyro_angle_standard, 0, 0);
-				gyro_angle_standard += rotation(90, gyro_angle_standard);
-				gyro_deceleration(1500, gyro_angle_standard, 0, 0);
-				gyro_angle_standard += rotation(90, gyro_angle_standard);
-				gyro_angle_standard = wall_fix(1000);
-				collection_green_3_to_1();
-				break;
-			default:
-				/* 0値 */
-				break;
-				sprintf(str, "Error");
-				ev3_lcd_draw_string(str,0,str_p*10);
-				str_p += 1;
+	}else{							//スタート赤
+		if(0 == (binary_code[3][0]+binary_code[3][1])){
+			collection_road_red(1);		//赤1-3
+		}else if(0 == (binary_code[2][0]+binary_code[2][1])){
+			collection_road_red(2);		//黄3-1
+		}else{
+			collection_road_red(3);		//緑3-1
 		}
 	}
+
+	/* 2回目　回収する道路を計算&優先度で決定 */
+	if(0 == (binary_code[2][0]+binary_code[2][1])){
+		//黄
+		if(2 != roda_f){
+			collection_road_yello(2);
+		}
+	}else{
+		if(0 == (binary_code[1][0]+binary_code[1][1])){
+			//緑
+			if(3 != roda_f){
+				collection_road_yello(3);
+			}
+		}else{
+			if(0 == (binary_code[0][0]+binary_code[0][1])){
+				//青
+				if(4 != roda_f){
+					collection_road_yello(4);
+				}		
+			}
+		}
+	}
+
+	sprintf(str, "Point no1 road_priority=%d",road_priority);
+	ev3_lcd_draw_string(str,0,str_p*10);
+	str_p += 1;
 
 
 	/********************************************************************************************************************************************
@@ -692,12 +632,105 @@ int WRO(void) {
 	return 0;
 }
 
+/* 計算通りに雪と車回収 */
+void collection_road_red(int collection_road_priority){
+	switch(collection_road_priority){
+		case 1:
+			/* 赤道路 */
+			gyro_deceleration(100, gyro_angle_standard, 0, 0);
+			ev3_motor_reset_counts(B_MOTOR);
+			ev3_motor_set_power(B_MOTOR, -85);
+			while(-180<=ev3_motor_get_counts(B_MOTOR));
+			BRAKE(B_MOTOR);
+			ev3_motor_reset_counts(C_MOTOR);
+			ev3_motor_set_power(C_MOTOR, 85);
+			while(180>=ev3_motor_get_counts(C_MOTOR));
+			BRAKE(C_MOTOR);
+
+			collection_red_1_to_3();
+			break;
+		case 2:
+			/* 黄道路 */
+			gyro_deceleration(-1050, gyro_angle_standard, 0, 0);
+			gyro_angle_standard += rotation(-90, gyro_angle_standard);
+			gyro_angle_standard = wall_fix(1000);
+			collection_yellow_3_to_1();
+			break;
+		case 3:
+			/* 緑道路 */
+			gyro_deceleration(100, gyro_angle_standard, 0, 0);
+			ev3_motor_reset_counts(B_MOTOR);
+			ev3_motor_set_power(B_MOTOR, -85);
+			while(-180<=ev3_motor_get_counts(B_MOTOR));
+			BRAKE(B_MOTOR);
+			ev3_motor_reset_counts(C_MOTOR);
+			ev3_motor_set_power(C_MOTOR, 85);
+			while(180>=ev3_motor_get_counts(C_MOTOR));
+			BRAKE(C_MOTOR);
+
+			gyro_deceleration(500, gyro_angle_standard, 0, 0);
+			gyro_angle_standard += rotation(-90, gyro_angle_standard);
+			gyro_angle_standard = wall_fix(1000);
+			collection_green_3_to_1();
+			break;
+		default:
+			/* 0値 */
+			break;
+			sprintf(str, "Error");
+			ev3_lcd_draw_string(str,0,str_p*10);
+			str_p += 1;
+			break;
+	}
+}
+
+/* 計算通りに雪と車回収 */
+void collection_road_yello(int collection_road_priority){
+	switch(collection_road_priority){
+		case 1:
+			/* 赤道路 */
+			collection_red_3_to_1();
+			break;
+		case 2:
+			/* 黄道路 */
+			gyro_deceleration(120, gyro_angle_standard, 0, 0);
+			gyro_angle_standard += rotation(90, gyro_angle_standard);
+			gyro_deceleration(430, gyro_angle_standard, 0, 0);
+			collection_yellow_1_to_3();
+			break;
+		case 3:
+			/* 緑道路 */
+			gyro_deceleration(1700, gyro_angle_standard, 0, 0);
+			gyro_angle_standard += rotation(90, gyro_angle_standard);
+			gyro_deceleration(1500, gyro_angle_standard, 0, 0);
+			gyro_angle_standard += rotation(90, gyro_angle_standard);
+			gyro_angle_standard = wall_fix(1000);
+			collection_green_3_to_1();
+			break;
+		case 4:
+			/* 青道路 */
+			gyro_deceleration(120, gyro_angle_standard, 0, 0);
+			gyro_angle_standard += rotation(90, gyro_angle_standard);
+			gyro_deceleration(2000, gyro_angle_standard, 0, 0);
+			gyro_angle_standard += rotation(-90, gyro_angle_standard);
+			gyro_angle_standard = wall_fix(500);
+			collection_blue_3_to_1();
+			break;
+		default:
+			/* 0値 */
+			break;
+			sprintf(str, "Error");
+			ev3_lcd_draw_string(str,0,str_p*10);
+			str_p += 1;
+	}
+}
+
+
 
 /********************************************************************************************************************************************
  *	緑道路車雪回収 3-1
  ********************************************************************************************************************************************/
 int collection_green_3_to_1(void){
-	roda_f = 4;
+	roda_f = 3;
 	int tire_angul = 0;
 	// a_arm_reset(true);
 	a_arm(165);
@@ -735,7 +768,7 @@ int collection_green_3_to_1(void){
  *	青道路車雪回収 3-1
  ********************************************************************************************************************************************/
 int collection_blue_3_to_1(void){
-	roda_f = 3;
+	roda_f = 4;
 	int tire_angul = 0;
 	// a_arm_reset(true);
 	a_arm(165);
@@ -853,7 +886,7 @@ int collection_yellow_3_to_1(void){
 	gyro_angle_standard -= 90;
 	gyro_angle_standard = wall_fix(500);
 
-	// car_put();
+	snow_put(-1);
 	return 0;
 }
 
@@ -883,10 +916,6 @@ int collection_yellow_1_to_3(void){
 	gyro_deceleration(1100, gyro_angle_standard, 0, 0);
 	a_arm_reset(false);
 	gyro_deceleration_power(85, gyro_angle_standard, 0);
-	line_color(0, -1);
-	gyro_deceleration(250, gyro_angle_standard, 0, 0);
-	gyro_angle_standard += rotation(-90, gyro_angle_standard);
-	gyro_angle_standard = wall_fix(1000);
 
 	snow_put(0);
 	return 0;
