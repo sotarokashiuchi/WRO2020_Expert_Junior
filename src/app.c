@@ -313,31 +313,35 @@ int WRO(void) {
 		gyro_deceleration(300, gyro_angle_standard, 0, 0);
 		gyro_angle_standard += rotation(180, gyro_angle_standard);
 		gyro_deceleration(1000, gyro_angle_standard, -1, 0);
+		line_color(0, 0);
+		gyro_angle_standard += rotation(90, gyro_angle_standard);
+		gyro_angle_standard = wall_fix(1000);
 	}else{
 		//赤
+		gyro_deceleration(100, gyro_angle_standard, 0, 0);
+		ev3_motor_reset_counts(B_MOTOR);
+		ev3_motor_set_power(B_MOTOR, -85);
+		while(-180<=ev3_motor_get_counts(B_MOTOR));
+		BRAKE(B_MOTOR);
+		ev3_motor_reset_counts(C_MOTOR);
+		ev3_motor_set_power(C_MOTOR, 85);
+		while(180>=ev3_motor_get_counts(C_MOTOR));
+		BRAKE(C_MOTOR);
 		if(0 == (binary_code[3][0]+binary_code[3][1])){
-			// collection_red_1_to_3
+			collection_red_1_to_3();
 		}else{
 			//雪ない
-			ev3_motor_reset_counts(B_MOTOR);
-			ev3_motor_set_power(B_MOTOR, -85);
-			while(-200<=ev3_motor_get_counts(B_MOTOR));
-			BRAKE(B_MOTOR);
-			ev3_motor_reset_counts(C_MOTOR);
-			ev3_motor_set_power(C_MOTOR, 85);
-			while(200>=ev3_motor_get_counts(C_MOTOR));
-			BRAKE(C_MOTOR);
-
-			gyro_deceleration(2100, gyro_angle_standard, 0, 0);
+			gyro_deceleration(2000, gyro_angle_standard, 0, 0);
 			gyro_angle_standard += rotation(-90, gyro_angle_standard);
 			gyro_deceleration(1500, gyro_angle_standard, 0, 0);
 			gyro_angle_standard += rotation(90, gyro_angle_standard);
 			gyro_deceleration(100, gyro_angle_standard, -1, 0);
+			line_color(0, 0);
+			gyro_angle_standard += rotation(90, gyro_angle_standard);
+			gyro_angle_standard = wall_fix(1000);
 		}
 	}
-	line_color(0, 0);
-	gyro_angle_standard += rotation(90, gyro_angle_standard);
-	gyro_angle_standard = wall_fix(1000);
+	
 
 
 	/********************************************************************************************************************************************
@@ -386,7 +390,7 @@ int WRO(void) {
 				}
 			}
 		}
-		sprintf(str, "NO03 %d",road_priority);
+		sprintf(str, "Point no1 road_priority=%d",road_priority);
 		ev3_lcd_draw_string(str,0,str_p*10);
 		str_p += 1;
 
@@ -409,6 +413,8 @@ int WRO(void) {
 				gyro_deceleration(120, gyro_angle_standard, 0, 0);
 				gyro_angle_standard += rotation(90, gyro_angle_standard);
 				gyro_deceleration(1700, gyro_angle_standard, 0, 0);
+				gyro_angle_standard += rotation(-90, gyro_angle_standard);
+				gyro_angle_standard = wall_fix(500);
 				collection_blue_3_to_1();
 				break;
 			case 4:
@@ -428,7 +434,6 @@ int WRO(void) {
 				str_p += 1;
 		}
 	}
-	while(1);
 
 
 	/********************************************************************************************************************************************
@@ -932,6 +937,28 @@ int collection_red_3_to_1(void){
 	return 0;
 }
 
+/********************************************************************************************************************************************
+ *	赤道路車雪回収
+ ********************************************************************************************************************************************/
+int collection_red_1_to_3(void){
+	roda_f = 1;
+	int tire_angul = 0;
+	gyro_deceleration_power(85, gyro_angle_standard, 0);
+	tire_angul += 200;
+	while(tire_angul >= ev3_motor_get_counts(C_MOTOR));
+	a_arm_reset(false);
+	tire_angul += 300;
+	while(tire_angul >= ev3_motor_get_counts(C_MOTOR));
+	a_arm(165);
+	tire_angul += 700;
+	while(tire_angul >= ev3_motor_get_counts(C_MOTOR));
+	a_arm_reset(false);
+	tire_angul += 800;
+	while(tire_angul >= ev3_motor_get_counts(C_MOTOR));
+	gyro_deceleration(150, gyro_angle_standard, -1, 0);
+
+	snow_put(3);
+}
 
 
 /********************************************************************************************************************************************
@@ -1167,6 +1194,9 @@ int snow_put(int rodo_c){
 			gyro_deceleration(600, gyro_angle_standard, 0, 0);
 			gyro_angle_standard += rotation(-90, gyro_angle_standard);
 			gyro_deceleration(100, gyro_angle_standard, 0, 0);
+		}else{
+			line_color(0, 0);
+			a_arm(50);
 		}
 	}
 	gyro_deceleration(-200, gyro_angle_standard, 0, 0);
@@ -1228,9 +1258,7 @@ void dispenser_recovery(int b_b){
 
 void dispenser(void){
 	gyro_deceleration(1, gyro_angle_standard, -1, -1);
-	// ev3_motor_reset_counts(C_MOTOR);
-	// gyrotrace_task_4_power_p_i_d_angle(15, 2, 0, 0.5, gyro_angle_standard);
-	// ev3_sta_cyc(GYROTRACE_TASK_4);
+
 	while((BRAKE_REFLECTED+WHITE_REFLECTED)/2 < ev3_color_sensor_get_reflect(COLOR_1));
 	ev3_motor_reset_counts(C_MOTOR);
 	tone_line();
@@ -1238,13 +1266,6 @@ void dispenser(void){
 	ev3_sta_cyc(GYROTRACE_TASK_4);
 	while(200>=ev3_motor_get_counts(C_MOTOR));
 	perfect_BRAKE();
-	// ev3_stp_cyc(LINETRACE_TASK_4);
-	// ev3_motor_reset_counts(C_MOTOR);
-	// ev3_motor_reset_counts(B_MOTOR);
-	// linetrace_task_4_power_p_i_d(15, 0.35, 0, 0.06);
-	// ev3_sta_cyc(LINETRACE_TASK_4);
-	// while(200>=(ev3_motor_get_counts(C_MOTOR)+(ev3_motor_get_counts(B_MOTOR)*-1))/2);
-	// perfect_BRAKE();
 	
 	ev3_motor_reset_counts(C_MOTOR);
 	ev3_motor_reset_counts(B_MOTOR);
