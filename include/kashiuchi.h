@@ -54,7 +54,7 @@ int gyro_deceleration_power(int power, int gyro_angle_standard, int reset);
 /*
  *   線合わせ
  */
-void line_fix(int color_reflect);
+// void line_fix(int color_reflect);
 
 
 
