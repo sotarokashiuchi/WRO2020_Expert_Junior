@@ -78,6 +78,7 @@ ulong_t pastTime,nowTime = 0;
 memfile_t memfile;
 int binary_code[4][2] = {{0}};
 
+
 int main_task(void) {
 
 	/* タスクの開始 */
@@ -153,13 +154,43 @@ int WRO(void) {
 	// // collection_yellow_1_to_3();
 	// snow_put(0);
 	// while(1);
-	gyro_deceleration_power(gyro_angle_standard, 0, 0);]
-	while(1000>=ev3_motor_get_counts(C_MOTOR));
-	BRAKE(C_MOTOR);
-	while(1100>=ev3_motor_get_counts(C_MOTOR));
-	ev3_motor_set_power(B_MOTOR, 85);
-	while(90 > ev3_gyro_sensor_get_angle(GYRO_4));
+	get_tim(&pastTime);
+
+	gyro_deceleration(1000, gyro_angle_standard, 0, 0);
+	rotation(-90, gyro_angle_standard);
 	perfect_BRAKE();
+
+
+
+
+
+
+
+	// gyro_deceleration_power(85, gyro_angle_standard, 0);
+	// while(-1000<=ev3_motor_get_counts(B_MOTOR));
+	// ev3_stp_cyc(GYROTRACE_TASK_4);
+	// // BRAKE(C_MOTOR);
+	// // while(-1500>=ev3_motor_get_counts(B_MOTOR));
+	// ev3_motor_set_power(C_MOTOR,-85);
+	// ev3_motor_set_power(B_MOTOR,-85);
+	
+	// while(0+53<=ev3_gyro_sensor_get_angle(GYRO_4)-(-90));
+	// ev3_motor_set_power(B_MOTOR,-15);
+	// ev3_motor_set_power(C_MOTOR,-15);
+	// while(0+33<=ev3_gyro_sensor_get_angle(GYRO_4)-(-90));
+	// ev3_motor_set_power(B_MOTOR,-9);
+	// ev3_motor_set_power(C_MOTOR,-9);
+	// while((0+13<=ev3_gyro_sensor_get_angle(GYRO_4)-(-90)));
+	// BRAKE(B_MOTOR);
+	// BRAKE(C_MOTOR);
+	// // while(-90 <= ev3_gyro_sensor_get_angle(GYRO_4));
+	// tslp_tsk(100);
+	// perfect_BRAKE();
+
+
+	get_tim(&nowTime);
+	sprintf(str,"%d",(nowTime-pastTime));
+	ev3_lcd_draw_string(str,0,str_p*10);
 
 	while(1);
 	
