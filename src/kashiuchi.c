@@ -245,6 +245,29 @@ int deceleration(int angul, int stp){
     }
 }
 
+/*
+ *   ジャイロ減速
+ */
+int gyro_deceleration_85(int angul, int gyro_angle_standard, int stp){
+    if(angul<0){
+        ev3_motor_reset_counts(C_MOTOR);
+        gyrotrace_task_4_power_p_i_d_angle(-85, 15, 0, 1, gyro_angle_standard);
+        ev3_sta_cyc(GYROTRACE_B_TASK_4);
+
+    }else{
+        ev3_motor_reset_counts(C_MOTOR);
+        gyrotrace_task_4_power_p_i_d_angle(85, 15, 0, 1, gyro_angle_standard);
+        ev3_sta_cyc(GYROTRACE_TASK_4);
+    }
+
+    if(stp==0){
+        while(angul>=ev3_motor_get_counts(C_MOTOR));
+        ev3_stp_cyc(GYROTRACE_TASK_4);
+    }
+    return angul;
+}
+
+
 
 
 /*
