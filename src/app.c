@@ -125,6 +125,7 @@ int WRO(void) {
 	fprintf(fp,"%d\n\r",ev3_battery_voltage_mV());
 	// ev3_memfile_load("ev3rt/res/awf.wav", &memfile);
 	tslp_tsk(5000);
+	while(false==ev3_button_is_pressed(ENTER_BUTTON));
 
 	ev3_motor_reset_counts(B_MOTOR);
 	ev3_motor_reset_counts(C_MOTOR);
@@ -139,7 +140,7 @@ int WRO(void) {
 
 	gyro_angle_standard = wall_fix(1000);
 	a_arm_reset(false);
-	a_arm(165);
+	a_arm(A_ARM_C);
 
 	// ev3_lcd_set_font(1);
 
@@ -341,7 +342,9 @@ int WRO(void) {
 	if(sta_point == 1){
 		//黄
 		gyro_deceleration(300, gyro_angle_standard, 0, 0);
-		gyro_angle_standard += rotation(180, gyro_angle_standard);
+		gyro_angle_standard += rotation(-90, gyro_angle_standard);
+		gyro_deceleration(100, gyro_angle_standard, 0, 0);
+		gyro_angle_standard += rotation(-90, gyro_angle_standard);
 		gyro_deceleration(1000, gyro_angle_standard, -1, 0);
 		line_color(0, 0);
 		gyro_angle_standard += rotation(90, gyro_angle_standard);
@@ -385,7 +388,7 @@ int WRO(void) {
 		}
 	}
 	if(-1 != roda_f){
-		if((0 == (binary_code[1][0]+binary_code[1][1])) && (2 != roda_f)){
+		if((0 == (binary_code[1][0]+binary_code[1][1]))){
 			//緑
 			if(3 != roda_f){
 				collection_road_yello(3);
@@ -394,7 +397,7 @@ int WRO(void) {
 		}
 	}
 	if(-1 != roda_f){
-		if(0 == ((binary_code[0][0]+binary_code[0][1]) && ((2 != roda_f) && (3 != roda_f)))){
+		if(0 == ((binary_code[0][0]+binary_code[0][1]))){
 			//青
 			if(4 != roda_f){
 				collection_road_yello(4);
@@ -686,7 +689,19 @@ void collection_road_red(int collection_road_priority){
 			break;
 		case 2:
 			/* 黄道路 */
-			gyro_deceleration(-1200, gyro_angle_standard, 0, 0);
+			gyro_deceleration(-750, gyro_angle_standard, 0, 0);
+			ev3_motor_reset_counts(B_MOTOR);
+			ev3_motor_set_power(B_MOTOR, 85);
+			while(180>=ev3_motor_get_counts(B_MOTOR));
+			BRAKE(B_MOTOR);
+			ev3_motor_reset_counts(C_MOTOR);
+			ev3_motor_set_power(C_MOTOR, -85);
+			while(-180<=ev3_motor_get_counts(C_MOTOR));
+			BRAKE(C_MOTOR);
+
+			gyro_deceleration_power(-85, gyro_angle_standard, 0);
+			line_color(0, -1);
+			gyro_deceleration(-130, gyro_angle_standard, 0, 0);
 			gyro_angle_standard += rotation(-90, gyro_angle_standard);
 			gyro_angle_standard = wall_fix(1000);
 			collection_yellow_3_to_1();
@@ -770,7 +785,7 @@ int collection_green_3_to_1(void){
 	roda_f = 3;
 	int tire_angul = 0;
 	// a_arm_reset(true);
-	a_arm(165);
+	a_arm(A_ARM_C);
 	tire_angul += 300;
 	gyro_deceleration(tire_angul, gyro_angle_standard, 0, 0);
 	gyro_angle_standard += rotation(-45, gyro_angle_standard);
@@ -808,7 +823,7 @@ int collection_blue_3_to_1(void){
 	roda_f = 4;
 	int tire_angul = 0;
 	// a_arm_reset(true);
-	a_arm(165);
+	a_arm(A_ARM_C);
 	tire_angul += 300;
 	gyro_deceleration(tire_angul, gyro_angle_standard, 0, 0);
 	gyro_angle_standard += rotation(-45, gyro_angle_standard);
@@ -824,7 +839,7 @@ int collection_blue_3_to_1(void){
 	a_arm_reset(false);
 	gyro_deceleration(150, gyro_angle_standard, 0, 0);
 	gyro_angle_standard += rotation(-45, gyro_angle_standard);
-	a_arm(165);
+	a_arm(A_ARM_C);
 	gyro_deceleration(350, gyro_angle_standard, -1, 0);
 	line_color(0, 0);
 	ev3_motor_set_power(B_MOTOR,-30);
@@ -858,7 +873,7 @@ int collection_yellow_3_to_1(void){
 	gyro_deceleration_power(30, gyro_angle_standard, 0);
 	tire_angul += 1200;
 	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
-	a_arm(165);
+	a_arm(A_ARM_C);
 	tire_angul += 180;
 	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
 	ev3_stp_cyc(GYROTRACE_TASK_4);
@@ -874,7 +889,7 @@ int collection_yellow_3_to_1(void){
 	a_arm_reset(false);
 	tire_angul += 600;
 	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
-	a_arm(165);
+	a_arm(A_ARM_C);
 	tire_angul += 700;
 	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
 	a_arm_reset(true);
@@ -882,7 +897,7 @@ int collection_yellow_3_to_1(void){
 	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
 	a_arm_reset(false);
 	gyro_deceleration(750, gyro_angle_standard, 0, -1);
-	a_arm(165);
+	a_arm(A_ARM_C);
 	d_motor_car_close(1);
 
 	ev3_motor_reset_counts(C_MOTOR);
@@ -914,13 +929,13 @@ int collection_yellow_1_to_3(void){
 	a_arm_reset(false);
 	tire_angul += 200;
 	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
-	a_arm(165);
+	a_arm(A_ARM_C);
 	tire_angul += 1350;
 	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
 	a_arm_reset(false);
 	tire_angul += 100;
 	while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
-	a_arm(165);
+	a_arm(A_ARM_C);
 	gyro_deceleration(120, gyro_angle_standard, 0, 0);
 	gyro_angle_standard += rotation(-90, gyro_angle_standard);
 	a_arm_reset(true);
@@ -958,7 +973,7 @@ int collection_red_3_to_1(void){
 	tire_angul += 980;
 	while(tire_angul >= ev3_motor_get_counts(C_MOTOR));
 	a_arm(50);
-	a_arm(165);
+	a_arm(A_ARM_C);
 	tire_angul += 360;
 	while(tire_angul >= ev3_motor_get_counts(C_MOTOR));
 	ev3_stp_cyc(GYROTRACE_TASK_4);
@@ -979,7 +994,7 @@ int collection_red_3_to_1(void){
 	gyro_angle_standard += 177;
 
 	gyro_deceleration_power(85, gyro_angle_standard, 0);
-	a_arm(165);
+	a_arm(A_ARM_C);
 	while(500 >= ev3_motor_get_counts(C_MOTOR));
 	gyro_deceleration(1650, gyro_angle_standard, -1, 0);
 	line_color(0, 0);
@@ -1000,7 +1015,7 @@ int collection_red_1_to_3(void){
 	a_arm_reset(false);
 	tire_angul += 300;
 	while(tire_angul >= ev3_motor_get_counts(C_MOTOR));
-	a_arm(165);
+	a_arm(A_ARM_C);
 	tire_angul += 700;
 	while(tire_angul >= ev3_motor_get_counts(C_MOTOR));
 	a_arm_reset(false);
@@ -1008,7 +1023,7 @@ int collection_red_1_to_3(void){
 	while(tire_angul >= ev3_motor_get_counts(C_MOTOR));
 	gyro_deceleration(150, gyro_angle_standard, -1, 0);
 
-	snow_put(3);
+	snow_put(-1);
 }
 
 
@@ -1144,7 +1159,7 @@ int goal(int point){
 int put_green_blue_3_to_1(void){
 	int tire_angul = 0;
 	// a_arm_reset(true);
-	a_arm(165);
+	a_arm(A_ARM_C);
 	gyro_deceleration(100, gyro_angle_standard, 0, 0);
 	gyro_angle_standard += rotation(-45, gyro_angle_standard);
 	gyro_deceleration_power(85, gyro_angle_standard, 0);
@@ -1199,7 +1214,7 @@ int snow_put(int rodo_c){
 			gyro_deceleration_power(85, gyro_angle_standard, 0);
 			tire_angul += 500;
 			while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
-			a_arm(165);
+			a_arm(A_ARM_C);
 			tire_angul += 2000;
 			while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
 			gyro_deceleration(1000, gyro_angle_standard, -1, 0);
@@ -1218,7 +1233,7 @@ int snow_put(int rodo_c){
 			gyro_deceleration_power(85, gyro_angle_standard, 0);
 			tire_angul += 500;
 			while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
-			a_arm(165);
+			a_arm(A_ARM_C);
 			tire_angul += 2000;
 			while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
 			gyro_deceleration(700, gyro_angle_standard, -1, 0);
@@ -1239,7 +1254,7 @@ int snow_put(int rodo_c){
 			gyro_deceleration_power(85, gyro_angle_standard, 0);
 			tire_angul += 500;
 			while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
-			a_arm(165);
+			a_arm(A_ARM_C);
 			tire_angul += 500;
 			while(tire_angul>=ev3_motor_get_counts(C_MOTOR));
 			gyro_deceleration(600, gyro_angle_standard, 0, 0);
@@ -1256,7 +1271,7 @@ int snow_put(int rodo_c){
 		gyro_angle_standard += 90;
 		gyro_angle_standard = wall_fix(1000);
 
-		gyro_deceleration(100, gyro_angle_standard, 0, 0);
+		gyro_deceleration(200, gyro_angle_standard, 0, 0);
 		ev3_motor_reset_counts(C_MOTOR);
 		ev3_motor_set_power(C_MOTOR, 85);
 		while(200>=ev3_motor_get_counts(C_MOTOR));
@@ -1281,8 +1296,12 @@ int snow_put(int rodo_c){
 	// ev3_motor_set_power(B_MOTOR, -85);
 	// while((gyro_angle_standard-80) <= ev3_gyro_sensor_get_angle(GYRO_4));
 	// gyro_angle_standard += -90;
-	a_arm(165);
-	gyro_deceleration(1500, gyro_angle_standard, 0, 0);
+	a_arm(A_ARM_C);
+	gyro_deceleration_power(85, gyro_angle_standard, 0);
+	a_arm_reset(false);
+	a_arm(A_ARM_C);
+	while(1000 >= ev3_motor_get_counts(C_MOTOR));
+	gyro_deceleration(500, gyro_angle_standard, 0, 0);
 	gyro_angle_standard += rotation(90, gyro_angle_standard);
 	gyro_deceleration(100, gyro_angle_standard, -1, 0);
 	line_color(0, 0);

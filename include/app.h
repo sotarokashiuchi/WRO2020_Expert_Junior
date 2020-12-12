@@ -21,6 +21,8 @@
 #define HT_YELLOW_RGB   
 #define RED_RGB         180             //純カラーセンサー赤RGB和
 #define HT_RED_RGB      35              //HTカラーセンサー赤RGB和
+#define A_ARM_C         170              //a_armの中央値
+
 
 #define BRAKE(p)		ev3_motor_stop(p,true)
 
