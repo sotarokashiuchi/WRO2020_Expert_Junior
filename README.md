@@ -9,6 +9,9 @@
 # 大会
 ## 大会の様子
 - [大会動画](https://www.youtube.com/watch?v=7a4GRy7a7xs)
+    - [1走目](https://youtu.be/7a4GRy7a7xs?t=7114)
+    - [2走目](https://youtu.be/7a4GRy7a7xs?t=17086)
+    - [表彰式](https://youtu.be/7a4GRy7a7xs?t=21708)
 
 ## 記事
 - [奈良新聞](https://www.nara-np.co.jp/news/20201223091712.html)
